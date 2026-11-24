@@ -16,12 +16,33 @@ import {
   Award,
   Layers,
 } from 'lucide-react';
-import { MASSIVE_FITNESS_CATALOG, BRANDS } from '../../data/massiveFitnessDatabase';
-import { EXERCISE_CATEGORIES, MUSCLE_GROUPS } from '../../data/fitnessData';
+import { GYM_VISUAL_EXERCISES } from '../../data/gymVisualDatabase';
+import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
 import { GlassCard } from '../common/GlassCard';
-import { RealisticBiomechanicsPlayer } from './RealisticBiomechanicsPlayer';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
 import { useApp } from '../../context/AppContext';
+
+const EQUIPMENT_FILTERS = [
+  { id: 'all', label: 'All Equipment' },
+  { id: 'machine', label: 'Gym Machines & Lever' },
+  { id: 'cable', label: 'Cables & Pulleys' },
+  { id: 'smith', label: 'Smith Machine' },
+  { id: 'barbell', label: 'Barbell' },
+  { id: 'dumbbell', label: 'Dumbbell' },
+  { id: 'bodyweight', label: 'Calisthenics & Bodyweight' },
+  { id: 'sled', label: 'Sled & Functional' },
+];
+
+const MUSCLE_FILTER_OPTIONS = [
+  'All Muscles',
+  'Chest',
+  'Back',
+  'Legs',
+  'Shoulders',
+  'Arms',
+  'Core',
+  'Cardio',
+];
 
 export function FitnessSection() {
   const {
@@ -35,30 +56,40 @@ export function FitnessSection() {
 
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMuscle, setSelectedMuscle] = useState('All Muscles');
-  const [selectedBrand, setSelectedBrand] = useState('All Brands');
+  const [selectedEquipment, setSelectedEquipment] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Filter 1,000+ exercises with memoization for 60fps performance
+  // Filter 1,323 exercises with memoization
   const filteredCatalog = useMemo(() => {
-    return MASSIVE_FITNESS_CATALOG.filter((item) => {
+    return GYM_VISUAL_EXERCISES.filter((item) => {
+      // Category filter
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+
+      // Muscle filter
       const matchesMuscle =
         selectedMuscle === 'All Muscles' ||
-        item.muscleCategory === selectedMuscle ||
-        item.primaryMuscles.some((m) => m.name.toLowerCase().includes(selectedMuscle.toLowerCase()));
-      const matchesBrand =
-        selectedBrand === 'All Brands' ||
-        item.equipmentBrand === selectedBrand;
+        item.muscleCategory.toLowerCase() === selectedMuscle.toLowerCase() ||
+        item.muscle.toLowerCase().includes(selectedMuscle.toLowerCase());
+
+      // Equipment filter
+      let matchesEquipment = true;
+      if (selectedEquipment === 'machine') {
+        matchesEquipment = item.equipment === 'machine' || item.equipment === 'lever';
+      } else if (selectedEquipment !== 'all') {
+        matchesEquipment = item.equipment === selectedEquipment;
+      }
+
+      // Search query
       const matchesSearch =
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.equipmentBrand && item.equipmentBrand.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        item.muscleCategory.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesMuscle && matchesBrand && matchesSearch;
+        item.muscle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.equipment.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCategory && matchesMuscle && matchesEquipment && matchesSearch;
     });
-  }, [selectedCategory, selectedMuscle, selectedBrand, searchQuery]);
+  }, [selectedCategory, selectedMuscle, selectedEquipment, searchQuery]);
 
   const displayedItems = filteredCatalog.slice(0, visibleCount);
 
@@ -72,19 +103,19 @@ export function FitnessSection() {
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className="px-3 py-1 rounded-full text-xs font-black tracking-widest uppercase bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              1,000+ Heavy Gym Equipment & Biomechanics Vault
+              1,300+ 3D Anatomical Gym Equipment & Biomechanics Vault
             </span>
             <span className="text-xs text-slate-400 font-mono">
-              Calibrated to {user.currentWeight}kg Mass
+              Illuminated Muscle Activation
             </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
-            1,000+ <span className="gold-gradient-text">GYM MACHINES & EXERCISES</span> ARCHIVE
+            1,300+ <span className="gold-gradient-text">3D ANATOMICAL EXERCISE</span> VAULT
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl mb-6">
-            The ultimate encyclopedia for fitness freaks and bodybuilders. Explore over 1,000+ real-world gym machines across <strong>Hammer Strength, Cybex, Prime Fitness, Arsenal, Panatta, Watson, Nautilus, and Rogue</strong>. Realistic anatomical biomechanics reveal exact joint angles, correct vs wrong flaring traps, progressive overload ratios, and weight-to-bodyweight multipliers.
+            Every exercise and machine now includes authentic <strong>3D anatomical animations with illuminated target muscle fiber highlights</strong> (latissimus dorsi, pectoralis major, quadriceps teardrop, deltoids). Inspect joint angles, test flawed vs optimal form deviations, calculate pyramid set overload, and track calibrated calorie burn for your <strong className="text-amber-300">{user.currentWeight} kg</strong> body weight.
           </p>
 
           {/* Quick Metrics Bar */}
@@ -106,10 +137,10 @@ export function FitnessSection() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-md">
-              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Vault Capacity</div>
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">3D Exercise Vault</div>
               <div className="text-xl sm:text-2xl font-black text-amber-200 flex items-center gap-1.5 mt-0.5">
                 <Layers className="w-5 h-5 text-amber-400" />
-                {MASSIVE_FITNESS_CATALOG.length}+ <span className="text-xs font-normal text-slate-400">items</span>
+                {GYM_VISUAL_EXERCISES.length}+ <span className="text-xs font-normal text-slate-400">items</span>
               </div>
             </div>
 
@@ -154,14 +185,14 @@ export function FitnessSection() {
           ))}
         </div>
 
-        {/* Search, Muscle & Brand Filter Controls */}
+        {/* Search, Muscle & Equipment Filter Controls */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Search Box */}
           <div className="relative md:col-span-1">
             <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search 1,000+ machines, angles, brands..."
+              placeholder="Search 1,300+ exercises (lat pulldown, bench, squat)..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -174,7 +205,7 @@ export function FitnessSection() {
           {/* Muscle Group Dropdown */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400 font-medium shrink-0 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5 text-amber-400" /> Muscle:
+              <Filter className="w-3.5 h-3.5 text-amber-400" /> Target:
             </span>
             <select
               value={selectedMuscle}
@@ -184,7 +215,7 @@ export function FitnessSection() {
               }}
               className="w-full px-3 py-2 rounded-xl glass-input text-xs font-semibold text-slate-200 cursor-pointer"
             >
-              {MUSCLE_GROUPS.map((group) => (
+              {MUSCLE_FILTER_OPTIONS.map((group) => (
                 <option key={group} value={group} className="bg-obsidian-900 text-white">
                   {group}
                 </option>
@@ -192,44 +223,41 @@ export function FitnessSection() {
             </select>
           </div>
 
-          {/* Equipment Brand Dropdown */}
+          {/* Equipment Dropdown */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400 font-medium shrink-0 flex items-center gap-1">
-              <Award className="w-3.5 h-3.5 text-amber-400" /> Brand:
+              <Dumbbell className="w-3.5 h-3.5 text-amber-400" /> Equipment:
             </span>
             <select
-              value={selectedBrand}
+              value={selectedEquipment}
               onChange={(e) => {
-                setSelectedBrand(e.target.value);
+                setSelectedEquipment(e.target.value);
                 setVisibleCount(24);
               }}
               className="w-full px-3 py-2 rounded-xl glass-input text-xs font-semibold text-slate-200 cursor-pointer"
             >
-              <option value="All Brands" className="bg-obsidian-900 text-white">
-                All Equipment Brands ({BRANDS.length})
-              </option>
-              {BRANDS.map((b) => (
-                <option key={b} value={b} className="bg-obsidian-900 text-white">
-                  {b}
+              {EQUIPMENT_FILTERS.map((b) => (
+                <option key={b.id} value={b.id} className="bg-obsidian-900 text-white">
+                  {b.label}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Counter notification */}
+        {/* Counter Info */}
         <div className="text-xs text-slate-400 flex items-center justify-between">
           <span>
             Showing <strong className="text-amber-300">{displayedItems.length}</strong> of{' '}
-            <strong className="text-white">{filteredCatalog.length}</strong> filtered exercises & machines
+            <strong className="text-white">{filteredCatalog.length}</strong> 3D anatomical movements
           </span>
           <span className="text-[11px] font-mono text-amber-400/80">
-            Click any item for 3D Angle Simulator & Progressive Overload
+            Click any exercise for 3D Muscle Highlight & Progressive Overload
           </span>
         </div>
       </div>
 
-      {/* Exercise Grid */}
+      {/* 3D Anatomical Exercise Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedItems.map((item) => {
           const burnPreview = Math.round((item.metScore * 3.5 * (user.currentWeight || 75) / 200) * 20);
@@ -240,28 +268,44 @@ export function FitnessSection() {
               className="flex flex-col justify-between border-amber-500/15 group cursor-pointer"
               onClick={() => setSelectedExercise(item)}
             >
-              {/* Card Mini Realistic Biomechanics Visual */}
-              <div className="relative overflow-hidden bg-black/60 rounded-t-2xl">
-                <RealisticBiomechanicsPlayer exercise={item} isMini={true} />
-                <div className="absolute top-3 right-3">
+              {/* Card Mini 3D Animated Thumbnail with Dark Gold Obsidian Frame */}
+              <div className="relative h-56 overflow-hidden bg-gradient-to-b from-[#141824] via-[#0a0c12] to-[#06070a] rounded-t-2xl flex items-center justify-center p-2">
+                <img
+                  src={item.gifUrl}
+                  alt={item.name}
+                  loading="lazy"
+                  className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 filter contrast-105"
+                  style={{ mixBlendMode: 'screen' }}
+                />
+
+                {/* Ambient glow highlight */}
+                <div className="absolute inset-0 bg-radial-gold opacity-15 pointer-events-none" />
+
+                <div className="absolute top-3 left-3">
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/80 border border-amber-500/30 text-amber-300 backdrop-blur-md">
-                    {item.equipmentBrand || item.badge || item.level}
+                    {item.muscleCategory}
+                  </span>
+                </div>
+
+                <div className="absolute top-3 right-3">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md">
+                    {item.equipment}
                   </span>
                 </div>
               </div>
 
-              {/* Card Body */}
+              {/* Card Content */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                      {item.muscleCategory}
+                      ⚡ Active: {item.muscle}
                     </span>
                     <span className="text-slate-600">·</span>
                     <span className="text-[10px] text-slate-400 font-mono">MET {item.metScore}</span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight">
                     {item.name}
                   </h3>
 
@@ -290,7 +334,7 @@ export function FitnessSection() {
                   </div>
 
                   <div className="flex items-center gap-1 text-xs font-semibold text-amber-400 group-hover:translate-x-1 transition">
-                    <span>Inspect Biomechanics</span>
+                    <span>Inspect 3D Form</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -307,7 +351,7 @@ export function FitnessSection() {
             onClick={() => setVisibleCount((prev) => prev + 24)}
             className="gold-btn-outline px-8 py-3 rounded-2xl text-xs sm:text-sm font-bold shadow-lg"
           >
-            Load More Machines ({filteredCatalog.length - visibleCount} remaining)
+            Load More Exercises ({filteredCatalog.length - visibleCount} remaining)
           </button>
         </div>
       )}
@@ -315,8 +359,8 @@ export function FitnessSection() {
       {filteredCatalog.length === 0 && (
         <div className="text-center py-16 glass-panel rounded-3xl border border-amber-500/15">
           <Dumbbell className="w-12 h-12 text-amber-500/40 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white">No machines match your query</h3>
-          <p className="text-xs text-slate-400 mt-1">Try resetting category, brand or muscle filters.</p>
+          <h3 className="text-lg font-bold text-white">No exercises match your query</h3>
+          <p className="text-xs text-slate-400 mt-1">Try resetting category, equipment or target filters.</p>
         </div>
       )}
 

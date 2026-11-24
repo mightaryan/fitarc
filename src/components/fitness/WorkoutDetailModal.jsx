@@ -13,6 +13,7 @@ import {
   Compass,
   TrendingUp,
 } from 'lucide-react';
+import { Anatomical3DPlayer } from './Anatomical3DPlayer';
 import { RealisticBiomechanicsPlayer } from './RealisticBiomechanicsPlayer';
 import { ProgressiveOverloadCalculator } from './ProgressiveOverloadCalculator';
 import { calculateWorkoutImpact } from '../../data/fitnessData';
@@ -89,16 +90,16 @@ export function WorkoutDetailModal({ exercise, onClose }) {
 
         {/* Modal Body */}
         <div className="p-4 sm:p-6 space-y-6">
-          {/* Realistic 3D Anatomical Visual Motion Player with Angle Deviation Controls */}
+          {/* Realistic 3D Anatomical Visual Motion Player with Muscle Highlights */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-amber-400" />
-                Realistic Musculoskeletal Biomechanics & Angle Simulator
+                3D Anatomical Muscle Motion & Biomechanical Analysis
               </h3>
-              <span className="text-[11px] text-slate-400">Volumetric Muscle Fiber Shading</span>
+              <span className="text-[11px] text-slate-400">GymVisual 3D Engine & Illuminated Target Muscle</span>
             </div>
-            <RealisticBiomechanicsPlayer exercise={exercise} />
+            <Anatomical3DPlayer exercise={exercise} />
           </div>
 
           {/* Navigation Tabs for Instruction Content */}
