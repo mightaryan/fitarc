@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { Anatomical3DPlayer } from './Anatomical3DPlayer';
 import { ProgressiveOverloadCalculator } from './ProgressiveOverloadCalculator';
+import { MachineSetupVisualizer } from './MachineSetupVisualizer';
+import { JointAngleShearCanvas } from './JointAngleShearCanvas';
 import { calculateWorkoutImpact } from '../../data/fitnessData';
 import { useApp } from '../../context/AppContext';
 
@@ -117,18 +119,13 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             })}
           </div>
 
-          {/* Realistic 3D Anatomical Visual Motion Player with Muscle Highlights */}
-          <div>
-            <Anatomical3DPlayer
-              exercise={exercise}
-              activeTab={activeTab}
-              userWeightKg={currentWeightKg}
-            />
-          </div>
-
-          {/* TAB 1: ANGLE BIOMECHANICS & CALORIE CALCULATOR */}
+          {/* TAB 1: 3D ANATOMICAL MUSCLE MOTION & BIOMECHANICAL GUIDANCE */}
           {activeTab === 'biomechanics' && (
             <div className="space-y-6">
+              <Anatomical3DPlayer
+                exercise={exercise}
+                userWeightKg={currentWeightKg}
+              />
               {/* Angle Recruitment Breakdown */}
               <div className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
@@ -245,56 +242,14 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             />
           )}
 
-          {/* TAB 3: SETUP & ADJUSTMENTS */}
+          {/* TAB 3: MACHINE SETUP & ERGONOMIC ADJUSTMENTS */}
           {activeTab === 'setup' && (
-            <div className="space-y-3">
-              <h5 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
-                Pre-Set Machine Adjustments
-              </h5>
-              {exercise.setupSteps?.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-3 p-3.5 rounded-xl bg-obsidian-850/70 border border-amber-500/10"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-xs sm:text-sm text-slate-200">{step}</p>
-                </div>
-              ))}
-            </div>
+            <MachineSetupVisualizer exercise={exercise} />
           )}
 
-          {/* TAB 4: MISTAKES & PRO TIPS */}
+          {/* TAB 4: LIVE ANGLE & JOINT SHEAR SIMULATOR */}
           {activeTab === 'mistakes' && (
-            <div className="space-y-4">
-              <div>
-                <h5 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2">
-                  Common Pitfalls & Injury Hazards
-                </h5>
-                <div className="space-y-2">
-                  {exercise.commonMistakes?.map((mistake, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-xs sm:text-sm"
-                    >
-                      <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                      <span>{mistake}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {exercise.proTip && (
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block text-amber-300 font-bold text-xs uppercase tracking-wider mb-1">
-                      Elite Coach Pro Tip
-                    </strong>
-                    <p className="text-xs sm:text-sm leading-relaxed">{exercise.proTip}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <JointAngleShearCanvas exercise={exercise} />
           )}
         </div>
 
