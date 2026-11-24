@@ -399,8 +399,11 @@ export function FoodSection() {
             {/* Image Thumbnail of Cooked Dish */}
             <div className="relative h-52 overflow-hidden bg-black/60 rounded-t-2xl">
               <img
-                src={recipe.image}
+                src={recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=70'}
                 alt={recipe.title}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=70';
+                }}
                 className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-obsidian-900 via-transparent to-transparent" />

@@ -322,9 +322,12 @@ export function FitnessSection() {
               {/* Card Mini 3D Animated Thumbnail with Dark Gold Obsidian Frame */}
               <div className="relative h-56 overflow-hidden bg-gradient-to-b from-[#141824] via-[#0a0c12] to-[#06070a] rounded-t-2xl flex items-center justify-center p-3">
                 <img
-                  src={item.gifUrl}
+                  src={item.gifUrl || 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/archer-push-up.gif'}
                   alt={item.name}
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/archer-push-up.gif';
+                  }}
                   className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
                 />
 

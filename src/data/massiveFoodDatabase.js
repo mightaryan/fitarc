@@ -1,7 +1,7 @@
 // Massive 500+ Food Items & Nutrition Database with Vegetarian / Non-Vegetarian / Vegan Filters
 // Designed for fitness freaks, exact gram measurement tracking, and healthy home gastronomy.
 
-import { RECIPES_CATALOG as CURATED_RECIPES } from './foodData';
+import { RECIPES_CATALOG as CURATED_RECIPES } from './foodData.js';
 
 export const DIET_FILTERS = [
   { id: 'all', label: 'All Items (500+)', icon: 'Sparkles' },
@@ -124,69 +124,74 @@ function generateMassiveFoodCatalog() {
 
     for (let p = 0; p < PREPARATION_STYLES.length; p++) {
       const prep = PREPARATION_STYLES[p];
-      const side = SIDES_COMBOS[(s + p) % SIDES_COMBOS.length];
 
-      idCounter++;
+      for (let sd = 0; sd < SIDES_COMBOS.length; sd++) {
+        const side = SIDES_COMBOS[sd];
+        idCounter++;
 
-      // Overall dietary classification
-      let mealDiet = staple.diet;
-      if (staple.diet === 'nonveg' || side.diet === 'nonveg') {
-        mealDiet = 'nonveg';
-      } else if (staple.diet === 'eggetarian' || side.diet === 'eggetarian') {
-        mealDiet = 'eggetarian';
-      } else if (staple.diet === 'veg' || side.diet === 'veg') {
-        mealDiet = 'veg';
-      } else {
-        mealDiet = 'vegan';
+        // Overall dietary classification
+        let mealDiet = staple.diet;
+        if (staple.diet === 'nonveg' || side.diet === 'nonveg') {
+          mealDiet = 'nonveg';
+        } else if (staple.diet === 'eggetarian' || side.diet === 'eggetarian') {
+          mealDiet = 'eggetarian';
+        } else if (staple.diet === 'veg' || side.diet === 'veg') {
+          mealDiet = 'veg';
+        } else {
+          mealDiet = 'vegan';
+        }
+
+        const totalCalories = staple.calories + prep.calOffset + side.cal;
+        const totalP = staple.p + side.p;
+        const totalC = staple.c + side.c;
+        const totalF = Math.round((staple.f + prep.fOffset + side.f) * 10) / 10;
+        const totalFib = staple.fib + side.fib;
+
+        const mealTitle = `${prep.method} ${staple.name}`;
+
+        catalog.push({
+          id: `meal-prep-${idCounter}`,
+          title: mealTitle,
+          name: mealTitle,
+          subtitle: `Served with ${side.name} · High Anabolic Ratio`,
+          category: staple.category,
+          diet: mealDiet,
+          prepTime: '8 min',
+          cookTime: prep.time,
+          difficulty: prep.diff,
+          servings: 1,
+          calories: totalCalories,
+          protein: totalP,
+          carbs: totalC,
+          fats: totalF,
+          fiber: totalFib,
+          image: staple.img,
+          tags: [
+            mealDiet === 'veg' ? 'Vegetarian' : mealDiet === 'vegan' ? 'Vegan' : mealDiet === 'eggetarian' ? 'Eggetarian' : 'Non-Vegetarian',
+            totalP >= 35 ? 'High Protein (>35g)' : 'Clean Macros',
+            'Exact Home Recipe'
+          ],
+          description: `Delicately prepared ${staple.name.toLowerCase()} cooked via ${prep.method.toLowerCase()}, accompanied by warm ${side.name.toLowerCase()}.`,
+          ingredients: [
+            { name: staple.name, measurement: staple.serving, weightGrams: parseInt(staple.serving) || 150, notes: 'Main protein / whole food' },
+            { name: side.name, measurement: '1 side portion', weightGrams: 140, notes: 'Nutrient-rich complex side' },
+            { name: 'Extra Virgin Olive Oil / Avocado Oil', measurement: '1 tsp', weightGrams: 5, notes: 'Searing medium' },
+            { name: 'Organic Fresh Garlic & Thyme', measurement: '1 clove', weightGrams: 5, notes: 'Aromatic glaze' },
+          ],
+          instructions: [
+            `Heat a heavy skillet or oven to 200°C (400°F).`,
+            `Weigh out ${staple.serving} of ${staple.name} and coat lightly with 1 tsp oil and chosen aromatics.`,
+            `Cook for ${prep.time} until golden crust develops and interior retains moisture.`,
+            `Plate alongside warm ${side.name} and garnish with mineral sea salt flakes.`,
+          ],
+          chefTips: 'Resting proteins for 3-5 minutes after cooking allows cellular re-absorption of moisture for superior tenderness.',
+        });
+
+        // Stop once we surpass 520+ distinct items
+        if (catalog.length >= 520) break;
       }
-
-      const totalCalories = staple.calories + prep.calOffset + side.cal;
-      const totalP = staple.p + side.p;
-      const totalC = staple.c + side.c;
-      const totalF = Math.round((staple.f + prep.fOffset + side.f) * 10) / 10;
-      const totalFib = staple.fib + side.fib;
-
-      catalog.push({
-        id: `meal-prep-${idCounter}`,
-        title: `${prep.method} ${staple.name}`,
-        subtitle: `Served with ${side.name} · High Anabolic Ratio`,
-        category: staple.category,
-        diet: mealDiet,
-        prepTime: '8 min',
-        cookTime: prep.time,
-        difficulty: prep.diff,
-        servings: 1,
-        calories: totalCalories,
-        protein: totalP,
-        carbs: totalC,
-        fats: totalF,
-        fiber: totalFib,
-        image: staple.img,
-        tags: [
-          mealDiet === 'veg' ? 'Vegetarian' : mealDiet === 'vegan' ? 'Vegan' : mealDiet === 'eggetarian' ? 'Eggetarian' : 'Non-Vegetarian',
-          totalP >= 35 ? 'High Protein (>35g)' : 'Clean Macros',
-          'Exact Home Recipe'
-        ],
-        description: `Delicately prepared ${staple.name.toLowerCase()} cooked via ${prep.method.toLowerCase()}, accompanied by warm ${side.name.toLowerCase()}.`,
-        ingredients: [
-          { name: staple.name, measurement: staple.serving, weightGrams: parseInt(staple.serving) || 150, notes: 'Main protein / whole food' },
-          { name: side.name, measurement: '1 side portion', weightGrams: 140, notes: 'Nutrient-rich complex side' },
-          { name: 'Extra Virgin Olive Oil / Avocado Oil', measurement: '1 tsp', weightGrams: 5, notes: 'Searing medium' },
-          { name: 'Organic Fresh Garlic & Thyme', measurement: '1 clove', weightGrams: 5, notes: 'Aromatic glaze' },
-        ],
-        instructions: [
-          `Heat a heavy skillet or oven to 200°C (400°F).`,
-          `Weigh out ${staple.serving} of ${staple.name} and coat lightly with 1 tsp oil and chosen aromatics.`,
-          `Cook for ${prep.time} until golden crust develops and interior retains moisture.`,
-          `Plate alongside warm ${side.name} and garnish with mineral sea salt flakes.`,
-        ],
-        chefTips: 'Resting proteins for 3-5 minutes after cooking allows cellular re-absorption of moisture for superior tenderness.',
-      });
-
-      // Stop once we surpass 520+ distinct items
       if (catalog.length >= 520) break;
     }
-
     if (catalog.length >= 520) break;
   }
 

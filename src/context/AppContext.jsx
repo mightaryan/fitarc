@@ -6,6 +6,8 @@ import { evaluateMealNutrition, FOOD_SCAN_PRESETS } from '../data/foodData';
 const AppContext = createContext(null);
 
 const STORAGE_KEY = 'FITARC_APP_STATE_V1';
+const VAULT_KEY = 'FITARC_USERS_VAULT_V2';
+const ACTIVE_USER_ID_KEY = 'FITARC_ACTIVE_USER_ID_V2';
 
 const getTodayDateString = () => {
   const d = new Date();
@@ -13,8 +15,10 @@ const getTodayDateString = () => {
 };
 
 const DEFAULT_PROFILE = {
+  id: 'user_alex',
   name: 'Alex Vance',
   email: 'alex.vance@fitarc.elite',
+  phone: '+1 415-890-2341',
   currentWeight: 78.5,
   targetWeight: 74.0,
   startWeight: 82.0,
@@ -27,6 +31,8 @@ const DEFAULT_PROFILE = {
   dailyWorkoutTargetMin: 45,
   dailyWaterTargetLiters: 3.5,
   isLoggedIn: true,
+  memberTier: 'Gold Elite Pro',
+  loginMethod: 'email',
 };
 
 const SEED_WEIGHT_HISTORY = [
@@ -118,40 +124,65 @@ export function AppProvider({ children }) {
     document.documentElement.style.fontSize = scaleMap[fontSizeScale] || '100%';
   }, [fontSizeScale]);
 
+  // Multi-profile vault state
+  const [profilesVault, setProfilesVault] = useState(() => {
+    try {
+      const stored = localStorage.getItem(VAULT_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return {
+      'user_alex': {
+        profile: DEFAULT_PROFILE,
+        weightHistory: SEED_WEIGHT_HISTORY,
+        loggedWorkouts: SEED_WORKOUTS,
+        loggedMeals: SEED_MEALS,
+        snoozeUntil: null,
+      }
+    };
+  });
+
   // Load from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.user) setUser(parsed.user);
-        if (parsed.fontSizeScale) setFontSizeScale(parsed.fontSizeScale);
-        if (parsed.weightHistory) setWeightHistory(parsed.weightHistory);
-        if (parsed.loggedWorkouts) setLoggedWorkouts(parsed.loggedWorkouts);
-        if (parsed.loggedMeals) setLoggedMeals(parsed.loggedMeals);
-        if (parsed.snoozeUntil) setSnoozeUntil(parsed.snoozeUntil);
+      const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY) || 'user_alex';
+      const storedVault = localStorage.getItem(VAULT_KEY);
+      const vault = storedVault ? JSON.parse(storedVault) : profilesVault;
+      const activeData = vault[activeId] || vault['user_alex'];
+      if (activeData) {
+        setUser(activeData.profile);
+        setWeightHistory(activeData.weightHistory || []);
+        setLoggedWorkouts(activeData.loggedWorkouts || []);
+        setLoggedMeals(activeData.loggedMeals || []);
+        setSnoozeUntil(activeData.snoozeUntil || null);
       }
     } catch (e) {
       console.warn('Could not read from local storage', e);
     }
   }, []);
 
-  // Save to localStorage on changes
+  // Save current active user data into profiles vault on any state change
   useEffect(() => {
+    if (!user?.id) return;
     try {
-      const payload = {
-        user,
-        fontSizeScale,
-        weightHistory,
-        loggedWorkouts,
-        loggedMeals,
-        snoozeUntil,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      setProfilesVault((prevVault) => {
+        const updatedVault = {
+          ...prevVault,
+          [user.id]: {
+            profile: user,
+            weightHistory,
+            loggedWorkouts,
+            loggedMeals,
+            snoozeUntil,
+          }
+        };
+        localStorage.setItem(VAULT_KEY, JSON.stringify(updatedVault));
+        localStorage.setItem(ACTIVE_USER_ID_KEY, user.id);
+        return updatedVault;
+      });
     } catch (e) {
       console.warn('Could not write to local storage', e);
     }
-  }, [user, fontSizeScale, weightHistory, loggedWorkouts, loggedMeals, snoozeUntil]);
+  }, [user, weightHistory, loggedWorkouts, loggedMeals, snoozeUntil]);
 
   // Check if weight needs to be logged today or if snoozed
   useEffect(() => {
@@ -261,6 +292,177 @@ export function AppProvider({ children }) {
     setLoggedMeals((prev) => prev.filter((m) => m.id !== id));
   };
 
+  // Login or Register via Phone Number
+  const loginWithPhone = (phoneNumber, otpCode, fullName = '', startingWeight = 75.0) => {
+    const cleanDigits = phoneNumber.replace(/\D/g, '');
+    const profileId = `phone_${cleanDigits}`;
+
+    let currentVault = { ...profilesVault };
+    try {
+      const stored = localStorage.getItem(VAULT_KEY);
+      if (stored) currentVault = JSON.parse(stored);
+    } catch (e) {}
+
+    if (currentVault[profileId]) {
+      const existing = currentVault[profileId];
+      setUser({ ...existing.profile, isLoggedIn: true });
+      setWeightHistory(existing.weightHistory || []);
+      setLoggedWorkouts(existing.loggedWorkouts || []);
+      setLoggedMeals(existing.loggedMeals || []);
+      setSnoozeUntil(existing.snoozeUntil || null);
+    } else {
+      const newProfile = {
+        id: profileId,
+        name: fullName || `Athlete ${cleanDigits.slice(-4)}`,
+        phone: phoneNumber,
+        email: '',
+        currentWeight: startingWeight,
+        targetWeight: Math.round((startingWeight * 0.95) * 10) / 10,
+        startWeight: startingWeight,
+        height: 178,
+        age: 26,
+        gender: 'male',
+        unit: 'kg',
+        goal: 'muscle_gain',
+        dailyCalorieTarget: 2300,
+        dailyWorkoutTargetMin: 45,
+        dailyWaterTargetLiters: 3.5,
+        isLoggedIn: true,
+        memberTier: 'Verified Athlete',
+        loginMethod: 'phone',
+      };
+      const initialWeightHistory = [
+        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' }
+      ];
+      setUser(newProfile);
+      setWeightHistory(initialWeightHistory);
+      setLoggedWorkouts([]);
+      setLoggedMeals([]);
+      setSnoozeUntil(null);
+
+      currentVault[profileId] = {
+        profile: newProfile,
+        weightHistory: initialWeightHistory,
+        loggedWorkouts: [],
+        loggedMeals: [],
+        snoozeUntil: null,
+      };
+      setProfilesVault(currentVault);
+      localStorage.setItem(VAULT_KEY, JSON.stringify(currentVault));
+    }
+
+    localStorage.setItem(ACTIVE_USER_ID_KEY, profileId);
+    triggerConfetti();
+  };
+
+  // Login or Register via Email Address
+  const loginWithEmail = (emailAddress, password = '', fullName = '', startingWeight = 75.0) => {
+    const cleanEmail = emailAddress.trim().toLowerCase();
+    const profileId = `email_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`;
+
+    let currentVault = { ...profilesVault };
+    try {
+      const stored = localStorage.getItem(VAULT_KEY);
+      if (stored) currentVault = JSON.parse(stored);
+    } catch (e) {}
+
+    if (currentVault[profileId]) {
+      const existing = currentVault[profileId];
+      setUser({ ...existing.profile, isLoggedIn: true });
+      setWeightHistory(existing.weightHistory || []);
+      setLoggedWorkouts(existing.loggedWorkouts || []);
+      setLoggedMeals(existing.loggedMeals || []);
+      setSnoozeUntil(existing.snoozeUntil || null);
+    } else {
+      const newProfile = {
+        id: profileId,
+        name: fullName || cleanEmail.split('@')[0],
+        email: cleanEmail,
+        phone: '',
+        currentWeight: startingWeight,
+        targetWeight: Math.round((startingWeight * 0.95) * 10) / 10,
+        startWeight: startingWeight,
+        height: 180,
+        age: 27,
+        gender: 'male',
+        unit: 'kg',
+        goal: 'fat_loss',
+        dailyCalorieTarget: 2200,
+        dailyWorkoutTargetMin: 45,
+        dailyWaterTargetLiters: 3.5,
+        isLoggedIn: true,
+        memberTier: 'Gold Pro Vault',
+        loginMethod: 'email',
+      };
+      const initialWeightHistory = [
+        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' }
+      ];
+      setUser(newProfile);
+      setWeightHistory(initialWeightHistory);
+      setLoggedWorkouts([]);
+      setLoggedMeals([]);
+      setSnoozeUntil(null);
+
+      currentVault[profileId] = {
+        profile: newProfile,
+        weightHistory: initialWeightHistory,
+        loggedWorkouts: [],
+        loggedMeals: [],
+        snoozeUntil: null,
+      };
+      setProfilesVault(currentVault);
+      localStorage.setItem(VAULT_KEY, JSON.stringify(currentVault));
+    }
+
+    localStorage.setItem(ACTIVE_USER_ID_KEY, profileId);
+    triggerConfetti();
+  };
+
+  // Switch to another profile
+  const switchUserProfile = (targetUserId) => {
+    let currentVault = { ...profilesVault };
+    try {
+      const stored = localStorage.getItem(VAULT_KEY);
+      if (stored) currentVault = JSON.parse(stored);
+    } catch (e) {}
+
+    if (currentVault[targetUserId]) {
+      const target = currentVault[targetUserId];
+      setUser({ ...target.profile, isLoggedIn: true });
+      setWeightHistory(target.weightHistory || []);
+      setLoggedWorkouts(target.loggedWorkouts || []);
+      setLoggedMeals(target.loggedMeals || []);
+      setSnoozeUntil(target.snoozeUntil || null);
+      localStorage.setItem(ACTIVE_USER_ID_KEY, targetUserId);
+      triggerConfetti();
+    }
+  };
+
+  // Logout
+  const logoutUser = () => {
+    setUser((prev) => ({ ...prev, isLoggedIn: false }));
+    setIsAuthModalOpen(true);
+  };
+
+  // Get list of all saved profiles
+  const getAllSavedProfiles = () => {
+    let currentVault = { ...profilesVault };
+    try {
+      const stored = localStorage.getItem(VAULT_KEY);
+      if (stored) currentVault = JSON.parse(stored);
+    } catch (e) {}
+
+    return Object.values(currentVault).map((v) => ({
+      id: v.profile.id,
+      name: v.profile.name,
+      email: v.profile.email,
+      phone: v.profile.phone,
+      currentWeight: v.profile.currentWeight,
+      memberTier: v.profile.memberTier,
+      avatar: v.profile.avatar,
+    }));
+  };
+
   // Reset demo data to defaults
   const resetDemoData = () => {
     setUser(DEFAULT_PROFILE);
@@ -269,6 +471,8 @@ export function AppProvider({ children }) {
     setLoggedMeals(SEED_MEALS);
     setSnoozeUntil(null);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(VAULT_KEY);
+    localStorage.removeItem(ACTIVE_USER_ID_KEY);
   };
 
   // Compute daily totals for today
@@ -313,6 +517,11 @@ export function AppProvider({ children }) {
     setSelectedRecipeForModal,
     isAuthModalOpen,
     setIsAuthModalOpen,
+    loginWithPhone,
+    loginWithEmail,
+    switchUserProfile,
+    logoutUser,
+    getAllSavedProfiles,
     isMealScannerOpen,
     setIsMealScannerOpen,
     totalCaloriesBurned,

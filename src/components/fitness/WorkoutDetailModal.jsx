@@ -95,11 +95,14 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-amber-400" />
-                3D Anatomical Muscle Motion & Biomechanical Analysis
+                3D Anatomical Muscle Motion & Biomechanical Guidance
               </h3>
-              <span className="text-[11px] text-slate-400">GymVisual 3D Engine & Illuminated Target Muscle</span>
+              <span className="text-[11px] text-slate-400">GymVisual 3D Engine · Illuminated Muscle Fibers</span>
             </div>
-            <Anatomical3DPlayer exercise={exercise} />
+            <Anatomical3DPlayer
+              exercise={exercise}
+              defaultMode={activeTab === 'mistakes' ? 'angle_simulator' : '3d_gif'}
+            />
           </div>
 
           {/* Navigation Tabs for Instruction Content */}

@@ -106,8 +106,11 @@ export function RecipeDetailModal({ recipe, onClose }) {
           {/* Actual Cooked Dish Photography with Macro Bar */}
           <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden border border-amber-500/20 shadow-2xl">
             <img
-              src={recipe.image}
+              src={recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80'}
               alt={recipe.title}
+              onError={(e) => {
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80';
+              }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-900/30 to-transparent" />
@@ -207,8 +210,11 @@ export function RecipeDetailModal({ recipe, onClose }) {
                       {/* Small ingredient item thumbnail */}
                       <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-amber-500/20 bg-black/60 shadow-inner">
                         <img
-                          src={thumb}
+                          src={thumb || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&auto=format&fit=crop&q=80'}
                           alt={ing.name}
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&auto=format&fit=crop&q=80';
+                          }}
                           className="w-full h-full object-cover"
                         />
                       </div>
