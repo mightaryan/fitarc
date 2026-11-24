@@ -111,15 +111,19 @@ export function FitnessSection() {
         matchesEquipment = item.equipment === selectedEquipment;
       }
 
-      // Search query
+      // Search query: multi-token matching so "incline dumbbell" finds "Dumbbell Incline Bench Press"
       const q = searchQuery.toLowerCase().trim();
+      const searchTerms = q.split(/\s+/).filter(Boolean);
       const matchesSearch =
-        !q ||
-        (item.name && item.name.toLowerCase().includes(q)) ||
-        (item.muscle && item.muscle.toLowerCase().includes(q)) ||
-        (item.muscleCategory && item.muscleCategory.toLowerCase().includes(q)) ||
-        (item.equipment && item.equipment.toLowerCase().includes(q)) ||
-        (item.equipmentBrand && item.equipmentBrand.toLowerCase().includes(q));
+        searchTerms.length === 0 ||
+        searchTerms.every(
+          (t) =>
+            (item.name && item.name.toLowerCase().includes(t)) ||
+            (item.muscle && item.muscle.toLowerCase().includes(t)) ||
+            (item.muscleCategory && item.muscleCategory.toLowerCase().includes(t)) ||
+            (item.equipment && item.equipment.toLowerCase().includes(t)) ||
+            (item.equipmentBrand && item.equipmentBrand.toLowerCase().includes(t))
+        );
 
       return matchesDiff && matchesCategory && matchesMuscle && matchesEquipment && matchesSearch;
     });

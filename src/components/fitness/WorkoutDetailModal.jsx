@@ -89,39 +89,24 @@ export function WorkoutDetailModal({ exercise, onClose }) {
 
         {/* Modal Body */}
         <div className="p-4 sm:p-6 space-y-6">
-          {/* Realistic 3D Anatomical Visual Motion Player with Muscle Highlights */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-amber-400" />
-                3D Anatomical Muscle Motion & Biomechanical Guidance
-              </h3>
-              <span className="text-[11px] text-slate-400">GymVisual 3D Engine · Illuminated Muscle Fibers</span>
-            </div>
-            <Anatomical3DPlayer
-              exercise={exercise}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              userWeightKg={currentWeightKg}
-            />
-          </div>
-
           {/* Navigation Tabs for Instruction Content */}
-          <div className="flex border-b border-white/10 gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex border-b border-white/10 gap-2 overflow-x-auto pb-2 scrollbar-none">
             {[
-              { id: 'biomechanics', label: 'Angle Biomechanics & Calorie Burn', icon: Compass },
-              { id: 'pyramid', label: 'Weight Ratio & Pyramid Overload', icon: TrendingUp },
-              { id: 'setup', label: 'Machine Setup & Adjustments', icon: CheckCircle2 },
-              { id: 'mistakes', label: 'Wrong Angles & Injury Traps', icon: AlertTriangle },
+              { id: 'biomechanics', label: '3D Motion & Vectors', icon: Compass },
+              { id: 'pyramid', label: 'Weight Ratio & Overload', icon: TrendingUp },
+              { id: 'setup', label: 'Machine Setup & Alignment', icon: CheckCircle2 },
+              { id: 'mistakes', label: 'Angle & Joint Shear Simulator', icon: AlertTriangle },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`pb-3 px-3 text-xs sm:text-sm font-semibold whitespace-nowrap transition border-b-2 -mb-[1px] flex items-center gap-1.5 ${
+                  className={`pb-2.5 px-3 text-xs sm:text-sm font-semibold whitespace-nowrap transition border-b-2 -mb-[1px] flex items-center gap-1.5 ${
                     activeTab === tab.id
-                      ? 'border-amber-400 text-amber-300'
+                      ? tab.id === 'mistakes'
+                        ? 'border-rose-500 text-rose-300 font-bold'
+                        : 'border-amber-400 text-amber-300 font-bold'
                       : 'border-transparent text-slate-400 hover:text-slate-200'
                   }`}
                 >
@@ -130,6 +115,15 @@ export function WorkoutDetailModal({ exercise, onClose }) {
                 </button>
               );
             })}
+          </div>
+
+          {/* Realistic 3D Anatomical Visual Motion Player with Muscle Highlights */}
+          <div>
+            <Anatomical3DPlayer
+              exercise={exercise}
+              activeTab={activeTab}
+              userWeightKg={currentWeightKg}
+            />
           </div>
 
           {/* TAB 1: ANGLE BIOMECHANICS & CALORIE CALCULATOR */}
