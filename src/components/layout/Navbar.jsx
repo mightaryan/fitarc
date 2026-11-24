@@ -47,7 +47,7 @@ export function Navbar() {
               Golden Standard Fitness & Nutrition
             </div>
             <div className="text-[8px] uppercase tracking-wider text-amber-400/80 font-bold block sm:hidden">
-              Vault Active
+              Elite Athlete
             </div>
           </div>
         </div>

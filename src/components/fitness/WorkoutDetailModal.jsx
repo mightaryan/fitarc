@@ -16,7 +16,6 @@ import {
 import { Anatomical3DPlayer } from './Anatomical3DPlayer';
 import { ProgressiveOverloadCalculator } from './ProgressiveOverloadCalculator';
 import { MachineSetupVisualizer } from './MachineSetupVisualizer';
-import { JointAngleShearCanvas } from './JointAngleShearCanvas';
 import { calculateWorkoutImpact } from '../../data/fitnessData';
 import { useApp } from '../../context/AppContext';
 
@@ -55,8 +54,8 @@ export function WorkoutDetailModal({ exercise, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto glass-panel-glow rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col">
         {/* Header Bar */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-6 bg-obsidian-900/90 backdrop-blur-md border-b border-amber-500/15">
           <div className="flex items-center gap-3">
@@ -90,8 +89,24 @@ export function WorkoutDetailModal({ exercise, onClose }) {
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 space-y-6">
-          {/* Navigation Tabs for Instruction Content */}
+        <div className="p-4 sm:p-6 space-y-5">
+          {/* Authentic 3D Anatomical Visual Motion Player (Shared across all 4 modes) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-amber-400" />
+                3D Anatomical Muscle Motion & Biomechanical Guidance
+              </h3>
+              <span className="text-[11px] text-slate-400">GymVisual 3D Engine · Illuminated Muscle Fibers</span>
+            </div>
+            <Anatomical3DPlayer
+              exercise={exercise}
+              activeTab={activeTab}
+              userWeightKg={currentWeightKg}
+            />
+          </div>
+
+          {/* Navigation Tabs for Biomechanical Modalities */}
           <div className="flex border-b border-white/10 gap-2 overflow-x-auto pb-2 scrollbar-none">
             {[
               { id: 'biomechanics', label: '3D Motion & Vectors', icon: Compass },
@@ -122,10 +137,6 @@ export function WorkoutDetailModal({ exercise, onClose }) {
           {/* TAB 1: 3D ANATOMICAL MUSCLE MOTION & BIOMECHANICAL GUIDANCE */}
           {activeTab === 'biomechanics' && (
             <div className="space-y-6">
-              <Anatomical3DPlayer
-                exercise={exercise}
-                userWeightKg={currentWeightKg}
-              />
               {/* Angle Recruitment Breakdown */}
               <div className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
@@ -138,7 +149,7 @@ export function WorkoutDetailModal({ exercise, onClose }) {
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 45° - 60° Tucked Elbows / Optimal Track
                     </span>
                     <p className="text-slate-300 text-[11px] leading-relaxed">
-                      Maximizes alignment with sternocostal pectoral fibers. Eliminates rotational torque on the glenohumeral joint and places 88% mechanical tension across mid-chest.
+                      Maximizes alignment with target muscle fibers. Eliminates rotational torque on joint capsules and places 88%+ direct mechanical tension on prime movers.
                     </p>
                   </div>
 
@@ -147,7 +158,7 @@ export function WorkoutDetailModal({ exercise, onClose }) {
                       <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> 90° Flared Elbows / Flawed Trajectory
                     </span>
                     <p className="text-rose-200/90 text-[11px] leading-relaxed">
-                      Subacromial space compresses by 38%, pinching supraspinatus tendon. Chest activation plummets to ~32%, forcing deltoids and clavicle to bear excessive shear.
+                      Subacromial space compresses significantly, increasing joint shear stress. Target muscle activation plummets, forcing secondary stabilizers to bear excessive load.
                     </p>
                   </div>
                 </div>
@@ -247,9 +258,46 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             <MachineSetupVisualizer exercise={exercise} />
           )}
 
-          {/* TAB 4: LIVE ANGLE & JOINT SHEAR SIMULATOR */}
+          {/* TAB 4: LIVE ANGLE & JOINT SHEAR SIMULATOR / WRONG ANGLES & INJURY TRAPS */}
           {activeTab === 'mistakes' && (
-            <JointAngleShearCanvas exercise={exercise} />
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                  Common Form Pitfalls & Injury Hazards
+                </h4>
+                <div className="space-y-2">
+                  {(exercise.commonMistakes && exercise.commonMistakes.length > 0
+                    ? exercise.commonMistakes
+                    : [
+                        'Using excessive momentum or body swing to complete the repetition.',
+                        'Cutting the eccentric negative phase short, eliminating hypertrophy stimulus.',
+                        'Flaring joints past natural scapular plane, increasing subacromial shear.',
+                      ]
+                  ).map((mistake, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-2.5 p-3 rounded-xl bg-black/40 border border-rose-500/20 text-rose-200 text-xs sm:text-sm"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{mistake}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {exercise.proTip && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex items-start gap-3">
+                  <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-amber-300 font-bold text-xs uppercase tracking-wider mb-1">
+                      Elite Biomechanical Pro Tip
+                    </strong>
+                    <p className="text-xs sm:text-sm leading-relaxed">{exercise.proTip}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

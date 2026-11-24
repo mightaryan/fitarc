@@ -31,6 +31,8 @@ export function FoodSection() {
     totalProtein,
     totalCarbs,
     totalFats,
+    totalSugar,
+    sugarLimitGrams,
     deleteMeal,
     isMealScannerOpen,
     setIsMealScannerOpen,
@@ -101,7 +103,7 @@ export function FoodSection() {
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            Nutrition <span className="gold-gradient-text font-extrabold">Vault</span>
+            Culinary <span className="gold-gradient-text font-extrabold">Archive</span>
           </h1>
         </div>
 
@@ -115,8 +117,8 @@ export function FoodSection() {
         </button>
       </div>
 
-      {/* LUXURY COMPACT MACRONUTRIENT BAR */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      {/* LUXURY COMPACT MACRONUTRIENT & SUGAR BAR */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
         <div className="p-3 rounded-xl bg-obsidian-850 border border-amber-500/20 flex items-center justify-between">
           <div>
             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Calories</span>
@@ -145,7 +147,26 @@ export function FoodSection() {
           <span className="text-xs font-mono font-bold text-sky-400">{carbPercent}%</span>
         </div>
 
-        <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
+        {/* Daily Sugar Intake Tracker */}
+        <div className={`p-3 rounded-xl bg-obsidian-850 border flex items-center justify-between ${
+          totalSugar > sugarLimitGrams ? 'border-rose-500/40 bg-rose-950/20' : 'border-amber-500/20'
+        }`}>
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Sugar</span>
+            <span className={`text-base sm:text-lg font-bold ${
+              totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-300'
+            }`}>
+              {totalSugar}g <span className="text-[10px] text-slate-400 font-normal">/ {sugarLimitGrams}g</span>
+            </span>
+          </div>
+          <span className={`text-xs font-mono font-bold ${
+            totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-400'
+          }`}>
+            {Math.round((totalSugar / sugarLimitGrams) * 100)}%
+          </span>
+        </div>
+
+        <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between col-span-2 sm:col-span-1">
           <div>
             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Fats</span>
             <span className="text-base sm:text-lg font-bold text-emerald-300">{totalFats}g</span>

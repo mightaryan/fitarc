@@ -8,9 +8,18 @@ import { FoodSection } from './components/food/FoodSection';
 import { OverviewDashboard } from './components/dashboard/OverviewDashboard';
 import { DailyWeightModal } from './components/weight/DailyWeightModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { PlanSelectorModal } from './components/plans/PlanSelectorModal';
 
 function AppContent() {
-  const { activeTab, isWeightModalOpen, setIsWeightModalOpen, isAuthModalOpen, setIsAuthModalOpen } = useApp();
+  const {
+    activeTab,
+    isWeightModalOpen,
+    setIsWeightModalOpen,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    isPlanModalOpen,
+    setIsPlanModalOpen,
+  } = useApp();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090C] text-slate-100">
@@ -40,6 +49,12 @@ function AppContent() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* 30/60/90 Day Transformation Plan Selector Modal */}
+      <PlanSelectorModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
       />
     </div>
   );

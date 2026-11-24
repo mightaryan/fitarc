@@ -20,6 +20,7 @@ import {
   X,
 } from 'lucide-react';
 import { MASTER_EXERCISE_CATALOG, DIFFICULTY_LEVELS } from '../../data/allExercisesMaster';
+import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
 import { GlassCard } from '../common/GlassCard';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
@@ -56,6 +57,7 @@ export function FitnessSection() {
     totalWorkoutMinutes,
     deleteWorkout,
     setIsWeightModalOpen,
+    setIsPlanModalOpen,
   } = useApp();
 
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
@@ -67,6 +69,11 @@ export function FitnessSection() {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
+  // Combined catalog of 3D Gym Lifts, Full Body Yoga, Face Yoga & Home Workouts
+  const fullExerciseCatalog = useMemo(() => {
+    return [...YOGA_AND_HOME_WORKOUTS, ...MASTER_EXERCISE_CATALOG];
+  }, []);
+
   // Active filter count for badge
   const activeFilterCount =
     (selectedDifficulty !== 'all' ? 1 : 0) +
@@ -74,9 +81,9 @@ export function FitnessSection() {
     (selectedMuscle !== 'All Muscles' ? 1 : 0) +
     (selectedEquipment !== 'all' ? 1 : 0);
 
-  // Filter 1,323+ exercises with fast memoization
+  // Filter exercises with fast memoization
   const filteredCatalog = useMemo(() => {
-    return MASTER_EXERCISE_CATALOG.filter((item) => {
+    return fullExerciseCatalog.filter((item) => {
       // Difficulty filter
       let matchesDiff = true;
       if (selectedDifficulty === 'beginner') {
@@ -90,9 +97,16 @@ export function FitnessSection() {
       // Category filter
       let matchesCategory = selectedCategory === 'all';
       if (!matchesCategory) {
-        if (selectedCategory === 'mobility') {
+        if (selectedCategory === 'yoga') {
+          matchesCategory = item.category === 'yoga';
+        } else if (selectedCategory === 'face_yoga') {
+          matchesCategory = item.category === 'face_yoga' || item.muscleCategory === 'Face & Neck';
+        } else if (selectedCategory === 'home_workout') {
+          matchesCategory = item.category === 'home_workout' || item.equipment === 'bodyweight';
+        } else if (selectedCategory === 'mobility') {
           matchesCategory =
             item.category === 'mobility' ||
+            item.category === 'yoga' ||
             item.muscleCategory === 'Core' ||
             item.equipment === 'band' ||
             (item.name && (item.name.toLowerCase().includes('stretch') || item.name.toLowerCase().includes('mobility')));
@@ -121,7 +135,7 @@ export function FitnessSection() {
         matchesEquipment = item.equipment === selectedEquipment;
       }
 
-      // Search query: multi-token matching so "incline dumbbell" finds "Dumbbell Incline Bench Press"
+      // Search query: multi-token matching
       const q = searchQuery.toLowerCase().trim();
       const searchTerms = q.split(/\s+/).filter(Boolean);
       const matchesSearch =
@@ -137,7 +151,7 @@ export function FitnessSection() {
 
       return matchesDiff && matchesCategory && matchesMuscle && matchesEquipment && matchesSearch;
     });
-  }, [selectedDifficulty, selectedCategory, selectedMuscle, selectedEquipment, searchQuery]);
+  }, [fullExerciseCatalog, selectedDifficulty, selectedCategory, selectedMuscle, selectedEquipment, searchQuery]);
 
   const displayedItems = filteredCatalog.slice(0, visibleCount);
 
@@ -156,7 +170,7 @@ export function FitnessSection() {
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            Exercise <span className="gold-gradient-text font-extrabold">Vault</span>
+            Movement <span className="gold-gradient-text font-extrabold">Archive</span>
           </h1>
         </div>
 
@@ -183,6 +197,38 @@ export function FitnessSection() {
         </div>
       </div>
 
+      {/* ACTIVE TRANSFORMATION GOAL PLAN BANNER (30 / 60 / 90 DAYS) */}
+      {user.activePlan && (
+        <div
+          onClick={() => setIsPlanModalOpen(true)}
+          className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-600/10 to-obsidian-850 border border-amber-500/30 flex items-center justify-between cursor-pointer hover:border-amber-400 active:scale-[0.99] transition-all shadow-lg group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-black flex items-center justify-center font-bold shadow-gold-glow-sm shrink-0">
+              <Zap className="w-5 h-5 fill-current" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  Active Goal Plan
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                  {user.activePlan.durationDays} Days · {user.activePlan.badge || 'Sprint'}
+                </span>
+              </div>
+              <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition mt-0.5">
+                {user.activePlan.title}
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs font-semibold text-amber-400 shrink-0">
+            <span className="hidden sm:inline">Change Goal Plan</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+          </div>
+        </div>
+      )}
+
       {/* SEARCH & STREAMLINED FILTER CONTROLS */}
       <div className="space-y-3">
         {/* Search Input + Quick Filter Toggle Button */}
@@ -191,7 +237,7 @@ export function FitnessSection() {
             <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder={`Search ${MASTER_EXERCISE_CATALOG.length.toLocaleString()}+ movements (e.g., bench press, squat, curl)...`}
+              placeholder={`Search ${fullExerciseCatalog.length.toLocaleString()}+ movements (e.g., sun salutation, sofa squat, bench, jawline)...`}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -229,14 +275,17 @@ export function FitnessSection() {
           </button>
         </div>
 
-        {/* Horizontal Swipeable Category Chips (Single Clean Row) */}
+        {/* Horizontal Swipeable Category Chips (Single Clean Row with Yoga, Face Yoga & Home Workouts) */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
           {[
             { id: 'all', label: 'All Movements' },
+            { id: 'yoga', label: '🧘 Full Body Yoga' },
+            { id: 'face_yoga', label: '✨ Face Yoga' },
+            { id: 'home_workout', label: '🏠 Home Workouts' },
             { id: 'machines', label: 'Gym Machines' },
             { id: 'freeweights', label: 'Free Weights & Dumbbells' },
-            { id: 'bodyweight', label: 'Bodyweight' },
-            { id: 'cardio', label: 'Cardio' },
+            { id: 'bodyweight', label: 'Calisthenics' },
+            { id: 'cardio', label: 'Cardio & HIIT' },
             { id: 'mobility', label: 'Mobility' },
           ].map((cat) => (
             <button

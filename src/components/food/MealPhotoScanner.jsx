@@ -84,6 +84,7 @@ export function MealPhotoScanner({ onClose, onMealLogged }) {
       calories: scanResult.estimatedCalories,
       protein: scanResult.macros.protein,
       carbs: scanResult.macros.carbs,
+      sugar: scanResult.macros.sugar || Math.round((scanResult.macros.carbs || 30) * 0.12) || 4,
       fats: scanResult.macros.fats,
       photoUrl: scanResult.photoUrl,
       rating: {
@@ -263,22 +264,28 @@ export function MealPhotoScanner({ onClose, onMealLogged }) {
                 </div>
 
                 {/* Exact Macronutrient Pillars */}
-                <div className="grid grid-cols-4 gap-2">
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Protein</span>
-                    <div className="text-lg font-black text-amber-400">{scanResult.macros.protein}g</div>
+                <div className="grid grid-cols-5 gap-2">
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
+                    <span className="text-[9px] text-slate-400 uppercase font-semibold">Protein</span>
+                    <div className="text-base sm:text-lg font-black text-amber-400">{scanResult.macros.protein}g</div>
                   </div>
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Carbs</span>
-                    <div className="text-lg font-black text-sky-400">{scanResult.macros.carbs}g</div>
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
+                    <span className="text-[9px] text-slate-400 uppercase font-semibold">Carbs</span>
+                    <div className="text-base sm:text-lg font-black text-sky-400">{scanResult.macros.carbs}g</div>
                   </div>
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Fats</span>
-                    <div className="text-lg font-black text-emerald-400">{scanResult.macros.fats}g</div>
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
+                    <span className="text-[9px] text-slate-400 uppercase font-semibold">Sugar</span>
+                    <div className="text-base sm:text-lg font-black text-amber-300">
+                      {scanResult.macros.sugar || Math.round((scanResult.macros.carbs || 30) * 0.12) || 4}g
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-center">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold">Fiber</span>
-                    <div className="text-lg font-black text-purple-400">{scanResult.macros.fiber}g</div>
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
+                    <span className="text-[9px] text-slate-400 uppercase font-semibold">Fats</span>
+                    <div className="text-base sm:text-lg font-black text-emerald-400">{scanResult.macros.fats}g</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
+                    <span className="text-[9px] text-slate-400 uppercase font-semibold">Fiber</span>
+                    <div className="text-base sm:text-lg font-black text-purple-400">{scanResult.macros.fiber}g</div>
                   </div>
                 </div>
 

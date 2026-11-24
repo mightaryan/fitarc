@@ -27,12 +27,29 @@ const DEFAULT_PROFILE = {
   gender: 'male',
   unit: 'kg',
   goal: 'fat_loss', // 'fat_loss' | 'muscle_gain' | 'recomp'
+  bodyFat: 16.5,
   dailyCalorieTarget: 2200,
   dailyWorkoutTargetMin: 45,
   dailyWaterTargetLiters: 3.5,
   isLoggedIn: true,
   memberTier: 'Gold Elite Pro',
   loginMethod: 'email',
+  activePlan: {
+    id: 'belly-fat-30',
+    targetArea: 'belly_fat',
+    durationDays: 30,
+    title: '30-Day Belly Fat Blitz',
+    badge: 'High Intensity Sprint',
+    startDate: '2026-11-20',
+    currentDay: 5,
+    dailyCalorieDeficit: 500,
+    dailySugarLimitGrams: 20,
+    workoutDaysPerWeek: 5,
+  },
+  bodyFatHistory: [
+    { date: '2026-11-18', bodyFat: 17.2, method: 'manual', note: 'Baseline scan' },
+    { date: '2026-11-24', bodyFat: 16.5, method: 'ai_scan', note: 'AI torso vision scan' }
+  ],
 };
 
 const SEED_WEIGHT_HISTORY = [
@@ -112,6 +129,7 @@ export function AppProvider({ children }) {
   const [selectedRecipeForModal, setSelectedRecipeForModal] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMealScannerOpen, setIsMealScannerOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
   // Sync font size scale to root document
   useEffect(() => {
@@ -475,6 +493,40 @@ export function AppProvider({ children }) {
     localStorage.removeItem(ACTIVE_USER_ID_KEY);
   };
 
+  // Select active transformation plan (30, 60, 90 days)
+  const selectTransformationPlan = (plan) => {
+    setUser((prev) => ({
+      ...prev,
+      activePlan: {
+        ...plan,
+        startDate: getTodayDateString(),
+        currentDay: 1,
+      }
+    }));
+    triggerConfetti();
+  };
+
+  // Log Body Fat % reading (manual or AI photo vision estimate)
+  const logBodyFat = (fatPercent, photoUrl = null, method = 'manual', note = '') => {
+    const numericFat = Math.round(parseFloat(fatPercent) * 10) / 10;
+    if (isNaN(numericFat) || numericFat <= 3) return;
+    const today = getTodayDateString();
+    const entry = {
+      date: today,
+      bodyFat: numericFat,
+      photoUrl,
+      method,
+      note: note || (method === 'ai_scan' ? 'AI Physique Vision Scan' : 'Manual Entry'),
+    };
+
+    setUser((prev) => ({
+      ...prev,
+      bodyFat: numericFat,
+      bodyFatHistory: [entry, ...(prev.bodyFatHistory || [])],
+    }));
+    triggerConfetti();
+  };
+
   // Compute daily totals for today
   const today = getTodayDateString();
   const todaysWorkouts = loggedWorkouts.filter((w) => w.date === today);
@@ -487,8 +539,13 @@ export function AppProvider({ children }) {
   const totalProtein = todaysMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
   const totalCarbs = todaysMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
   const totalFats = todaysMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
+  const totalSugar = todaysMeals.reduce((sum, m) => sum + (m.sugar || 0), 0);
+  const sugarLimitGrams = user.activePlan?.dailySugarLimitGrams || 25;
 
   const netCalories = totalCaloriesConsumed - totalCaloriesBurned;
+
+  // Calculate live BMI
+  const bmi = Math.round(((user.currentWeight || 75) / (((user.height || 180) / 100) ** 2)) * 10) / 10;
 
   const value = {
     activeTab,
@@ -497,6 +554,13 @@ export function AppProvider({ children }) {
     setFontSizeScale,
     user,
     setUser,
+    bmi,
+    totalSugar,
+    sugarLimitGrams,
+    selectTransformationPlan,
+    logBodyFat,
+    isPlanModalOpen,
+    setIsPlanModalOpen,
     weightHistory,
     logDailyWeight,
     snoozeWeightReminder,

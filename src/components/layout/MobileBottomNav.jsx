@@ -122,7 +122,7 @@ export function MobileBottomNav() {
             </div>
           </div>
           <span className="text-[10px] mt-1 font-semibold text-slate-300 tracking-tight">
-            Vault
+            Profile
           </span>
         </button>
       </div>
