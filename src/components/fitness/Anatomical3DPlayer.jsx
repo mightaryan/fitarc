@@ -30,6 +30,12 @@ export function Anatomical3DPlayer({
   const [jointAngle, setJointAngle] = useState(45); // default 45° optimal angle
   const [formMode, setFormMode] = useState('optimal'); // 'optimal' | 'flawed'
 
+  // Reset image load state whenever active exercise changes
+  useEffect(() => {
+    setImgLoaded(false);
+    setImgError(false);
+  }, [exercise?.id, gifUrl]);
+
   // Sync internal mode when parent changes active tab
   useEffect(() => {
     if (activeTab) {
@@ -137,6 +143,7 @@ export function Anatomical3DPlayer({
         {/* 3D Anatomical GIF Image with Dark Mode Transformation Filter */}
         <div className="relative w-full h-full flex items-center justify-center p-4">
           <img
+            key={exercise?.id || gifUrl}
             src={imgError ? FALLBACK_GIF : gifUrl}
             alt={exercise?.name || 'Exercise'}
             onLoad={() => setImgLoaded(true)}
