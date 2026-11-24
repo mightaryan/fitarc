@@ -65,8 +65,8 @@ export function OverviewDashboard() {
           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
             Biometric Performance Summary
           </span>
-          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-            DAILY METABOLIC COMMAND
+          <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight">
+            Daily Metabolic Performance
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
             Welcome back, <strong className="text-amber-300">{user.name}</strong> · Focus today:{' '}

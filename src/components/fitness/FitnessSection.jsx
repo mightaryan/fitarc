@@ -110,8 +110,8 @@ export function FitnessSection() {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
-            1,300+ <span className="gold-gradient-text">3D ANATOMICAL EXERCISE</span> VAULT
+          <h1 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight leading-snug mb-3">
+            1,300+ <span className="gold-gradient-text font-bold">3D Anatomical Movements</span> & Equipment Vault
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl mb-6">
@@ -274,8 +274,7 @@ export function FitnessSection() {
                   src={item.gifUrl}
                   alt={item.name}
                   loading="lazy"
-                  className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 filter contrast-105"
-                  style={{ mixBlendMode: 'screen' }}
+                  className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
                 />
 
                 {/* Ambient glow highlight */}

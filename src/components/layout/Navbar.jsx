@@ -6,10 +6,7 @@ import {
   Scale,
   Flame,
   Camera,
-  User,
-  Sparkles,
   ChevronDown,
-  Type,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -18,41 +15,31 @@ export function Navbar() {
     activeTab,
     setActiveTab,
     user,
-    fontSizeScale,
-    setFontSizeScale,
-    totalCaloriesBurned,
-    totalCaloriesConsumed,
     setIsWeightModalOpen,
     setIsAuthModalOpen,
     setIsMealScannerOpen,
   } = useApp();
 
-  const cycleFontSize = () => {
-    const order = ['normal', 'medium', 'large', 'xlarge'];
-    const nextIdx = (order.indexOf(fontSizeScale) + 1) % order.length;
-    setFontSizeScale(order[nextIdx]);
-  };
-
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-500/20 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-        {/* Brand & Logo */}
+        {/* Brand & Logo (Rich Luxury Aesthetic) */}
         <div
           onClick={() => setActiveTab('fitness')}
           className="flex items-center gap-3 cursor-pointer group shrink-0"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-gold-glow flex items-center justify-center group-hover:scale-105 transition duration-300">
             <div className="w-full h-full bg-obsidian-900 rounded-[14px] flex items-center justify-center">
-              <span className="text-xl font-black text-amber-400">⚡</span>
+              <span className="text-xl font-bold text-amber-400">⚡</span>
             </div>
           </div>
 
           <div>
-            <div className="text-xl sm:text-2xl font-black tracking-tighter text-white flex items-center gap-1">
-              FIT<span className="gold-gradient-text">ARC</span>
+            <div className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-1">
+              FIT<span className="gold-gradient-text font-extrabold">ARC</span>
             </div>
-            <div className="text-[9px] uppercase tracking-widest text-amber-400 font-bold -mt-1 hidden sm:block">
-              Golden Standard Fitness & Food
+            <div className="text-[9px] uppercase tracking-widest text-amber-400/90 font-semibold -mt-0.5 hidden sm:block">
+              Golden Standard Fitness & Nutrition
             </div>
           </div>
         </div>
@@ -62,9 +49,9 @@ export function Navbar() {
           {/* FITNESS SECTION */}
           <button
             onClick={() => setActiveTab('fitness')}
-            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-black tracking-wide transition flex items-center gap-2 relative ${
+            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
               activeTab === 'fitness'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-black'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -78,9 +65,9 @@ export function Navbar() {
           {/* FOOD SECTION */}
           <button
             onClick={() => setActiveTab('food')}
-            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-black tracking-wide transition flex items-center gap-2 relative ${
+            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
               activeTab === 'food'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-black'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -94,9 +81,9 @@ export function Navbar() {
           {/* OVERVIEW / DASHBOARD */}
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`hidden md:flex px-4 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wide transition items-center gap-1.5 ${
+            className={`hidden md:flex px-4 py-2 rounded-xl text-xs sm:text-sm font-medium tracking-wide transition items-center gap-1.5 ${
               activeTab === 'dashboard'
-                ? 'bg-amber-500 text-black shadow-gold-glow-sm font-black'
+                ? 'bg-amber-500 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -115,21 +102,9 @@ export function Navbar() {
           >
             <Scale className="w-4 h-4 text-amber-400 group-hover:scale-110 transition" />
             <div className="text-left leading-none">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Weight</span>
-              <span className="text-xs font-black text-amber-300">{user.currentWeight} kg</span>
+              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Weight</span>
+              <span className="text-xs font-bold text-amber-300">{user.currentWeight} kg</span>
             </div>
-          </button>
-
-          {/* Quick Font Size Switcher */}
-          <button
-            onClick={cycleFontSize}
-            className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-obsidian-850/80 border border-white/10 text-amber-300 hover:border-amber-400 text-xs font-black transition flex items-center gap-1"
-            title={`Current Font Scale: ${fontSizeScale}. Click to cycle.`}
-          >
-            <Type className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[11px] uppercase font-mono">
-              {fontSizeScale === 'normal' ? 'A' : fontSizeScale === 'medium' ? 'A+' : fontSizeScale === 'large' ? 'A++' : 'A+++'}
-            </span>
           </button>
 
           {/* Quick Meal Photo Scan Button */}
@@ -139,7 +114,7 @@ export function Navbar() {
             title="Upload or snap photo of your food"
           >
             <Camera className="w-4 h-4 text-amber-400" />
-            <span className="hidden lg:inline text-xs font-bold">Scan Food</span>
+            <span className="hidden lg:inline text-xs font-semibold">Scan Food</span>
           </button>
 
           {/* Profile Avatar / Trigger */}
@@ -148,7 +123,7 @@ export function Navbar() {
             className="flex items-center gap-2 p-1.5 rounded-xl bg-obsidian-800/80 border border-white/10 hover:border-amber-500/40 transition"
             title="Account & Goals"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-black text-xs flex items-center justify-center shadow-gold-glow-sm">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-bold text-xs flex items-center justify-center shadow-gold-glow-sm">
               {user.name?.slice(0, 2).toUpperCase() || 'AV'}
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
