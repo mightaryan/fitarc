@@ -57,24 +57,24 @@ export function WorkoutDetailModal({ exercise, onClose }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col">
         {/* Header Bar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-6 bg-obsidian-900/90 backdrop-blur-md border-b border-amber-500/15">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
-              <Dumbbell className="w-5 h-5" />
+        <div className="sticky top-0 z-20 flex items-center justify-between p-3.5 sm:p-6 bg-obsidian-900/95 backdrop-blur-md border-b border-amber-500/15 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
+              <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <div className="min-w-0 flex-1 pr-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
                   {exercise.category}
                 </span>
-                <span className="text-xs text-slate-400">{exercise.level}</span>
+                <span className="text-[11px] sm:text-xs text-slate-400 shrink-0">{exercise.level}</span>
                 {exercise.equipmentBrand && (
-                  <span className="text-[10px] text-amber-400 font-mono hidden sm:inline">
+                  <span className="text-[10px] text-amber-400 font-mono hidden md:inline truncate">
                     · {exercise.equipmentBrand}
                   </span>
                 )}
               </div>
-              <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
+              <h2 className="text-sm sm:text-2xl font-black text-white tracking-tight mt-0.5 break-words line-clamp-2">
                 {exercise.name}
               </h2>
             </div>
@@ -82,9 +82,10 @@ export function WorkoutDetailModal({ exercise, onClose }) {
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition shrink-0"
+            aria-label="Close modal"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 

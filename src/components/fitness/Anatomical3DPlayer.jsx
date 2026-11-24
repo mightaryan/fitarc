@@ -17,6 +17,109 @@ import {
 const FALLBACK_GIF =
   'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
 
+function getMuscleTelemetry(exercise, jointAngle) {
+  const muscleGroup = (exercise?.muscleCategory || exercise?.muscle || '').toLowerCase();
+  const category = (exercise?.category || '').toLowerCase();
+  const name = (exercise?.name || '').toLowerCase();
+
+  const isCore =
+    muscleGroup.includes('core') ||
+    muscleGroup.includes('abs') ||
+    name.includes('crunch') ||
+    name.includes('plank');
+  const isLegs =
+    muscleGroup.includes('legs') ||
+    muscleGroup.includes('quad') ||
+    muscleGroup.includes('glute') ||
+    muscleGroup.includes('hamstring') ||
+    name.includes('squat') ||
+    name.includes('lunge');
+  const isBack =
+    muscleGroup.includes('back') ||
+    muscleGroup.includes('lat') ||
+    name.includes('row') ||
+    name.includes('pull');
+  const isYogaOrFace =
+    category === 'yoga' ||
+    category === 'face_yoga' ||
+    muscleGroup.includes('face') ||
+    name.includes('yoga') ||
+    name.includes('jawline');
+
+  if (isCore) {
+    return {
+      vectorLabel: 'Kinetic Vector:',
+      optimalVector: '45° Torso Flexion (0% Cervical Shear)',
+      optimalBadge: '45° Optimal Guide',
+      flawedBadge: '90° Spinal Strain',
+      sliderMin: '30° Safe',
+      sliderMax: '90° Strain',
+      hazardTitle: `Excessive ${jointAngle}° Flexion · Lumbar & Cervical Strain`,
+      hazardDesc: 'Spinal shear hazard · Target abdominal engagement drops to 32%',
+      optimalTitle: `Optimal ${jointAngle}° Flexion · Peak Core Recruitment`,
+      optimalDesc: '0% Spinal Strain · 94% Tension on Rectus & Obliques',
+      topBanner: '⚡ 45° Torso Flexion Alignment · Peak Core Tension',
+    };
+  } else if (isLegs) {
+    return {
+      vectorLabel: 'Joint Trajectory:',
+      optimalVector: 'Patellar Tracking Line (0% Knee Shear)',
+      optimalBadge: '45° Tracking Guide',
+      flawedBadge: '90° Knee Shear Risk',
+      sliderMin: '30° Safe',
+      sliderMax: '90° Valgus',
+      hazardTitle: `Dangerous ${jointAngle}° Knee Flare · High Patellar Shear`,
+      hazardDesc: 'Joint shearing hazard · Quad/Glute tension drops',
+      optimalTitle: `Optimal ${jointAngle}° Knee-Toe Vector · Quad & Glute Lock`,
+      optimalDesc: '0% Ligament Shear · 95% Mechanical Tension on Quads',
+      topBanner: '⚡ Ergonomic Patellar Tracking · 0% Knee Shear Stress',
+    };
+  } else if (isBack) {
+    return {
+      vectorLabel: 'Scapular Plane:',
+      optimalVector: 'Retracted Scapulae (0% Lumbar Strain)',
+      optimalBadge: 'Retracted Scapula Guide',
+      flawedBadge: 'Spinal Kyphosis Risk',
+      sliderMin: '30° Neutral',
+      sliderMax: '90° Rounded',
+      hazardTitle: `Deviated ${jointAngle}° Torso Angle · High Spinal Shear`,
+      hazardDesc: 'Erector spinae strain · Latissimus recruitment drops',
+      optimalTitle: `Optimal ${jointAngle}° Scapular Plane · Peak Latissimus Tension`,
+      optimalDesc: '0% Spinal Shear · 93% Mechanical Tension across Lats',
+      topBanner: '⚡ Scapular Retraction Vector · 0% Spinal Shear',
+    };
+  } else if (isYogaOrFace) {
+    return {
+      vectorLabel: 'Fascial Track:',
+      optimalVector: 'Gentle Elongation (0% Pinching)',
+      optimalBadge: 'Optimal Gentle Glide',
+      flawedBadge: 'Excessive Tension Risk',
+      sliderMin: '30° Soft',
+      sliderMax: '90° Strain',
+      hazardTitle: `Excessive ${jointAngle}° Force · Tissue Pinching Hazard`,
+      hazardDesc: 'Connective tissue strain · Reduces lymphatic drainage',
+      optimalTitle: `Optimal ${jointAngle}° Fascial Track · Collagen & Fiber Release`,
+      optimalDesc: '0% Pinching · 96% Lymphatic Drainage Alignment',
+      topBanner: '⚡ Fascial Elongation Arc · Zero Joint Compression',
+    };
+  }
+
+  // Default (Chest / Shoulders / Arms)
+  return {
+    vectorLabel: 'Kinetic Vector:',
+    optimalVector: '45° Scapular Track (0% AC Impingement)',
+    optimalBadge: '45° Optimal Guide',
+    flawedBadge: '90° Flared Risk',
+    sliderMin: '30° Tuck',
+    sliderMax: '90° Flare',
+    hazardTitle: `Dangerous ${jointAngle}° Joint Flare · High Shear Hazard`,
+    hazardDesc: '38% Subacromial Pinching · Target activation drops to 32%',
+    optimalTitle: `Optimal ${jointAngle}° Angle · Peak Fiber Alignment`,
+    optimalDesc: '0% Joint Impingement · 94% Mechanical Tension',
+    topBanner: '⚡ 45° Scapular Plane Recruitment · Peak Mechanical Tension',
+  };
+}
+
 export function Anatomical3DPlayer({
   exercise,
   isMini = false,
@@ -29,6 +132,8 @@ export function Anatomical3DPlayer({
   const [formMode, setFormMode] = useState('optimal'); // 'optimal' | 'flawed'
 
   const gifUrl = exercise?.gifUrl || FALLBACK_GIF;
+  const isAngleHazard = jointAngle > 65;
+  const telemetry = getMuscleTelemetry(exercise, jointAngle);
 
   // Reset image load state whenever active exercise changes
   useEffect(() => {
@@ -55,8 +160,6 @@ export function Anatomical3DPlayer({
       setJointAngle(90);
     }
   };
-
-  const isAngleHazard = jointAngle > 65;
 
   // Working weight ratio calculation for pyramid mode
   const estWorkingWeight = Math.round(userWeightKg * (exercise?.metScore > 7 ? 1.15 : 0.85));
@@ -100,22 +203,22 @@ export function Anatomical3DPlayer({
           {activeTab === 'biomechanics' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Banner Ribbon */}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  ⚡ 45° Scapular Plane Recruitment · Peak Mechanical Tension
+              <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
+                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2 max-w-full truncate">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                  <span className="truncate">{telemetry.topBanner}</span>
                 </span>
 
-                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md">
+                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md shrink-0">
                   MET {exercise?.metScore || 6.5} · {Math.round((exercise?.hypertrophyRate || 0.9) * 100)}% Hypertrophy Rate
                 </span>
               </div>
 
               {/* Bottom Footer Ribbon */}
-              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-400 font-medium">Kinetic Vector:</span>
-                  <span className="text-amber-300 font-bold">45° Track (0% AC Impingement)</span>
+              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap max-w-full">
+                <div className="flex items-center gap-2 truncate max-w-full">
+                  <span className="text-[11px] text-slate-400 font-medium shrink-0">{telemetry.vectorLabel}</span>
+                  <span className="text-amber-300 font-bold truncate">{telemetry.optimalVector}</span>
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {exercise?.primaryMuscles?.slice(0, 3).map((m, idx) => (
@@ -135,38 +238,38 @@ export function Anatomical3DPlayer({
           {activeTab === 'pyramid' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Ratio Badges */}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-amber-400" />
-                  {bwRatio}x Mass Ratio · Working Load: {estWorkingWeight}kg (calibrated to {userWeightKg}kg mass)
+              <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
+                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2 max-w-full truncate">
+                  <TrendingUp className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate">{bwRatio}x Mass Ratio · Working Load: {estWorkingWeight}kg</span>
                 </span>
 
-                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md">
+                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md shrink-0">
                   Est. 1RM ~{est1RM}kg
                 </span>
               </div>
 
               {/* Bottom Overload 4-Phase Ribbon */}
-              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs max-w-full">
+                <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 shrink-0">
                   <Layers className="w-3.5 h-3.5 text-amber-400" />
                   Pyramid Overload Progression:
                 </span>
-                <div className="flex items-center gap-2 text-[10px] sm:text-xs">
-                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-slate-300">
-                    Set 1: 50% (Warmup)
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs overflow-x-auto max-w-full py-0.5">
+                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-slate-300 shrink-0">
+                    Set 1: 50%
                   </span>
                   <span className="text-slate-600">➔</span>
-                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-200">
-                    Set 2: 70% (Volume)
+                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-200 shrink-0">
+                    Set 2: 70%
                   </span>
                   <span className="text-slate-600">➔</span>
-                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-300">
-                    Set 3: 80% (Tension)
+                  <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-300 shrink-0">
+                    Set 3: 80%
                   </span>
                   <span className="text-slate-600">➔</span>
-                  <span className="px-2.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold">
-                    Top Set: 88% (Peak Drive)
+                  <span className="px-2.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold shrink-0">
+                    Top: 88%
                   </span>
                 </div>
               </div>
@@ -177,20 +280,20 @@ export function Anatomical3DPlayer({
           {activeTab === 'setup' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Setup Check */}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-emerald-500/30 text-emerald-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  Machine Axis & Ergonomic Lock: Calibrated
+              <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
+                <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-emerald-500/30 text-emerald-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2 max-w-full truncate">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="truncate">Machine Axis & Ergonomic Lock: Calibrated</span>
                 </span>
 
-                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md">
+                <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md shrink-0">
                   {exercise?.equipment || 'Equipment'} Safety Cam
                 </span>
               </div>
 
               {/* Bottom Checklist Ribbon */}
-              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap">
-                <div className="flex items-center gap-3">
+              <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap max-w-full">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
                     ✓ Seat Pin Locked
                   </span>
@@ -201,7 +304,7 @@ export function Anatomical3DPlayer({
                     ✓ Joint-Cam Alignment
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">100% Structural Stability</span>
+                <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">100% Stability</span>
               </div>
             </div>
           )}
@@ -210,77 +313,73 @@ export function Anatomical3DPlayer({
           {activeTab === 'mistakes' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Alert Badge */}
-              <div className="flex items-center justify-between gap-2 flex-wrap pointer-events-auto">
+              <div className="flex items-center justify-between gap-2 flex-wrap pointer-events-auto max-w-full">
                 <div
-                  className={`px-3.5 py-2 rounded-xl border backdrop-blur-md shadow-xl transition-all duration-300 flex items-center gap-2.5 ${
+                  className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border backdrop-blur-md shadow-xl transition-all duration-300 flex items-center gap-2 sm:gap-2.5 max-w-[calc(100%-80px)] overflow-hidden ${
                     isAngleHazard
-                      ? 'bg-rose-950/90 border-rose-500/50 text-rose-200 animate-pulse'
+                      ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
                       : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
                   }`}
                 >
                   {isAngleHazard ? (
-                    <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+                    <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-rose-400 shrink-0" />
                   ) : (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
                   )}
-                  <div className="text-left">
-                    <span className="text-xs font-bold uppercase tracking-wider block">
-                      {isAngleHazard
-                        ? `Dangerous ${jointAngle}° Joint Flare · High Shear Hazard`
-                        : `Optimal ${jointAngle}° Angle · Peak Fiber Alignment`}
+                  <div className="text-left overflow-hidden">
+                    <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider block truncate">
+                      {isAngleHazard ? telemetry.hazardTitle : telemetry.optimalTitle}
                     </span>
-                    <span className="text-[11px] opacity-85 block">
-                      {isAngleHazard
-                        ? '38% Subacromial Pinching · AC Joint Strain · Target Activation Drops to 32%'
-                        : '0% Joint Impingement · 94% Mechanical Tension on Target Muscle'}
+                    <span className="text-[10px] sm:text-[11px] opacity-85 block truncate">
+                      {isAngleHazard ? telemetry.hazardDesc : telemetry.optimalDesc}
                     </span>
                   </div>
                 </div>
 
                 {/* Angle Dial Badge */}
-                <div className="px-3.5 py-2 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md font-mono text-base font-extrabold flex items-center gap-1.5 shadow-lg">
+                <div className="px-3 py-1.5 sm:py-2 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md font-mono text-sm sm:text-base font-extrabold flex items-center gap-1.5 shadow-lg shrink-0">
                   <span>{jointAngle}°</span>
                   <span className="text-[10px] text-slate-400 font-sans font-normal uppercase">Track</span>
                 </div>
               </div>
 
               {/* Bottom Interactive Controls (Smooth Slider & Mode Toggles) */}
-              <div className="bg-black/90 backdrop-blur-md p-3.5 rounded-2xl border border-white/10 space-y-2.5 pointer-events-auto">
-                <div className="flex items-center justify-between gap-3 text-xs flex-wrap">
-                  <div className="flex items-center gap-1.5">
-                    <Sliders className="w-4 h-4 text-amber-400" />
-                    <span className="font-semibold text-slate-200">Joint Angle Biomechanics:</span>
+              <div className="bg-black/90 backdrop-blur-md p-3 sm:p-3.5 rounded-2xl border border-white/10 space-y-2 pointer-events-auto max-w-full">
+                <div className="flex items-center justify-between gap-2 text-xs flex-wrap">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <Sliders className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="font-semibold text-slate-200 truncate">Joint Angle Biomechanics:</span>
                   </div>
 
                   {/* Mode Buttons */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => handleAngleToggle('optimal')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition border ${
                         formMode === 'optimal'
                           ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
                           : 'bg-black/40 text-slate-400 border-white/5 hover:text-white'
                       }`}
                     >
-                      🟢 45° Optimal Guide
+                      🟢 {telemetry.optimalBadge}
                     </button>
                     <button
                       onClick={() => handleAngleToggle('flawed')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition border ${
                         formMode === 'flawed'
                           ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
                           : 'bg-black/40 text-slate-400 border-white/5 hover:text-white'
                       }`}
                     >
-                      🔴 90° Flared Risk
+                      🔴 {telemetry.flawedBadge}
                     </button>
                   </div>
                 </div>
 
                 {/* Slider */}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-emerald-400 font-mono font-semibold shrink-0">
-                    30° Tuck
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[11px] text-emerald-400 font-mono font-semibold shrink-0">
+                    {telemetry.sliderMin}
                   </span>
                   <input
                     type="range"
@@ -295,8 +394,8 @@ export function Anatomical3DPlayer({
                     }}
                     className="w-full accent-amber-400 h-2 bg-slate-800 rounded-lg cursor-pointer"
                   />
-                  <span className="text-xs text-rose-400 font-mono font-semibold shrink-0">
-                    90° Flare
+                  <span className="text-[11px] text-rose-400 font-mono font-semibold shrink-0">
+                    {telemetry.sliderMax}
                   </span>
                 </div>
               </div>

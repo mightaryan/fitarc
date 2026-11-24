@@ -78,16 +78,16 @@ export function RecipeDetailModal({ recipe, onClose }) {
             <div className="p-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
               <ChefHat className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <div className="min-w-0 flex-1 pr-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 flex-wrap">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
                   {recipe.diet === 'veg' ? '🌱 Vegetarian' : recipe.diet === 'vegan' ? '🌿 Vegan' : recipe.diet === 'eggetarian' ? '🥚 Eggetarian' : '🥩 Non-Veg'}
                 </span>
-                <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                <span className="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1 font-medium shrink-0">
                   <Clock className="w-3.5 h-3.5 text-amber-400" /> Cook: {recipe.cookTime || '15 min'}
                 </span>
               </div>
-              <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight">
+              <h2 className="text-base sm:text-2xl font-bold text-white tracking-tight break-words line-clamp-2">
                 {recipe.title}
               </h2>
             </div>
@@ -95,9 +95,10 @@ export function RecipeDetailModal({ recipe, onClose }) {
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition shrink-0"
+            aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 

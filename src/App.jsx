@@ -6,6 +6,7 @@ import { Footer } from './components/layout/Footer';
 import { FitnessSection } from './components/fitness/FitnessSection';
 import { FoodSection } from './components/food/FoodSection';
 import { OverviewDashboard } from './components/dashboard/OverviewDashboard';
+import { HomeSection } from './components/home/HomeSection';
 import { DailyWeightModal } from './components/weight/DailyWeightModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { PlanSelectorModal } from './components/plans/PlanSelectorModal';
@@ -28,6 +29,7 @@ function AppContent() {
 
       {/* Main Content Area (Extra bottom padding on mobile so content is never covered by bottom dock) */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 pb-28 md:pb-8">
+        {activeTab === 'home' && <HomeSection />}
         {activeTab === 'fitness' && <FitnessSection />}
         {activeTab === 'food' && <FoodSection />}
         {activeTab === 'dashboard' && <OverviewDashboard />}

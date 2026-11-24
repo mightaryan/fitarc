@@ -469,15 +469,15 @@ export function FitnessSection() {
               {/* Card Content */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+                  <div className="flex items-center gap-2 mb-1.5 overflow-hidden">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 truncate">
                       ⚡ Active: {item.muscle || item.muscleCategory}
                     </span>
-                    <span className="text-slate-600">·</span>
-                    <span className="text-[10px] text-slate-400 font-mono">MET {item.metScore}</span>
+                    <span className="text-slate-600 shrink-0">·</span>
+                    <span className="text-[10px] text-slate-400 font-mono shrink-0">MET {item.metScore}</span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight line-clamp-1">
                     {item.name}
                   </h3>
 
@@ -487,11 +487,11 @@ export function FitnessSection() {
                 </div>
 
                 {/* Primary Muscle Pills */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap overflow-hidden">
                   {item.primaryMuscles?.slice(0, 2).map((m, mIdx) => (
                     <span
                       key={mIdx}
-                      className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-500/10 text-amber-200 border border-amber-500/20"
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-500/10 text-amber-200 border border-amber-500/20 truncate max-w-[150px]"
                     >
                       {m.name} ({m.percentage}%)
                     </span>

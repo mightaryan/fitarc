@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import {
+  Home,
   Dumbbell,
   Utensils,
   LayoutDashboard,
@@ -30,7 +31,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
         {/* Brand & Logo (Rich Luxury Aesthetic) */}
         <div
-          onClick={() => setActiveTab('fitness')}
+          onClick={() => setActiveTab('home')}
           className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 active:scale-95 transition"
         >
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-gold-glow flex items-center justify-center group-hover:scale-105 transition duration-300">
@@ -52,12 +53,28 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* PRIMARY SECTIONS ON DESKTOP: FITNESS & FOOD (PLUS OVERVIEW) - HIDDEN ON MOBILE (USING BOTTOM DOCK) */}
+        {/* PRIMARY SECTIONS ON DESKTOP: HOME, FITNESS & FOOD (PLUS OVERVIEW) - HIDDEN ON MOBILE (USING BOTTOM DOCK) */}
         <nav className="hidden md:flex items-center gap-1.5 sm:gap-2 bg-black/50 p-1.5 rounded-2xl border border-amber-500/20 shadow-inner">
+          {/* HOME SECTION */}
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
+              activeTab === 'home'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Home className={`w-4 h-4 ${activeTab === 'home' ? 'text-black' : 'text-amber-400'}`} />
+            <span>HOME</span>
+            {activeTab === 'home' && (
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-amber-300 rounded-full blur-[1px]" />
+            )}
+          </button>
+
           {/* FITNESS SECTION */}
           <button
             onClick={() => setActiveTab('fitness')}
-            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
+            className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
               activeTab === 'fitness'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -73,7 +90,7 @@ export function Navbar() {
           {/* FOOD SECTION */}
           <button
             onClick={() => setActiveTab('food')}
-            className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
+            className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold tracking-wide transition flex items-center gap-2 relative ${
               activeTab === 'food'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -89,7 +106,7 @@ export function Navbar() {
           {/* OVERVIEW / DASHBOARD */}
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`flex px-4 py-2 rounded-xl text-xs sm:text-sm font-medium tracking-wide transition items-center gap-1.5 ${
+            className={`flex px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium tracking-wide transition items-center gap-1.5 ${
               activeTab === 'dashboard'
                 ? 'bg-amber-500 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'

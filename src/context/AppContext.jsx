@@ -117,7 +117,7 @@ const SEED_MEALS = [
 ];
 
 export function AppProvider({ children }) {
-  const [activeTab, setActiveTab] = useState('fitness'); // 'fitness' | 'food' | 'dashboard' | 'history'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'fitness' | 'food' | 'dashboard'
   const [user, setUser] = useState(DEFAULT_PROFILE);
   const [fontSizeScale, setFontSizeScale] = useState('normal'); // 'normal' | 'medium' | 'large' | 'xlarge'
   const [weightHistory, setWeightHistory] = useState(SEED_WEIGHT_HISTORY);

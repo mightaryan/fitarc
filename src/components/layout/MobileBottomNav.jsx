@@ -1,10 +1,10 @@
 import React from 'react';
 import {
+  Home,
   Dumbbell,
   Utensils,
   Camera,
   Scale,
-  ShieldCheck,
   User,
   Sparkles,
 } from 'lucide-react';
@@ -26,7 +26,33 @@ export function MobileBottomNav() {
       aria-label="Mobile Bottom Navigation"
     >
       <div className="max-w-md mx-auto flex items-center justify-around relative">
-        {/* 1. FITNESS / WORKOUTS */}
+        {/* 1. HOME / TODAY (Apple Fitness & Google Fit Inspired) */}
+        <button
+          onClick={() => setActiveTab('home')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+            activeTab === 'home'
+              ? 'text-amber-400 font-bold'
+              : 'text-slate-400 hover:text-slate-200 font-medium'
+          }`}
+          aria-label="Home Tab"
+        >
+          <div className="relative">
+            <Home
+              className={`w-5 h-5 transition-transform duration-200 ${
+                activeTab === 'home' ? 'scale-110 text-amber-400' : 'text-slate-400'
+              }`}
+            />
+            {activeTab === 'home' && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
+            )}
+          </div>
+          <span className="text-[10px] mt-1 tracking-tight">Home</span>
+          {activeTab === 'home' && (
+            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+          )}
+        </button>
+
+        {/* 2. FITNESS / MOVEMENTS */}
         <button
           onClick={() => setActiveTab('fitness')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
@@ -34,7 +60,7 @@ export function MobileBottomNav() {
               ? 'text-amber-400 font-bold'
               : 'text-slate-400 hover:text-slate-200 font-medium'
           }`}
-          aria-label="Fitness Tab"
+          aria-label="Fitness Movement Archive"
         >
           <div className="relative">
             <Dumbbell
@@ -52,7 +78,25 @@ export function MobileBottomNav() {
           )}
         </button>
 
-        {/* 2. FOOD / NUTRITION */}
+        {/* 3. CENTER ELEVATED FLOATING ACTION BUTTON: AI MEAL SCANNER */}
+        <div className="relative -mt-6 flex flex-col items-center">
+          <button
+            onClick={() => setIsMealScannerOpen(true)}
+            className="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-600 shadow-[0_0_25px_rgba(245,158,11,0.65)] hover:shadow-[0_0_35px_rgba(245,158,11,0.9)] active:scale-90 transition-all duration-200 group flex items-center justify-center"
+            title="Instant AI Meal Photo Scanner"
+            aria-label="Scan Meal with AI"
+          >
+            <div className="w-12 h-12 rounded-full bg-obsidian-950 flex flex-col items-center justify-center border border-amber-300/40 group-hover:bg-amber-500/20 transition">
+              <Camera className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
+            </div>
+          </button>
+          <span className="text-[9px] font-bold tracking-wider uppercase text-amber-400/90 mt-1 flex items-center gap-0.5">
+            <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+            AI Scan
+          </span>
+        </div>
+
+        {/* 4. FOOD & NUTRITION */}
         <button
           onClick={() => setActiveTab('food')}
           className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
@@ -78,43 +122,11 @@ export function MobileBottomNav() {
           )}
         </button>
 
-        {/* 3. CENTER ELEVATED FLOATING ACTION BUTTON: AI MEAL SCANNER */}
-        <div className="relative -mt-6 flex flex-col items-center">
-          <button
-            onClick={() => setIsMealScannerOpen(true)}
-            className="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-600 shadow-[0_0_25px_rgba(245,158,11,0.65)] hover:shadow-[0_0_35px_rgba(245,158,11,0.9)] active:scale-90 transition-all duration-200 group flex items-center justify-center"
-            title="Instant AI Meal Photo Scanner"
-            aria-label="Scan Meal with AI"
-          >
-            <div className="w-12 h-12 rounded-full bg-obsidian-950 flex flex-col items-center justify-center border border-amber-300/40 group-hover:bg-amber-500/20 transition">
-              <Camera className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
-            </div>
-          </button>
-          <span className="text-[9px] font-bold tracking-wider uppercase text-amber-400/90 mt-1 flex items-center gap-0.5">
-            <Sparkles className="w-2.5 h-2.5 text-amber-300" />
-            AI Scan
-          </span>
-        </div>
-
-        {/* 4. DAILY WEIGHT CHECK-IN */}
-        <button
-          onClick={() => setIsWeightModalOpen(true)}
-          className="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-amber-300 transition-all duration-200 active:scale-90 relative"
-          aria-label="Log Weight"
-        >
-          <div className="relative">
-            <Scale className="w-5 h-5 text-slate-400 hover:text-amber-400 transition" />
-          </div>
-          <span className="text-[10px] mt-1 font-semibold text-slate-300 tracking-tight">
-            {user.currentWeight ? `${user.currentWeight}kg` : 'Weight'}
-          </span>
-        </button>
-
-        {/* 5. ATHLETE VAULT & PROFILE */}
+        {/* 5. ATHLETE VAULT & PROFILE (BMI, Body Fat, Active Plan) */}
         <button
           onClick={() => setIsAuthModalOpen(true)}
           className="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-amber-300 transition-all duration-200 active:scale-90 relative"
-          aria-label="Athlete Profile & Vault"
+          aria-label="Athlete Profile, Body Fat & BMI"
         >
           <div className="relative">
             <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[9px] flex items-center justify-center shadow-gold-glow-sm">

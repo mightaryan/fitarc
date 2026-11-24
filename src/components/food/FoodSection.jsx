@@ -300,7 +300,7 @@ export function FoodSection() {
             {/* Card Content */}
             <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight line-clamp-1">
                   {recipe.title}
                 </h3>
                 <p className="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">
