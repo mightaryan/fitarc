@@ -148,20 +148,17 @@ export function FoodSection() {
         </div>
 
         {/* Daily Sugar Intake Tracker */}
-        <div className={`p-3 rounded-xl bg-obsidian-850 border flex items-center justify-between ${
-          totalSugar > sugarLimitGrams ? 'border-rose-500/40 bg-rose-950/20' : 'border-amber-500/20'
-        }`}>
+        <div className={`p-3 rounded-xl bg-obsidian-850 border flex items-center justify-between ${totalSugar > sugarLimitGrams ? 'border-rose-500/40 bg-rose-950/20' : 'border-amber-500/20'
+          }`}>
           <div>
             <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Sugar</span>
-            <span className={`text-base sm:text-lg font-bold ${
-              totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-300'
-            }`}>
+            <span className={`text-base sm:text-lg font-bold ${totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-300'
+              }`}>
               {totalSugar}g <span className="text-[10px] text-slate-400 font-normal">/ {sugarLimitGrams}g</span>
             </span>
           </div>
-          <span className={`text-xs font-mono font-bold ${
-            totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-400'
-          }`}>
+          <span className={`text-xs font-mono font-bold ${totalSugar > sugarLimitGrams ? 'text-rose-400' : 'text-amber-400'
+            }`}>
             {Math.round((totalSugar / sugarLimitGrams) * 100)}%
           </span>
         </div>
@@ -186,11 +183,10 @@ export function FoodSection() {
                   setSelectedDiet(d.id);
                   setVisibleCount(24);
                 }}
-                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-2 border ${
-                  selectedDiet === d.id
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-400 shadow-gold-glow-sm font-bold'
-                    : 'bg-obsidian-850/80 text-slate-300 border-white/5 hover:border-amber-500/30 hover:text-white'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-2 border ${selectedDiet === d.id
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-400 shadow-gold-glow-sm font-bold'
+                  : 'bg-obsidian-850/80 text-slate-300 border-white/5 hover:border-amber-500/30 hover:text-white'
+                  }`}
               >
                 {d.id === 'veg' && <Leaf className="w-4 h-4 text-emerald-400" />}
                 {d.id === 'nonveg' && <Flame className="w-4 h-4 text-rose-400" />}
@@ -229,11 +225,10 @@ export function FoodSection() {
                   setSelectedCategory(cat.id);
                   setVisibleCount(24);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${
-                  selectedCategory === cat.id
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-400'
-                    : 'bg-obsidian-850 text-slate-400 border-white/5 hover:text-white'
-                }`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${selectedCategory === cat.id
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-400'
+                  : 'bg-obsidian-850 text-slate-400 border-white/5 hover:text-white'
+                  }`}
               >
                 {cat.label}
               </button>
@@ -276,15 +271,14 @@ export function FoodSection() {
               {/* Diet Badge */}
               <div className="absolute top-3 left-3 flex items-center gap-1.5">
                 <span
-                  className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${
-                    recipe.diet === 'veg'
-                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
-                      : recipe.diet === 'vegan'
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${recipe.diet === 'veg'
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                    : recipe.diet === 'vegan'
                       ? 'bg-green-950/80 text-green-300 border-green-500/40'
                       : recipe.diet === 'eggetarian'
-                      ? 'bg-yellow-950/80 text-amber-300 border-amber-500/40'
-                      : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
-                  }`}
+                        ? 'bg-yellow-950/80 text-amber-300 border-amber-500/40'
+                        : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
+                    }`}
                 >
                   {recipe.diet === 'veg' ? '🌱 Veg' : recipe.diet === 'vegan' ? '🌿 Vegan' : recipe.diet === 'eggetarian' ? '🥚 Egg' : '🥩 Non-Veg'}
                 </span>

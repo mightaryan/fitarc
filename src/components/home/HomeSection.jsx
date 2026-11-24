@@ -70,18 +70,24 @@ export function HomeSection() {
 
   // Curated Featured Workouts for Today (Apple Fitness+ style)
   const featuredWorkouts = useMemo(() => {
-    const sunSalutation = YOGA_AND_HOME_WORKOUTS.find((e) => e.id === 'yoga-surya-namaskar-a');
-    const faceYoga = YOGA_AND_HOME_WORKOUTS.find((e) => e.id === 'face-jawline-glide');
-    const homeSquat = YOGA_AND_HOME_WORKOUTS.find((e) => e.id === 'home-sofa-bulgarian-split-squat');
-    const dumbbellPress = MASTER_EXERCISE_CATALOG.find((e) => e.id === 'pectorals/dumbbell-incline-bench-press');
-    const crossCrunch = MASTER_EXERCISE_CATALOG.find((e) => e.name && e.name.toLowerCase().includes('cross body crunch')) ||
+    const sunSalutation =
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.name && e.name.includes('Surya Namaskar')) ||
+      YOGA_AND_HOME_WORKOUTS[0];
+    const crossCrunch =
+      MASTER_EXERCISE_CATALOG.find((e) => e.name && e.name.toLowerCase().includes('cross body crunch')) ||
       MASTER_EXERCISE_CATALOG.find((e) => e.muscleCategory === 'Core' || e.muscle === 'abs');
+    const faceYoga =
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga' && e.name.includes('Jawline')) ||
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga');
+    const homeSquat =
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'home_workout' && e.name.includes('Split Squat')) ||
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'home_workout');
 
     return [
       {
-        exercise: sunSalutation || YOGA_AND_HOME_WORKOUTS[0],
+        exercise: sunSalutation,
         title: 'Morning Flow: Surya Namaskar',
-        subtitle: '15 min · Full Body Mobility',
+        subtitle: '15 min · Full Body Mobility Flow',
         tag: 'Yoga Flow',
         color: 'from-amber-500/20 to-orange-500/10',
         borderColor: 'border-amber-500/30',
@@ -97,7 +103,7 @@ export function HomeSection() {
         badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       },
       {
-        exercise: faceYoga || YOGA_AND_HOME_WORKOUTS[1],
+        exercise: faceYoga,
         title: 'Jawline Sculpt & Fascia Glide',
         subtitle: '8 min · Targeted Face Yoga',
         tag: 'Face Definition',
@@ -106,7 +112,7 @@ export function HomeSection() {
         badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
       },
       {
-        exercise: homeSquat || YOGA_AND_HOME_WORKOUTS[2],
+        exercise: homeSquat,
         title: 'Sofa Bulgarian Split Squat',
         subtitle: '18 min · Zero Equipment Home Leg Burn',
         tag: 'Home Workout',
@@ -465,8 +471,8 @@ export function HomeSection() {
       </div>
 
       {/* 5. APPLE FITNESS+ CURATED SESSIONS FOR TODAY */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
               Curated For You Today
@@ -478,9 +484,9 @@ export function HomeSection() {
 
           <button
             onClick={() => setActiveTab('fitness')}
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1"
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1 self-start sm:self-auto"
           >
-            <span>See All</span>
+            <span>See All ({YOGA_AND_HOME_WORKOUTS.length}+ Movements)</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -498,6 +504,10 @@ export function HomeSection() {
                   <img
                     src={item.exercise.gifUrl}
                     alt={item.title}
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif';
+                    }}
                     className="w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
@@ -507,7 +517,7 @@ export function HomeSection() {
                     </span>
                   </div>
 
-                  <div className="absolute bottom-2 right-2 p-2 rounded-xl bg-black/80 text-amber-400 border border-white/10 group-hover:bg-amber-500 group-hover:text-black transition">
+                  <div className="absolute bottom-2 right-2 p-2 rounded-xl bg-black/80 text-amber-400 border border-white/10 group-hover:bg-amber-500 group-hover:text-black transition shadow-lg">
                     <Play className="w-3.5 h-3.5 fill-current" />
                   </div>
                 </div>

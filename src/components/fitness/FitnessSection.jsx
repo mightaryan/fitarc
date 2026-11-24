@@ -163,7 +163,7 @@ export function FitnessSection() {
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              {MASTER_EXERCISE_CATALOG.length.toLocaleString()}+ Exercises
+              {fullExerciseCatalog.length.toLocaleString()}+ Exercises & 220+ Yogas
             </span>
             <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
               3D Anatomical Biomechanics
@@ -279,8 +279,8 @@ export function FitnessSection() {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
           {[
             { id: 'all', label: 'All Movements' },
-            { id: 'yoga', label: '🧘 Full Body Yoga' },
-            { id: 'face_yoga', label: '✨ Face Yoga' },
+            { id: 'yoga', label: `🧘 Full Body Yoga (185+)` },
+            { id: 'face_yoga', label: `✨ Face Yoga (35)` },
             { id: 'home_workout', label: '🏠 Home Workouts' },
             { id: 'machines', label: 'Gym Machines' },
             { id: 'freeweights', label: 'Free Weights & Dumbbells' },
