@@ -1,7 +1,7 @@
 // Massive 1,000+ Gym Machines, Free Weights, Cardio, Calisthenics & Specialty Equipment Database
 // Engineered for fitness freaks, bodybuilders, powerlifters, and athletes.
 
-import { FITNESS_CATALOG as CURATED_FLAGSHIP } from './fitnessData';
+import { FITNESS_CATALOG as CURATED_FLAGSHIP } from './fitnessData.js';
 
 export const BRANDS = [
   'Hammer Strength',
