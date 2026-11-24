@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Dumbbell,
   Utensils,
@@ -15,37 +15,45 @@ export function Navbar() {
     activeTab,
     setActiveTab,
     user,
+    workoutLogs,
     setIsWeightModalOpen,
     setIsAuthModalOpen,
     setIsMealScannerOpen,
   } = useApp();
 
+  const totalCaloriesBurned = useMemo(() => {
+    return (workoutLogs || []).reduce((acc, log) => acc + (log.caloriesBurned || 0), 0);
+  }, [workoutLogs]);
+
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-500/20 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-500/20 backdrop-blur-xl transition-all">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
         {/* Brand & Logo (Rich Luxury Aesthetic) */}
         <div
           onClick={() => setActiveTab('fitness')}
-          className="flex items-center gap-3 cursor-pointer group shrink-0"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 active:scale-95 transition"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-gold-glow flex items-center justify-center group-hover:scale-105 transition duration-300">
-            <div className="w-full h-full bg-obsidian-900 rounded-[14px] flex items-center justify-center">
-              <span className="text-xl font-bold text-amber-400">⚡</span>
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-0.5 shadow-gold-glow flex items-center justify-center group-hover:scale-105 transition duration-300">
+            <div className="w-full h-full bg-obsidian-900 rounded-[10px] sm:rounded-[14px] flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-amber-400">⚡</span>
             </div>
           </div>
 
           <div>
-            <div className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-1">
+            <div className="text-lg sm:text-2xl font-bold tracking-tight text-white flex items-center gap-1 leading-none">
               FIT<span className="gold-gradient-text font-extrabold">ARC</span>
             </div>
-            <div className="text-[9px] uppercase tracking-widest text-amber-400/90 font-semibold -mt-0.5 hidden sm:block">
+            <div className="text-[9px] uppercase tracking-widest text-amber-400/90 font-semibold mt-1 hidden sm:block">
               Golden Standard Fitness & Nutrition
+            </div>
+            <div className="text-[8px] uppercase tracking-wider text-amber-400/80 font-bold block sm:hidden">
+              Vault Active
             </div>
           </div>
         </div>
 
-        {/* PRIMARY TWO SECTIONS ON TOP: FITNESS & FOOD (PLUS OVERVIEW) */}
-        <nav className="flex items-center gap-1.5 sm:gap-2 bg-black/50 p-1.5 rounded-2xl border border-amber-500/20 shadow-inner">
+        {/* PRIMARY SECTIONS ON DESKTOP: FITNESS & FOOD (PLUS OVERVIEW) - HIDDEN ON MOBILE (USING BOTTOM DOCK) */}
+        <nav className="hidden md:flex items-center gap-1.5 sm:gap-2 bg-black/50 p-1.5 rounded-2xl border border-amber-500/20 shadow-inner">
           {/* FITNESS SECTION */}
           <button
             onClick={() => setActiveTab('fitness')}
@@ -81,7 +89,7 @@ export function Navbar() {
           {/* OVERVIEW / DASHBOARD */}
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`hidden md:flex px-4 py-2 rounded-xl text-xs sm:text-sm font-medium tracking-wide transition items-center gap-1.5 ${
+            className={`flex px-4 py-2 rounded-xl text-xs sm:text-sm font-medium tracking-wide transition items-center gap-1.5 ${
               activeTab === 'dashboard'
                 ? 'bg-amber-500 text-black shadow-gold-glow-sm font-bold'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -94,7 +102,13 @@ export function Navbar() {
 
         {/* Right Side Controls */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Quick Weight Status Pill */}
+          {/* Mobile Calorie Burn Chip (Live Dynamic Metric) */}
+          <div className="flex md:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs font-bold">
+            <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>{totalCaloriesBurned} <span className="text-[10px] text-slate-400 font-normal">kcal</span></span>
+          </div>
+
+          {/* Quick Weight Status Pill (Desktop only, mobile has it in bottom dock) */}
           <button
             onClick={() => setIsWeightModalOpen(true)}
             className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-obsidian-850/90 border border-amber-500/25 hover:border-amber-400 hover:bg-amber-500/10 transition group"
@@ -107,10 +121,10 @@ export function Navbar() {
             </div>
           </button>
 
-          {/* Quick Meal Photo Scan Button */}
+          {/* Quick Meal Photo Scan Button (Desktop only, mobile has floating center action button) */}
           <button
             onClick={() => setIsMealScannerOpen(true)}
-            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition flex items-center gap-1.5"
+            className="hidden sm:flex p-2 sm:px-3 sm:py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition items-center gap-1.5 active:scale-95"
             title="Upload or snap photo of your food"
           >
             <Camera className="w-4 h-4 text-amber-400" />
@@ -120,10 +134,11 @@ export function Navbar() {
           {/* Profile Avatar / Trigger */}
           <button
             onClick={() => setIsAuthModalOpen(true)}
-            className="flex items-center gap-2 p-1.5 rounded-xl bg-obsidian-800/80 border border-white/10 hover:border-amber-500/40 transition"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-xl bg-obsidian-800/80 border border-white/10 hover:border-amber-500/40 transition active:scale-95"
             title="Account & Goals"
+            aria-label="Account Settings"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-bold text-xs flex items-center justify-center shadow-gold-glow-sm">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-gold-glow-sm">
               {user.name?.slice(0, 2).toUpperCase() || 'AV'}
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />

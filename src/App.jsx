@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/layout/Navbar';
+import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { Footer } from './components/layout/Footer';
 import { FitnessSection } from './components/fitness/FitnessSection';
 import { FoodSection } from './components/food/FoodSection';
@@ -16,12 +17,15 @@ function AppContent() {
       {/* Sticky Glassmorphic Dark Gold Header */}
       <Navbar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content Area (Extra bottom padding on mobile so content is never covered by bottom dock) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 pb-28 md:pb-8">
         {activeTab === 'fitness' && <FitnessSection />}
         {activeTab === 'food' && <FoodSection />}
         {activeTab === 'dashboard' && <OverviewDashboard />}
       </main>
+
+      {/* Native Mobile App Bottom Navigation Bar (Dock) */}
+      <MobileBottomNav />
 
       {/* Footer */}
       <Footer />

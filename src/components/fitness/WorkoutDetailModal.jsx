@@ -254,33 +254,33 @@ export function WorkoutDetailModal({ exercise, onClose }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="sticky bottom-0 z-20 p-4 sm:p-5 bg-obsidian-900/95 backdrop-blur-md border-t border-amber-500/20 flex items-center justify-between gap-3">
-          <div className="text-xs text-slate-400">
+        <div className="sticky bottom-0 z-20 p-3.5 sm:p-5 bg-obsidian-900/95 backdrop-blur-md border-t border-amber-500/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs text-slate-400 text-center sm:text-left">
             Estimated burn: <span className="text-amber-300 font-bold">{impact.caloriesBurned} kcal</span> ·{' '}
             <span className="text-amber-400 font-semibold">+{impact.muscleGrowthScore} pts hypertrophy</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-white/10 text-xs sm:text-sm font-semibold text-slate-300 hover:bg-white/5 transition"
+              className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-white/10 text-xs sm:text-sm font-semibold text-slate-300 hover:bg-white/5 active:scale-95 transition text-center"
             >
               Close
             </button>
             <button
               onClick={handleLogToJournal}
               disabled={isLogged}
-              className="gold-btn px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2"
+              className="flex-1 sm:flex-initial gold-btn px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
             >
               {isLogged ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Workout Logged!
+                  <span>Workout Logged!</span>
                 </>
               ) : (
                 <>
                   <Flame className="w-4 h-4" />
-                  Log to Today's Workout
+                  <span>Log Workout</span>
                 </>
               )}
             </button>

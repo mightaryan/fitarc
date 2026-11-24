@@ -135,3 +135,35 @@
   filter: invert(0.93) hue-rotate(185deg) brightness(0.95) contrast(1.18);
   mix-blend-mode: screen;
 }
+
+/* Native Mobile App Experience Optimizations */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Smooth mobile touch scrolling */
+.touch-momentum {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile active button tactile press */
+.active-press:active {
+  transform: scale(0.95);
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hide scrollbar while keeping native smooth swipe */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
