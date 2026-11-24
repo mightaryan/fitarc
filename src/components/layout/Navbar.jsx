@@ -9,6 +9,7 @@ import {
   User,
   Sparkles,
   ChevronDown,
+  Type,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -17,12 +18,20 @@ export function Navbar() {
     activeTab,
     setActiveTab,
     user,
+    fontSizeScale,
+    setFontSizeScale,
     totalCaloriesBurned,
     totalCaloriesConsumed,
     setIsWeightModalOpen,
     setIsAuthModalOpen,
     setIsMealScannerOpen,
   } = useApp();
+
+  const cycleFontSize = () => {
+    const order = ['normal', 'medium', 'large', 'xlarge'];
+    const nextIdx = (order.indexOf(fontSizeScale) + 1) % order.length;
+    setFontSizeScale(order[nextIdx]);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-500/20 backdrop-blur-xl">
@@ -109,6 +118,18 @@ export function Navbar() {
               <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Weight</span>
               <span className="text-xs font-black text-amber-300">{user.currentWeight} kg</span>
             </div>
+          </button>
+
+          {/* Quick Font Size Switcher */}
+          <button
+            onClick={cycleFontSize}
+            className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-obsidian-850/80 border border-white/10 text-amber-300 hover:border-amber-400 text-xs font-black transition flex items-center gap-1"
+            title={`Current Font Scale: ${fontSizeScale}. Click to cycle.`}
+          >
+            <Type className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-[11px] uppercase font-mono">
+              {fontSizeScale === 'normal' ? 'A' : fontSizeScale === 'medium' ? 'A+' : fontSizeScale === 'large' ? 'A++' : 'A+++'}
+            </span>
           </button>
 
           {/* Quick Meal Photo Scan Button */}

@@ -96,6 +96,7 @@ const SEED_MEALS = [
 export function AppProvider({ children }) {
   const [activeTab, setActiveTab] = useState('fitness'); // 'fitness' | 'food' | 'dashboard' | 'history'
   const [user, setUser] = useState(DEFAULT_PROFILE);
+  const [fontSizeScale, setFontSizeScale] = useState('normal'); // 'normal' | 'medium' | 'large' | 'xlarge'
   const [weightHistory, setWeightHistory] = useState(SEED_WEIGHT_HISTORY);
   const [loggedWorkouts, setLoggedWorkouts] = useState(SEED_WORKOUTS);
   const [loggedMeals, setLoggedMeals] = useState(SEED_MEALS);
@@ -106,6 +107,17 @@ export function AppProvider({ children }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMealScannerOpen, setIsMealScannerOpen] = useState(false);
 
+  // Sync font size scale to root document
+  useEffect(() => {
+    const scaleMap = {
+      normal: '100%',
+      medium: '108%',
+      large: '118%',
+      xlarge: '128%',
+    };
+    document.documentElement.style.fontSize = scaleMap[fontSizeScale] || '100%';
+  }, [fontSizeScale]);
+
   // Load from localStorage on mount
   useEffect(() => {
     try {
@@ -113,6 +125,7 @@ export function AppProvider({ children }) {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.user) setUser(parsed.user);
+        if (parsed.fontSizeScale) setFontSizeScale(parsed.fontSizeScale);
         if (parsed.weightHistory) setWeightHistory(parsed.weightHistory);
         if (parsed.loggedWorkouts) setLoggedWorkouts(parsed.loggedWorkouts);
         if (parsed.loggedMeals) setLoggedMeals(parsed.loggedMeals);
@@ -128,6 +141,7 @@ export function AppProvider({ children }) {
     try {
       const payload = {
         user,
+        fontSizeScale,
         weightHistory,
         loggedWorkouts,
         loggedMeals,
@@ -137,7 +151,7 @@ export function AppProvider({ children }) {
     } catch (e) {
       console.warn('Could not write to local storage', e);
     }
-  }, [user, weightHistory, loggedWorkouts, loggedMeals, snoozeUntil]);
+  }, [user, fontSizeScale, weightHistory, loggedWorkouts, loggedMeals, snoozeUntil]);
 
   // Check if weight needs to be logged today or if snoozed
   useEffect(() => {
@@ -275,6 +289,8 @@ export function AppProvider({ children }) {
   const value = {
     activeTab,
     setActiveTab,
+    fontSizeScale,
+    setFontSizeScale,
     user,
     setUser,
     weightHistory,
