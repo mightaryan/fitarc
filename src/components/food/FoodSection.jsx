@@ -13,6 +13,7 @@ import {
   Sprout,
   Flame,
   Award,
+  X,
 } from 'lucide-react';
 import { MASSIVE_FOOD_CATALOG, DIET_FILTERS } from '../../data/massiveFoodDatabase';
 import { MEAL_CATEGORIES } from '../../data/foodData';
@@ -86,237 +87,76 @@ export function FoodSection() {
   const fatPercent = Math.min(100, Math.round((totalFats / 70) * 100));
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Magazine Editorial Hero Banner (Refined Rich Aesthetic) */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel-glow border border-amber-500/20 p-6 sm:p-10">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-amber-500/15 via-amber-600/5 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-        <div className="relative z-10 max-w-3xl">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              500+ Whole Food Items & Measured Cooked Dishes
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Sleek, Elegant Header (Minimalist Luxury Aesthetic) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              {MASSIVE_FOOD_CATALOG.length.toLocaleString()}+ Whole Foods & Recipes
             </span>
-            <span className="text-xs text-slate-400 font-mono">
-              Vegetarian & Non-Vegetarian Filter
+            <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
+              Exact Gram Macros
             </span>
           </div>
-
-          <h1 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight leading-snug mb-3">
-            500+ <span className="gold-gradient-text font-bold">Culinary Nutrition</span> Archive
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
+            Nutrition <span className="gold-gradient-text font-extrabold">Vault</span>
           </h1>
-
-          <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl mb-6">
-            The definitive culinary database for disciplined nutrition. Featuring over <strong>500+ whole food items and authentic cooked dishes</strong> with dedicated filters for <strong>Vegetarian (Veg), Non-Vegetarian (Non-Veg), Vegan, and Eggetarian</strong>. Upload a meal photo for AI Vision macro estimation, receive weight-calibrated health ratings, and inspect recipes with small item thumbnails in vertical list format.
-          </p>
-
-          {/* Action button */}
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => setIsMealScannerOpen(true)}
-              className="gold-btn px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-gold-glow"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Take / Upload Meal Photo & Scan</span>
-            </button>
-            <span className="text-xs text-slate-400">
-              Instant AI Vision macro estimation & smart ratings
-            </span>
-          </div>
         </div>
+
+        {/* Quick Action: Take / Upload Meal Photo */}
+        <button
+          onClick={() => setIsMealScannerOpen(true)}
+          className="gold-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-gold-glow-sm self-start sm:self-auto active:scale-95 transition"
+        >
+          <Camera className="w-4 h-4" />
+          <span>Snap & Scan Meal</span>
+        </button>
       </div>
 
-      {/* LUXURY MACRONUTRIENT PERFORMANCE CENTER */}
-      <div className="p-6 sm:p-8 rounded-3xl glass-panel-glow border border-amber-500/20 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/5 gap-2">
+      {/* LUXURY COMPACT MACRONUTRIENT BAR */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-3 rounded-xl bg-obsidian-850 border border-amber-500/20 flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">
-              Daily Metabolic Intake
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Calories</span>
+            <span className="text-base sm:text-lg font-bold text-amber-300">
+              {totalCaloriesConsumed} <span className="text-[10px] text-slate-400 font-normal">/ {targetCals}</span>
             </span>
-            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-              Macronutrient Target Adherence
-            </h3>
           </div>
-          <div className="text-xs text-slate-400">
-            Daily Calorie Budget: <strong className="text-amber-300">{targetCals} kcal</strong> ·{' '}
-            Protein Threshold: <strong className="text-amber-400">{proteinTarget}g</strong>
-          </div>
+          <span className="text-xs font-mono font-bold text-amber-400">{caloriePercent}%</span>
         </div>
 
-        {/* 4 Luxury Macro Cards with Circular Dials */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Calories Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/25 flex items-center justify-between shadow-lg relative overflow-hidden group">
-            <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
-                Total Calories
-              </span>
-              <div className="text-2xl sm:text-3xl font-bold text-amber-300">
-                {totalCaloriesConsumed}
-                <span className="text-xs font-normal text-slate-400 ml-1">kcal</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                of {targetCals} kcal target
-              </p>
-            </div>
-
-            {/* Circular Dial */}
-            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="text-slate-800"
-                  strokeWidth="3"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-amber-400"
-                  strokeDasharray={`${caloriePercent}, 100`}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-              <span className="absolute text-[11px] font-bold text-white font-mono">
-                {caloriePercent}%
-              </span>
-            </div>
+        <div className="p-3 rounded-xl bg-obsidian-850 border border-amber-500/20 flex items-center justify-between">
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Protein</span>
+            <span className="text-base sm:text-lg font-bold text-white">
+              {totalProtein}g <span className="text-[10px] text-slate-400 font-normal">/ {proteinTarget}g</span>
+            </span>
           </div>
+          <span className="text-xs font-mono font-bold text-amber-400">{proteinPercent}%</span>
+        </div>
 
-          {/* Protein Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/20 flex items-center justify-between shadow-lg relative overflow-hidden group">
-            <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
-                Protein (2g / kg)
-              </span>
-              <div className="text-2xl sm:text-3xl font-bold text-white">
-                {totalProtein}
-                <span className="text-xs font-normal text-slate-400 ml-1">g</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                of {proteinTarget}g threshold
-              </p>
-            </div>
-
-            {/* Circular Dial */}
-            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="text-slate-800"
-                  strokeWidth="3"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-amber-400"
-                  strokeDasharray={`${proteinPercent}, 100`}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-              <span className="absolute text-[11px] font-bold text-white font-mono">
-                {proteinPercent}%
-              </span>
-            </div>
+        <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Carbs</span>
+            <span className="text-base sm:text-lg font-bold text-sky-300">{totalCarbs}g</span>
           </div>
+          <span className="text-xs font-mono font-bold text-sky-400">{carbPercent}%</span>
+        </div>
 
-          {/* Carbohydrates Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-sky-500/20 flex items-center justify-between shadow-lg relative overflow-hidden group">
-            <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
-                Carbohydrates
-              </span>
-              <div className="text-2xl sm:text-3xl font-bold text-sky-300">
-                {totalCarbs}
-                <span className="text-xs font-normal text-slate-400 ml-1">g</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Clean muscle glycogen
-              </p>
-            </div>
-
-            {/* Circular Dial */}
-            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="text-slate-800"
-                  strokeWidth="3"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-sky-400"
-                  strokeDasharray={`${carbPercent}, 100`}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-              <span className="absolute text-[11px] font-bold text-white font-mono">
-                {carbPercent}%
-              </span>
-            </div>
+        <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">Fats</span>
+            <span className="text-base sm:text-lg font-bold text-emerald-300">{totalFats}g</span>
           </div>
-
-          {/* Healthy Fats Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-emerald-500/20 flex items-center justify-between shadow-lg relative overflow-hidden group">
-            <div className="space-y-1">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
-                Healthy Fats
-              </span>
-              <div className="text-2xl sm:text-3xl font-bold text-emerald-300">
-                {totalFats}
-                <span className="text-xs font-normal text-slate-400 ml-1">g</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Hormonal synthesis lipids
-              </p>
-            </div>
-
-            {/* Circular Dial */}
-            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="text-slate-800"
-                  strokeWidth="3"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-emerald-400"
-                  strokeDasharray={`${fatPercent}, 100`}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-              <span className="absolute text-[11px] font-bold text-white font-mono">
-                {fatPercent}%
-              </span>
-            </div>
-          </div>
+          <span className="text-xs font-mono font-bold text-emerald-400">{fatPercent}%</span>
         </div>
       </div>
 
       {/* FILTER BAR: VEG / NON-VEG / VEGAN / EGGETARIAN DIETARY FILTERS */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 block mb-2">
-            Filter by Dietary Preference:
-          </span>
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {DIET_FILTERS.map((d) => (
               <button
