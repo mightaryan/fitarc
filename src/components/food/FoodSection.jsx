@@ -62,10 +62,14 @@ export function FoodSection() {
       const matchesCat = selectedCategory === 'all' || recipe.category === selectedCategory;
 
       // Search query
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        recipe.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        recipe.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+        !q ||
+        (recipe.title && recipe.title.toLowerCase().includes(q)) ||
+        (recipe.name && recipe.name.toLowerCase().includes(q)) ||
+        (recipe.description && recipe.description.toLowerCase().includes(q)) ||
+        (recipe.tags && recipe.tags.some((t) => t.toLowerCase().includes(q))) ||
+        (recipe.ingredients && recipe.ingredients.some((i) => i.name.toLowerCase().includes(q)));
 
       return matchesDiet && matchesCat && matchesSearch;
     });

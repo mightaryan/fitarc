@@ -14,7 +14,6 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Anatomical3DPlayer } from './Anatomical3DPlayer';
-import { RealisticBiomechanicsPlayer } from './RealisticBiomechanicsPlayer';
 import { ProgressiveOverloadCalculator } from './ProgressiveOverloadCalculator';
 import { calculateWorkoutImpact } from '../../data/fitnessData';
 import { useApp } from '../../context/AppContext';
@@ -101,7 +100,9 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             </div>
             <Anatomical3DPlayer
               exercise={exercise}
-              defaultMode={activeTab === 'mistakes' ? 'angle_simulator' : '3d_gif'}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              userWeightKg={currentWeightKg}
             />
           </div>
 

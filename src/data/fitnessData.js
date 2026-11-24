@@ -513,19 +513,24 @@ export function calculateWorkoutImpact(exercise, minutes, userWeightKg = 75, int
   };
 
   const multiplier = intensityMap[intensity] || 1.0;
+  const met = exercise?.metScore || 6.0;
   // Standard exercise science formula: Calorie = MET * 3.5 * weightKg / 200 * minutes
-  const caloriesBurned = Math.round((exercise.metScore * multiplier * 3.5 * userWeightKg / 200) * minutes);
+  const caloriesBurned = Math.round((met * multiplier * 3.5 * (userWeightKg || 75) / 200) * (minutes || 20));
 
   // Hypertrophy stimulus index (0 to 100 points scale for the workout session)
-  const baseHypertrophy = (exercise.hypertrophyRate || 0.8) * minutes * (multiplier * 1.5);
+  const baseHypertrophy = (exercise?.hypertrophyRate || 0.8) * (minutes || 20) * (multiplier * 1.5);
   const muscleGrowthScore = Math.min(100, Math.round(baseHypertrophy * 1.8));
 
   // Breakdown per muscle
-  const muscleImpact = exercise.primaryMuscles.map(m => ({
+  const primaryMuscles = exercise?.primaryMuscles && exercise.primaryMuscles.length > 0
+    ? exercise.primaryMuscles
+    : [{ name: exercise?.muscleCategory || 'Primary Target', percentage: 85, color: '#f59e0b' }];
+
+  const muscleImpact = primaryMuscles.map(m => ({
     name: m.name,
-    activationPercentage: m.percentage,
-    stimulusPoints: Math.round((m.percentage / 100) * muscleGrowthScore),
-    color: m.color,
+    activationPercentage: m.percentage || 80,
+    stimulusPoints: Math.round(((m.percentage || 80) / 100) * muscleGrowthScore),
+    color: m.color || '#f59e0b',
   }));
 
   return {

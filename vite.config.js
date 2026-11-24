@@ -8,4 +8,19 @@ export default defineConfig({
     port: 3000,
     open: false,
   },
+  build: {
+    chunkSizeWarningLimit: 5000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) return 'icons';
+            return 'vendor';
+          }
+          if (id.includes('allExercisesMaster')) return 'exercises-master';
+          if (id.includes('massiveFoodDatabase')) return 'food-master';
+        },
+      },
+    },
+  },
 });

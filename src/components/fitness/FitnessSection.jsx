@@ -25,13 +25,13 @@ import { useApp } from '../../context/AppContext';
 
 const EQUIPMENT_FILTERS = [
   { id: 'all', label: 'All Equipment' },
+  { id: 'dumbbell', label: 'Free Weight Dumbbells' },
+  { id: 'barbell', label: 'Olympic Barbells & EZ' },
   { id: 'machine', label: 'Gym Machines & Lever' },
-  { id: 'cable', label: 'Cables & Pulleys' },
+  { id: 'cable', label: 'Cables & Bands' },
   { id: 'smith', label: 'Smith Machine' },
-  { id: 'barbell', label: 'Barbell' },
-  { id: 'dumbbell', label: 'Dumbbell' },
   { id: 'bodyweight', label: 'Calisthenics & Bodyweight' },
-  { id: 'sled', label: 'Sled & Functional' },
+  { id: 'sled', label: 'Sled, Kettlebell & Functional' },
 ];
 
 const MUSCLE_FILTER_OPTIONS = [
@@ -78,27 +78,48 @@ export function FitnessSection() {
       }
 
       // Category filter
-      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      let matchesCategory = selectedCategory === 'all';
+      if (!matchesCategory) {
+        if (selectedCategory === 'mobility') {
+          matchesCategory =
+            item.category === 'mobility' ||
+            item.muscleCategory === 'Core' ||
+            item.equipment === 'band' ||
+            (item.name && (item.name.toLowerCase().includes('stretch') || item.name.toLowerCase().includes('mobility')));
+        } else {
+          matchesCategory = item.category === selectedCategory;
+        }
+      }
 
       // Muscle filter
       const matchesMuscle =
         selectedMuscle === 'All Muscles' ||
         item.muscleCategory?.toLowerCase() === selectedMuscle.toLowerCase() ||
-        item.muscle?.toLowerCase().includes(selectedMuscle.toLowerCase());
+        (item.muscle && item.muscle.toLowerCase().includes(selectedMuscle.toLowerCase()));
 
       // Equipment filter
       let matchesEquipment = true;
       if (selectedEquipment === 'machine') {
         matchesEquipment = item.equipment === 'machine' || item.equipment === 'lever';
+      } else if (selectedEquipment === 'cable') {
+        matchesEquipment = item.equipment === 'cable' || item.equipment === 'band';
+      } else if (selectedEquipment === 'barbell') {
+        matchesEquipment = item.equipment === 'barbell' || item.equipment === 'ez-bar';
+      } else if (selectedEquipment === 'sled') {
+        matchesEquipment = item.equipment === 'sled' || item.equipment === 'kettlebell' || item.equipment === 'other';
       } else if (selectedEquipment !== 'all') {
         matchesEquipment = item.equipment === selectedEquipment;
       }
 
       // Search query
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.muscle && item.muscle.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.equipment && item.equipment.toLowerCase().includes(searchQuery.toLowerCase()));
+        !q ||
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        (item.muscle && item.muscle.toLowerCase().includes(q)) ||
+        (item.muscleCategory && item.muscleCategory.toLowerCase().includes(q)) ||
+        (item.equipment && item.equipment.toLowerCase().includes(q)) ||
+        (item.equipmentBrand && item.equipmentBrand.toLowerCase().includes(q));
 
       return matchesDiff && matchesCategory && matchesMuscle && matchesEquipment && matchesSearch;
     });
@@ -192,21 +213,20 @@ export function FitnessSection() {
                   setSelectedDifficulty(d.id);
                   setVisibleCount(24);
                 }}
-                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-2 border ${
-                  selectedDifficulty === d.id
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-400 shadow-gold-glow-sm font-bold'
-                    : 'bg-obsidian-850/80 text-slate-300 border-white/5 hover:border-amber-500/30 hover:text-white'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-2 border ${selectedDifficulty === d.id
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black border-amber-400 shadow-gold-glow-sm font-bold'
+                  : 'bg-obsidian-850/80 text-slate-300 border-white/5 hover:border-amber-500/30 hover:text-white'
+                  }`}
               >
                 <span>{d.label}</span>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-black/40 border border-white/10 font-mono">
                   {d.id === 'all'
                     ? MASTER_EXERCISE_CATALOG.length
                     : d.id === 'beginner'
-                    ? beginnerCount
-                    : d.id === 'intermediate'
-                    ? intermediateCount
-                    : advancedCount}
+                      ? beginnerCount
+                      : d.id === 'intermediate'
+                        ? intermediateCount
+                        : advancedCount}
                 </span>
               </button>
             ))}
@@ -222,11 +242,10 @@ export function FitnessSection() {
                 setSelectedCategory(cat.id);
                 setVisibleCount(24);
               }}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-1.5 border ${
-                selectedCategory === cat.id
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-400'
-                  : 'bg-obsidian-850 text-slate-400 border-white/5 hover:text-white'
-              }`}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold tracking-wide whitespace-nowrap transition flex items-center gap-1.5 border ${selectedCategory === cat.id
+                ? 'bg-amber-500/20 text-amber-300 border-amber-400'
+                : 'bg-obsidian-850 text-slate-400 border-white/5 hover:text-white'
+                }`}
             >
               {cat.id === 'machines' && <Dumbbell className="w-3.5 h-3.5" />}
               {cat.id === 'cardio' && <Flame className="w-3.5 h-3.5" />}
@@ -243,7 +262,7 @@ export function FitnessSection() {
             <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder={`Search ${MASTER_EXERCISE_CATALOG.length.toLocaleString()}+ exercises (wall push-up, lat pulldown, snatch, hack squat)...`}
+              placeholder={`Search ${MASTER_EXERCISE_CATALOG.length.toLocaleString()}+ exercises (wall push-up, lat pulldown, snatch, dumbbell)...`}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -337,13 +356,12 @@ export function FitnessSection() {
                 {/* Difficulty level badge */}
                 <div className="absolute top-3 left-3">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${
-                      item.level === 'Beginner'
-                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
-                        : item.level === 'Advanced'
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${item.level === 'Beginner'
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                      : item.level === 'Advanced'
                         ? 'bg-rose-950/80 text-rose-300 border-rose-500/40'
                         : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
-                    }`}
+                      }`}
                   >
                     {item.level === 'Beginner' ? '🟢 Simple' : item.level === 'Advanced' ? '🔴 Advanced' : '🟡 Intermediate'}
                   </span>
