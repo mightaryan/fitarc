@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   Phone,
@@ -22,8 +22,85 @@ import {
   RefreshCw,
   TrendingDown,
   Info,
+  Crown,
+  Award,
+  Zap,
+  Check,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+
+export const ATHLETE_TIERS = [
+  {
+    id: 'gold_elite',
+    name: 'Gold Elite Pro',
+    badge: 'Golden Standard',
+    color: 'from-amber-400 to-amber-600',
+    borderColor: 'border-amber-400',
+    bgGlow: 'bg-amber-500/15',
+    textGlow: 'text-amber-300',
+    price: 'Lifetime Elite Access',
+    description: 'The definitive gold-standard membership for elite athletes and serious lifters.',
+    perks: [
+      'Full 1,800+ 3D Biomechanical Visualizer Library',
+      'Instant AI Torso Vision Body Fat Scanner',
+      'Leap Fitness No-Jumping Home Workout Hub & Runner',
+      'Joint Angle & Subacromial Shear Simulator',
+      'Instant AI Meal & Macro Photo Analyzer',
+      '30/60/90-Day Trouble Zone Transformation Protocols',
+      'Apple Fitness Activity Rings & Dynamic Calorie Burn',
+    ],
+  },
+  {
+    id: 'pro_athlete',
+    name: 'Pro Athlete',
+    badge: 'Pro Performance',
+    color: 'from-sky-400 to-blue-600',
+    borderColor: 'border-sky-500/40',
+    bgGlow: 'bg-sky-500/15',
+    textGlow: 'text-sky-300',
+    price: 'Pro Athlete Tier',
+    description: 'Advanced tracking and overload telemetry for competitive bodybuilding and sports.',
+    perks: [
+      'Full 3D Exercise Movement Archive',
+      'Pyramid Overload Tension Calculator',
+      'Macro & Calorie Target Calibrator',
+      'Weekly Body Composition & Weight Graphing',
+    ],
+  },
+  {
+    id: 'intermediate_lifter',
+    name: 'Intermediate Lifter',
+    badge: 'Progressive Track',
+    color: 'from-emerald-400 to-teal-600',
+    borderColor: 'border-emerald-500/40',
+    bgGlow: 'bg-emerald-500/15',
+    textGlow: 'text-emerald-300',
+    price: 'Standard Tier',
+    description: 'Focused workout tracking, zero-equipment routines, and nutrition logging.',
+    perks: [
+      'Complete Home Workout Hub & Daily Routines',
+      'Daily Workout & Gym Log Tracker',
+      'Basic Body Mass Index (BMI) & Body Fat Tracker',
+      'Daily Weight & Calorie Deficit Log',
+    ],
+  },
+  {
+    id: 'foundation_novice',
+    name: 'Foundation Novice',
+    badge: 'Entry Point',
+    color: 'from-slate-400 to-slate-600',
+    borderColor: 'border-slate-500/40',
+    bgGlow: 'bg-slate-500/15',
+    textGlow: 'text-slate-300',
+    price: 'Free Access',
+    description: 'Essential beginner routines and habit-building foundation.',
+    perks: [
+      'Foundational Bodyweight Exercises',
+      'Daily Calorie Log',
+      'Daily Weight Log with Snooze Function',
+    ],
+  },
+];
 
 const COUNTRY_CODES = [
   { code: '+1', country: 'US / CA', flag: '🇺🇸' },
@@ -70,9 +147,13 @@ export function AuthModal({ isOpen, onClose }) {
     loginWithEmail,
     switchUserProfile,
     getAllSavedProfiles,
+    authModalTab,
+    setAuthModalTab,
+    updateMemberTier,
+    triggerConfetti,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState('biometrics'); // 'biometrics' | 'plan' | 'auth'
+  const [activeTab, setActiveTab] = useState(authModalTab || 'biometrics'); // 'biometrics' | 'tier' | 'plan' | 'auth'
   const [authMethod, setAuthMethod] = useState('phone'); // 'phone' | 'email'
   const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -85,6 +166,13 @@ export function AuthModal({ isOpen, onClose }) {
   const [otpValue, setOtpValue] = useState('');
   const [statusMessage, setStatusMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync with context's requested tab when modal opens
+  useEffect(() => {
+    if (authModalTab) {
+      setActiveTab(authModalTab);
+    }
+  }, [authModalTab, isOpen]);
 
   // Photo AI Scanner state
   const [physiquePhoto, setPhysiquePhoto] = useState(PHYSIQUE_PRESETS[0].photoUrl);
@@ -245,9 +333,15 @@ export function AuthModal({ isOpen, onClose }) {
               <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                Athlete Profile & Biometrics
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  Athlete Vault & Telemetry
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/35 flex items-center gap-1">
+                  <Crown className="w-2.5 h-2.5" />
+                  {user.memberTier || 'Gold Elite Pro'}
+                </span>
+              </div>
               <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
                 {user.name || 'Athlete Profile'}
               </h2>
@@ -263,41 +357,53 @@ export function AuthModal({ isOpen, onClose }) {
         </div>
 
         {/* TOP LEVEL NAVIGATION TABS */}
-        <div className="flex p-1.5 bg-black/60 border-b border-white/5 gap-1 shrink-0 px-4">
+        <div className="flex p-1.5 bg-black/60 border-b border-white/5 gap-1 shrink-0 px-2 sm:px-4 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('biometrics')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
               activeTab === 'biometrics'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Activity className="w-3.5 h-3.5" />
-            <span>Body Fat & BMI</span>
+            <Activity className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Vault & BMI</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('tier')}
+            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+              activeTab === 'tier'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Crown className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Tier & Perks</span>
           </button>
 
           <button
             onClick={() => setActiveTab('plan')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
               activeTab === 'plan'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Target className="w-3.5 h-3.5" />
-            <span>My Active Plan</span>
+            <Target className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Active Plan</span>
           </button>
 
           <button
             onClick={() => setActiveTab('auth')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
               activeTab === 'auth'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Account Login</span>
+            <Lock className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Login & Vault</span>
           </button>
         </div>
 
@@ -529,7 +635,101 @@ export function AuthModal({ isOpen, onClose }) {
           )}
 
           {/* ======================================================== */}
-          {/* TAB 2: ACTIVE TRANSFORMATION PLAN (30 / 60 / 90 DAYS) */}
+          {/* TAB 2: ATHLETE MEMBERSHIP TIER & PERKS */}
+          {/* ======================================================== */}
+          {activeTab === 'tier' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-600/10 to-obsidian-850 border border-amber-500/30 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-black flex items-center justify-center shadow-gold-glow-sm font-extrabold shrink-0">
+                    <Crown className="w-5 h-5 fill-current" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Current Active Membership</span>
+                    <h3 className="text-base font-extrabold text-white">{user.memberTier || 'Gold Elite Pro'}</h3>
+                  </div>
+                </div>
+                <div className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>Active</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                  Select Athlete Tier & Access Level:
+                </span>
+
+                <div className="grid grid-cols-1 gap-3">
+                  {ATHLETE_TIERS.map((tier) => {
+                    const isSelected = (user.memberTier || 'Gold Elite Pro').toLowerCase().includes(tier.name.toLowerCase().split(' ')[0]);
+                    return (
+                      <div
+                        key={tier.id}
+                        className={`p-4 rounded-2xl border transition-all duration-200 relative overflow-hidden ${
+                          isSelected
+                            ? `${tier.bgGlow} ${tier.borderColor} shadow-gold-glow-sm`
+                            : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-base font-extrabold text-white tracking-tight">
+                                {tier.name}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-white/10 border border-white/10 ${tier.textGlow}`}>
+                                {tier.badge}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-300 leading-snug">
+                              {tier.description}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              updateMemberTier(tier.name);
+                              setStatusMessage({ type: 'success', text: `Athlete Tier switched to ${tier.name}!` });
+                              if (triggerConfetti) triggerConfetti();
+                              setTimeout(() => setStatusMessage(null), 2000);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 active:scale-95 flex items-center gap-1 ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-gold-glow-sm'
+                                : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                            }`}
+                          >
+                            {isSelected ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                <span>Active</span>
+                              </>
+                            ) : (
+                              <span>Activate</span>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Perks Grid */}
+                        <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                          {tier.perks.map((perk, pIdx) => (
+                            <div key={pIdx} className="flex items-center gap-2 text-[11px] text-slate-300">
+                              <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-amber-400' : 'text-slate-500'}`} />
+                              <span className="truncate">{perk}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 3: ACTIVE TRANSFORMATION PLAN (30 / 60 / 90 DAYS) */}
           {/* ======================================================== */}
           {activeTab === 'plan' && (
             <div className="space-y-5">

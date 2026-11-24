@@ -21,9 +21,11 @@ import {
 } from 'lucide-react';
 import { MASTER_EXERCISE_CATALOG, DIFFICULTY_LEVELS } from '../../data/allExercisesMaster';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
+import { HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
 import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
 import { GlassCard } from '../common/GlassCard';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
+import { HomeWorkoutHub } from './HomeWorkoutHub';
 import { useApp } from '../../context/AppContext';
 
 const EQUIPMENT_FILTERS = [
@@ -60,6 +62,7 @@ export function FitnessSection() {
     setIsPlanModalOpen,
   } = useApp();
 
+  const [fitnessSubTab, setFitnessSubTab] = useState('home_hub'); // 'home_hub' | 'archive'
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMuscle, setSelectedMuscle] = useState('All Muscles');
@@ -69,9 +72,9 @@ export function FitnessSection() {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Combined catalog of 3D Gym Lifts, Full Body Yoga, Face Yoga & Home Workouts
+  // Combined catalog of 590+ Home Workouts, 225+ Full Body Yoga, and 1,323+ 3D Gym Lifts
   const fullExerciseCatalog = useMemo(() => {
-    return [...YOGA_AND_HOME_WORKOUTS, ...MASTER_EXERCISE_CATALOG];
+    return [...HOME_WORKOUTS_EXPANDED, ...YOGA_AND_HOME_WORKOUTS, ...MASTER_EXERCISE_CATALOG];
   }, []);
 
   // Active filter count for badge
@@ -197,8 +200,41 @@ export function FitnessSection() {
         </div>
       </div>
 
-      {/* ACTIVE TRANSFORMATION GOAL PLAN BANNER (30 / 60 / 90 DAYS) */}
-      {user.activePlan && (
+      {/* PRIMARY FITNESS NAVIGATION: HOME WORKOUT HUB (30-DAY CHALLENGES) vs 3D MOVEMENT ARCHIVE */}
+      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-lg shadow-inner">
+        <button
+          onClick={() => setFitnessSubTab('home_hub')}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 ${
+            fitnessSubTab === 'home_hub'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Flame className={`w-4 h-4 ${fitnessSubTab === 'home_hub' ? 'text-black fill-current' : 'text-amber-400'}`} />
+          <span>Home Workouts (30 Days)</span>
+        </button>
+
+        <button
+          onClick={() => setFitnessSubTab('archive')}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 ${
+            fitnessSubTab === 'archive'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Dumbbell className={`w-4 h-4 ${fitnessSubTab === 'archive' ? 'text-black' : 'text-amber-400'}`} />
+          <span>3D Master Archive ({fullExerciseCatalog.length.toLocaleString()}+)</span>
+        </button>
+      </div>
+
+      {/* VIEW 1: LEAP FITNESS HOME WORKOUT HUB */}
+      {fitnessSubTab === 'home_hub' && <HomeWorkoutHub />}
+
+      {/* VIEW 2: 3D MOVEMENT ARCHIVE & SEARCH */}
+      {fitnessSubTab === 'archive' && (
+        <div className="space-y-6">
+          {/* ACTIVE TRANSFORMATION GOAL PLAN BANNER (30 / 60 / 90 DAYS) */}
+          {user.activePlan && (
         <div
           onClick={() => setIsPlanModalOpen(true)}
           className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-600/10 to-obsidian-850 border border-amber-500/30 flex items-center justify-between cursor-pointer hover:border-amber-400 active:scale-[0.99] transition-all shadow-lg group"
@@ -587,6 +623,8 @@ export function FitnessSection() {
               </div>
             ))}
           </div>
+        </div>
+      )}
         </div>
       )}
 

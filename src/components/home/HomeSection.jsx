@@ -23,8 +23,10 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { WorkoutDetailModal } from '../fitness/WorkoutDetailModal';
+import { GuidedWorkoutPlayerModal } from '../fitness/GuidedWorkoutPlayerModal';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { MASTER_EXERCISE_CATALOG } from '../../data/allExercisesMaster';
+import { TROUBLE_ZONE_PLANS, HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
 
 export function HomeSection() {
   const {
@@ -40,10 +42,28 @@ export function HomeSection() {
     setIsWeightModalOpen,
     setIsMealScannerOpen,
     setIsPlanModalOpen,
+    isAuthModalOpen,
     setIsAuthModalOpen,
+    openAuthModal,
   } = useApp();
 
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [guidedWorkoutPlan, setGuidedWorkoutPlan] = useState(null);
+
+  const launchTroubleZoneSession = (zoneId = 'belly_fat') => {
+    const plan = TROUBLE_ZONE_PLANS.find((p) => p.id === zoneId) || TROUBLE_ZONE_PLANS[0];
+    const levelKey = (user.bodyFat || 20) > 30 ? 'beginner' : 'intermediate';
+    const lvl = plan.levels[levelKey] || plan.levels.intermediate;
+    const exercises = lvl.exerciseIds
+      .map((id) => HOME_WORKOUTS_EXPANDED.find((e) => e.id === id))
+      .filter(Boolean);
+
+    setGuidedWorkoutPlan({
+      title: `${plan.title} (Day 5)`,
+      badge: plan.badge,
+      exercises,
+    });
+  };
 
   // Dynamic Time-based Greeting
   const greeting = useMemo(() => {
@@ -151,16 +171,18 @@ export function HomeSection() {
           </div>
 
           <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-obsidian-850 border border-white/10 hover:border-amber-500/30 transition text-left leading-none active:scale-95"
-            title="Open Profile & Biometrics"
+            onClick={() => openAuthModal('tier')}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-obsidian-850 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition text-left leading-none active:scale-95 group shadow-sm"
+            title="Athlete Tier & Perks"
           >
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[10px] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[10px] flex items-center justify-center shadow-gold-glow-sm group-hover:scale-105 transition">
               {user.name?.slice(0, 2).toUpperCase() || 'AV'}
             </div>
             <div>
-              <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Tier</span>
-              <span className="text-xs font-bold text-slate-200">Gold Elite</span>
+              <span className="text-[9px] uppercase tracking-wider text-amber-400 font-bold block">Tier</span>
+              <span className="text-xs font-bold text-white group-hover:text-amber-300 transition">
+                {user.memberTier || 'Gold Elite Pro'}
+              </span>
             </div>
           </button>
         </div>
@@ -302,7 +324,7 @@ export function HomeSection() {
 
             {/* Estimated Body Fat */}
             <div
-              onClick={() => setIsAuthModalOpen(true)}
+              onClick={() => openAuthModal('biometrics')}
               className="p-3.5 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition cursor-pointer space-y-1 col-span-2 sm:col-span-1"
             >
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
@@ -395,26 +417,73 @@ export function HomeSection() {
         </div>
       )}
 
-      {/* 4. QUICK ACTION 1-TAP LAUNCHPAD */}
+      {/* 4. LEAP FITNESS TROUBLE ZONE 30-DAY CHALLENGES */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-amber-400" />
+            30 Days Challenge: Focus on Trouble Zone
+          </h2>
+          <button
+            onClick={() => setActiveTab('fitness')}
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1"
+          >
+            <span>Open Home Workout Hub</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {[
+            { id: 'belly_fat', label: 'Lose Belly Fat', tag: 'Core Chisel', icon: '🔥', color: 'from-rose-500/20 to-orange-500/10', border: 'border-rose-500/30' },
+            { id: 'chest_man_boobs', label: 'No Man Boobs', tag: 'Chest Sculpt', icon: '⚡', color: 'from-amber-500/20 to-yellow-500/10', border: 'border-amber-500/30' },
+            { id: 'arm_fat', label: 'Lose Arm Fat', tag: 'Tricep Tone', icon: '💪', color: 'from-blue-500/20 to-cyan-500/10', border: 'border-blue-500/30' },
+            { id: 'shape_full_body', label: 'Shape Full Body', tag: 'HIIT Burn', icon: '🏃', color: 'from-emerald-500/20 to-teal-500/10', border: 'border-emerald-500/30' },
+            { id: 'legs_glutes', label: 'Butt & Glutes', tag: 'Legs Lift', icon: '✨', color: 'from-pink-500/20 to-purple-500/10', border: 'border-pink-500/30' },
+            { id: 'lazy_fitness', label: 'Lazy Bed Fitness', tag: 'Restorative', icon: '🛋️', color: 'from-indigo-500/20 to-purple-500/10', border: 'border-indigo-500/30' },
+          ].map((zone) => (
+            <button
+              key={zone.id}
+              onClick={() => launchTroubleZoneSession(zone.id)}
+              className={`p-3.5 rounded-2xl bg-gradient-to-br ${zone.color} bg-obsidian-850 border ${zone.border} hover:border-amber-400 text-left transition-all duration-200 active:scale-95 flex flex-col justify-between space-y-2 group shadow-md`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xl group-hover:scale-110 transition">{zone.icon}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/50 text-amber-300">
+                  {zone.tag}
+                </span>
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition leading-tight">
+                  {zone.label}
+                </h4>
+                <span className="text-[10px] text-slate-400 block mt-0.5 font-mono">1-Tap Start</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 5. QUICK ACTION 1-TAP LAUNCHPAD */}
       <div className="space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Quick Launchpad
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Action 1: Explore Workouts */}
+          {/* Action 1: Home Workouts */}
           <button
             onClick={() => setActiveTab('fitness')}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
           >
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
-              <Dumbbell className="w-5 h-5" />
+              <Flame className="w-5 h-5 fill-amber-500 text-amber-400" />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                Movement Archive
+                Home Workouts
               </h4>
-              <p className="text-[11px] text-slate-400">1,320+ 3D Guided Lifts</p>
+              <p className="text-[11px] text-slate-400">590+ Zero-Equipment</p>
             </div>
           </button>
 
@@ -454,7 +523,7 @@ export function HomeSection() {
 
           {/* Action 4: Body Fat & BMI Vault */}
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => openAuthModal('biometrics')}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
           >
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
@@ -505,8 +574,11 @@ export function HomeSection() {
                     src={item.exercise.gifUrl}
                     alt={item.title}
                     onError={(e) => {
-                      e.currentTarget.src =
-                        'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif';
+                      if (!e.currentTarget.dataset.fallbackApplied) {
+                        e.currentTarget.dataset.fallbackApplied = 'true';
+                        e.currentTarget.src =
+                          'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
+                      }
                     }}
                     className="w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -646,6 +718,17 @@ export function HomeSection() {
         <WorkoutDetailModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
+        />
+      )}
+
+      {/* Guided Workout Live Session Runner Modal */}
+      {guidedWorkoutPlan && (
+        <GuidedWorkoutPlayerModal
+          isOpen={!!guidedWorkoutPlan}
+          onClose={() => setGuidedWorkoutPlan(null)}
+          routineTitle={guidedWorkoutPlan.title}
+          planBadge={guidedWorkoutPlan.badge}
+          exercises={guidedWorkoutPlan.exercises}
         />
       )}
     </div>

@@ -16,7 +16,9 @@ export function MobileBottomNav() {
     setActiveTab,
     user,
     setIsWeightModalOpen,
+    isAuthModalOpen,
     setIsAuthModalOpen,
+    openAuthModal,
     setIsMealScannerOpen,
   } = useApp();
 
@@ -122,20 +124,34 @@ export function MobileBottomNav() {
           )}
         </button>
 
-        {/* 5. ATHLETE VAULT & PROFILE (BMI, Body Fat, Active Plan) */}
+        {/* 5. ATHLETE VAULT & PROFILE (BMI, Body Fat, Active Plan, Tiers) */}
         <button
-          onClick={() => setIsAuthModalOpen(true)}
-          className="flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-slate-400 hover:text-amber-300 transition-all duration-200 active:scale-90 relative"
-          aria-label="Athlete Profile, Body Fat & BMI"
+          onClick={() => openAuthModal('biometrics')}
+          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+            isAuthModalOpen
+              ? 'text-amber-400 font-bold'
+              : 'text-slate-400 hover:text-amber-300 font-medium'
+          }`}
+          aria-label="Athlete Vault, Body Fat & BMI"
         >
           <div className="relative">
-            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[9px] flex items-center justify-center shadow-gold-glow-sm">
+            <div
+              className={`w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[9px] flex items-center justify-center transition ${
+                isAuthModalOpen ? 'shadow-gold-glow ring-2 ring-amber-400' : 'shadow-gold-glow-sm'
+              }`}
+            >
               {user.name?.slice(0, 2).toUpperCase() || 'AV'}
             </div>
+            {isAuthModalOpen && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
+            )}
           </div>
-          <span className="text-[10px] mt-1 font-semibold text-slate-300 tracking-tight">
-            Profile
+          <span className="text-[10px] mt-1 font-semibold tracking-tight">
+            Vault
           </span>
+          {isAuthModalOpen && (
+            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+          )}
         </button>
       </div>
     </nav>

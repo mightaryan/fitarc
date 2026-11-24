@@ -128,8 +128,21 @@ export function AppProvider({ children }) {
   const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
   const [selectedRecipeForModal, setSelectedRecipeForModal] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState('biometrics'); // 'biometrics' | 'tier' | 'plan' | 'auth'
   const [isMealScannerOpen, setIsMealScannerOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+
+  const openAuthModal = (tab = 'biometrics') => {
+    setAuthModalTab(tab);
+    setIsAuthModalOpen(true);
+  };
+
+  const updateMemberTier = (tierName) => {
+    setUser((prev) => ({
+      ...prev,
+      memberTier: tierName,
+    }));
+  };
 
   // Sync font size scale to root document
   useEffect(() => {
@@ -581,6 +594,10 @@ export function AppProvider({ children }) {
     setSelectedRecipeForModal,
     isAuthModalOpen,
     setIsAuthModalOpen,
+    authModalTab,
+    setAuthModalTab,
+    openAuthModal,
+    updateMemberTier,
     loginWithPhone,
     loginWithEmail,
     switchUserProfile,

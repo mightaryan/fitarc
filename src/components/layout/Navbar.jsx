@@ -18,7 +18,9 @@ export function Navbar() {
     user,
     workoutLogs,
     setIsWeightModalOpen,
+    isAuthModalOpen,
     setIsAuthModalOpen,
+    openAuthModal,
     setIsMealScannerOpen,
   } = useApp();
 
@@ -150,10 +152,10 @@ export function Navbar() {
 
           {/* Profile Avatar / Trigger */}
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => openAuthModal('biometrics')}
             className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 rounded-xl bg-obsidian-800/80 border border-white/10 hover:border-amber-500/40 transition active:scale-95"
-            title="Account & Goals"
-            aria-label="Account Settings"
+            title="Athlete Vault & Biometrics"
+            aria-label="Athlete Vault Settings"
           >
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-gold-glow-sm">
               {user.name?.slice(0, 2).toUpperCase() || 'AV'}
