@@ -39,6 +39,7 @@ export function HomeSection() {
     totalSugar,
     sugarLimitGrams,
     setActiveTab,
+    setFitnessSubTab,
     setIsWeightModalOpen,
     setIsMealScannerOpen,
     setIsPlanModalOpen,
@@ -98,10 +99,12 @@ export function HomeSection() {
       MASTER_EXERCISE_CATALOG.find((e) => e.muscleCategory === 'Core' || e.muscle === 'abs');
     const faceYoga =
       YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga' && e.name.includes('Jawline')) ||
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga');
+      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga') ||
+      YOGA_AND_HOME_WORKOUTS[1];
     const homeSquat =
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'home_workout' && e.name.includes('Split Squat')) ||
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'home_workout');
+      HOME_WORKOUTS_EXPANDED.find((e) => e.name && e.name.toLowerCase().includes('split squat')) ||
+      HOME_WORKOUTS_EXPANDED.find((e) => e.name && e.name.toLowerCase().includes('squat')) ||
+      HOME_WORKOUTS_EXPANDED[0];
 
     return [
       {
@@ -109,6 +112,7 @@ export function HomeSection() {
         title: 'Morning Flow: Surya Namaskar',
         subtitle: '15 min · Full Body Mobility Flow',
         tag: 'Yoga Flow',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/posterior-step-to-overhead-reach.gif',
         color: 'from-amber-500/20 to-orange-500/10',
         borderColor: 'border-amber-500/30',
         badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
@@ -118,6 +122,7 @@ export function HomeSection() {
         title: 'Core & Oblique Kinetic Sculpt',
         subtitle: '12 min · High Calisthenics Burn',
         tag: 'Belly Fat Focus',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif',
         color: 'from-rose-500/20 to-orange-500/10',
         borderColor: 'border-rose-500/30',
         badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
@@ -127,6 +132,7 @@ export function HomeSection() {
         title: 'Jawline Sculpt & Fascia Glide',
         subtitle: '8 min · Targeted Face Yoga',
         tag: 'Face Definition',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif',
         color: 'from-purple-500/20 to-pink-500/10',
         borderColor: 'border-purple-500/30',
         badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
@@ -136,6 +142,7 @@ export function HomeSection() {
         title: 'Sofa Bulgarian Split Squat',
         subtitle: '18 min · Zero Equipment Home Leg Burn',
         tag: 'Home Workout',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif',
         color: 'from-emerald-500/20 to-teal-500/10',
         borderColor: 'border-emerald-500/30',
         badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
@@ -425,7 +432,10 @@ export function HomeSection() {
             30 Days Challenge: Focus on Trouble Zone
           </h2>
           <button
-            onClick={() => setActiveTab('fitness')}
+            onClick={() => {
+              setFitnessSubTab?.('home_hub');
+              setActiveTab('fitness');
+            }}
             className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1"
           >
             <span>Open Home Workout Hub</span>
@@ -473,7 +483,10 @@ export function HomeSection() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Action 1: Home Workouts */}
           <button
-            onClick={() => setActiveTab('fitness')}
+            onClick={() => {
+              setFitnessSubTab?.('home_hub');
+              setActiveTab('fitness');
+            }}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
           >
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
@@ -506,6 +519,7 @@ export function HomeSection() {
           {/* Action 3: Daily Yoga & Face Yoga */}
           <button
             onClick={() => {
+              setFitnessSubTab?.('yoga');
               setActiveTab('fitness');
             }}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
@@ -552,7 +566,10 @@ export function HomeSection() {
           </div>
 
           <button
-            onClick={() => setActiveTab('fitness')}
+            onClick={() => {
+              setFitnessSubTab?.('yoga');
+              setActiveTab('fitness');
+            }}
             className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1 self-start sm:self-auto"
           >
             <span>See All ({YOGA_AND_HOME_WORKOUTS.length}+ Movements)</span>

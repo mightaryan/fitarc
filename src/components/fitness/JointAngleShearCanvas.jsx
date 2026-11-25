@@ -18,6 +18,69 @@ export function JointAngleShearCanvas({ exercise }) {
   const biomechanicConfig = useMemo(() => {
     const muscleCat = (exercise?.muscleCategory || exercise?.muscle || '').toLowerCase();
     const name = (exercise?.name || '').toLowerCase();
+    const category = (exercise?.category || '').toLowerCase();
+
+    const isYoga =
+      category === 'yoga' ||
+      exercise?.equipment === 'yogamat' ||
+      exercise?.equipment === 'exercise_ball' ||
+      name.includes('yoga') ||
+      name.includes('surya') ||
+      name.includes('asana') ||
+      name.includes('flow');
+
+    const isFace =
+      category === 'face_yoga' ||
+      muscleCat.includes('face') ||
+      name.includes('jawline') ||
+      name.includes('platysma') ||
+      name.includes('facial');
+
+    if (isFace) {
+      return {
+        type: 'face',
+        title: 'LIVE FACIAL FASCIA RELEASE & LYMPHATIC DRAINAGE SIMULATOR',
+        defaultAngle: 25,
+        minAngle: 10,
+        maxAngle: 60,
+        step: 5,
+        hazardThreshold: 45,
+        targetMuscle: 'Platysma & Facial Fascia',
+        safeAngleLabel: '25° Upward Glide',
+        hazardAngleLabel: '55° Downward Drag',
+        safeAlert: 'Safe Alignment: Gentle 25° Upward Fascia Glide · 0% Skin Tugging · 98% Lymphatic Drainage',
+        hazardAlert: 'Hazard Alert: 55° Downward Drag · Tugging delicate facial skin · Increases fold creasing',
+        clearanceMetric: 'Lymphatic Microflow',
+        safeClearance: '100% Free Flow',
+        hazardClearance: '22% Impaired Drag',
+        sliderLabel: 'Interactive Facial Glide Vector Angle:',
+        safeSlider: '15° Gentle Lift (Safe)',
+        hazardSlider: '55° Downward Drag (Hazard)',
+      };
+    }
+
+    if (isYoga) {
+      return {
+        type: 'yoga',
+        title: 'LIVE ASANA SPINAL ELONGATION & DIAPHRAGMATIC FLOW SIMULATOR',
+        defaultAngle: 30,
+        minAngle: 15,
+        maxAngle: 75,
+        step: 5,
+        hazardThreshold: 55,
+        targetMuscle: 'Spinal Erectors & Breathwave',
+        safeAngleLabel: '30° Axial Elongation',
+        hazardAngleLabel: '70° Forced Hyperextension',
+        safeAlert: 'Safe Alignment: 30° Decompressed Asana Arc · Zero facet joint compression · 98% parasympathetic tone',
+        hazardAlert: 'Hazard Alert: 70° Forced Hyperextension · Pinching lumbar facet joints · Breath restriction',
+        clearanceMetric: 'Intervertebral Axial Space',
+        safeClearance: '9.8 mm (Decompressed)',
+        hazardClearance: '1.9 mm (Facet Pinching)',
+        sliderLabel: 'Interactive Asana Spinal Extension Arc:',
+        safeSlider: '20° Fluid Arc (Safe)',
+        hazardSlider: '70° Forced Shear (Hazard)',
+      };
+    }
 
     if (
       muscleCat.includes('core') ||
@@ -179,7 +242,102 @@ export function JointAngleShearCanvas({ exercise }) {
       // ========================================================
       // 1. RENDER BASED ON BIOMECHANIC TYPE
       // ========================================================
-      if (biomechanicConfig.type === 'core') {
+      if (biomechanicConfig.type === 'face') {
+        // FACE YOGA / JAWLINE MANDIBLE & PLATYSMA FASCIA LIFT
+        const centerX = width * 0.42;
+        const centerY = height * 0.48;
+
+        // Gentle facial silhouette (Mandible, Cheek & Neck)
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(centerX - 40, centerY - 110);
+        ctx.quadraticCurveTo(centerX + 30, centerY - 70, centerX + 20, centerY - 30);
+        ctx.lineTo(centerX + 25, centerY);
+        ctx.quadraticCurveTo(centerX + 35, centerY + 20, centerX + 10, centerY + 45); // chin
+        ctx.quadraticCurveTo(centerX - 45, centerY + 30, centerX - 75, centerY - 10); // jawline
+        ctx.lineTo(centerX - 70, centerY + 80); // platysma neck
+        ctx.stroke();
+
+        // Upward Lymphatic Drainage Vector
+        const liftLen = 70;
+        const liftAngleRad = (jointAngle * Math.PI) / 180;
+        const liftEndX = centerX + 10 - Math.cos(liftAngleRad) * liftLen;
+        const liftEndY = centerY + 45 - Math.sin(liftAngleRad) * liftLen;
+
+        ctx.strokeStyle = isHazard ? '#f43f5e' : '#10b981';
+        ctx.lineWidth = 8;
+        ctx.shadowColor = isHazard ? 'transparent' : 'rgba(16, 185, 129, 0.7)';
+        ctx.shadowBlur = isHazard ? 0 : 20;
+        ctx.beginPath();
+        ctx.moveTo(centerX + 10, centerY + 45);
+        ctx.lineTo(liftEndX, liftEndY);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Kinetic Fascia Glide Aura
+        ctx.fillStyle = isHazard ? 'rgba(244, 63, 94, 0.1)' : 'rgba(52, 211, 153, 0.15)';
+        ctx.beginPath();
+        ctx.arc(centerX - 10, centerY - 15, 75, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (biomechanicConfig.type === 'yoga') {
+        // YOGA ASANA MAT / BALL SPINAL DECOMPRESSION MODEL
+        const floorY = height * 0.78;
+        const matStartX = width * 0.12;
+        const matWidth = width * 0.76;
+
+        // Non-slip Yoga Mat
+        ctx.fillStyle = '#0f291e';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(matStartX, floorY, matWidth, 14, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // If exercise ball, draw ball
+        const isBall = exercise?.equipment === 'exercise_ball';
+        const rootX = width * 0.4;
+        const rootY = isBall ? floorY - 55 : floorY - 15;
+
+        if (isBall) {
+          ctx.fillStyle = 'rgba(52, 211, 153, 0.15)';
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(rootX - 20, floorY - 45, 45, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        // Spine elongation curve
+        const angleRad = (jointAngle * Math.PI) / 180;
+        const spineLen = 130;
+        const headX = rootX - Math.cos(angleRad) * spineLen + Math.sin(t * 1.5) * 6;
+        const headY = rootY - Math.sin(angleRad) * spineLen - Math.cos(t * 1.5) * 4;
+
+        // Flowing Breath Aura
+        ctx.fillStyle = isHazard ? 'rgba(244, 63, 94, 0.08)' : 'rgba(16, 185, 129, 0.15)';
+        ctx.beginPath();
+        ctx.arc((rootX + headX) * 0.5, (rootY + headY) * 0.5, 90, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Mindful spine curve
+        ctx.strokeStyle = isHazard ? '#f43f5e' : '#10b981';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(rootX, rootY);
+        ctx.quadraticCurveTo(rootX - 40, rootY - 60, headX, headY);
+        ctx.stroke();
+
+        // Crown / Head
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(headX - 12, headY - 12, 18, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (biomechanicConfig.type === 'core') {
         // CORE / CRUNCH MODEL
         const floorY = height * 0.72;
         const pelvisX = width * 0.35;
@@ -598,35 +756,35 @@ export function JointAngleShearCanvas({ exercise }) {
             ref={canvasRef}
             className="w-full h-auto max-w-full rounded-2xl drop-shadow-[0_15px_30px_rgba(0,0,0,0.85)]"
           />
+        </div>
 
-          {/* Floating Live Alert Badge */}
-          <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
-            <div
-              className={`p-3 rounded-2xl border backdrop-blur-md shadow-xl transition-all duration-300 flex items-center justify-between gap-3 ${
-                isHazard
-                  ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
-                  : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                {isHazard ? (
-                  <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0 animate-bounce" />
-                ) : (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                )}
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider block">
-                    {isHazard ? `Hazard Alert: ${jointAngle}° Joint Shear` : `Safe Alignment: ${jointAngle}° Track`}
-                  </span>
-                  <span className="text-[11px] opacity-85 block">
-                    {isHazard ? biomechanicConfig.hazardAlert : biomechanicConfig.safeAlert}
-                  </span>
-                </div>
+        {/* Live Alignment Telemetry Alert Strip (In normal flow, eliminates mobile overlap) */}
+        <div className="p-3 sm:p-4 bg-obsidian-900 border-t border-white/5">
+          <div
+            className={`p-3 rounded-2xl border backdrop-blur-md shadow-lg transition-all duration-300 flex items-center justify-between gap-3 ${
+              isHazard
+                ? 'bg-rose-950/90 border-rose-500/50 text-rose-200'
+                : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {isHazard ? (
+                <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0 animate-bounce" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              )}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider block">
+                  {isHazard ? `Hazard Alert: ${jointAngle}° Joint Shear` : `Safe Alignment: ${jointAngle}° Track`}
+                </span>
+                <span className="text-[11px] opacity-85 block">
+                  {isHazard ? biomechanicConfig.hazardAlert : biomechanicConfig.safeAlert}
+                </span>
               </div>
+            </div>
 
-              <div className="px-3 py-1.5 rounded-xl bg-black/80 border border-white/10 font-mono text-sm font-extrabold shrink-0 text-amber-300">
-                {jointAngle}° Track
-              </div>
+            <div className="px-3 py-1.5 rounded-xl bg-black/80 border border-white/10 font-mono text-sm font-extrabold shrink-0 text-amber-300">
+              {jointAngle}° Track
             </div>
           </div>
         </div>

@@ -118,6 +118,7 @@ const SEED_MEALS = [
 
 export function AppProvider({ children }) {
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'fitness' | 'food' | 'dashboard'
+  const [fitnessSubTab, setFitnessSubTab] = useState('yoga'); // 'yoga' | 'home_hub' | 'archive'
   const [user, setUser] = useState(DEFAULT_PROFILE);
   const [fontSizeScale, setFontSizeScale] = useState('normal'); // 'normal' | 'medium' | 'large' | 'xlarge'
   const [weightHistory, setWeightHistory] = useState(SEED_WEIGHT_HISTORY);
@@ -563,6 +564,8 @@ export function AppProvider({ children }) {
   const value = {
     activeTab,
     setActiveTab,
+    fitnessSubTab,
+    setFitnessSubTab,
     fontSizeScale,
     setFontSizeScale,
     user,

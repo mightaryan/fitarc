@@ -12,6 +12,9 @@ import {
   Layers,
   Compass,
   TrendingUp,
+  Sun,
+  Smile,
+  ShieldCheck,
 } from 'lucide-react';
 import { Anatomical3DPlayer } from './Anatomical3DPlayer';
 import { ProgressiveOverloadCalculator } from './ProgressiveOverloadCalculator';
@@ -29,6 +32,10 @@ export function WorkoutDetailModal({ exercise, onClose }) {
   const [isLogged, setIsLogged] = useState(false);
 
   if (!exercise) return null;
+
+  const isYoga = exercise.category === 'yoga' || exercise.category === 'face_yoga';
+  const isFace = exercise.category === 'face_yoga';
+  const isBall = exercise.equipment === 'exercise_ball';
 
   const currentWeightKg = user.currentWeight || 75;
   const impact = calculateWorkoutImpact(exercise, minutes, currentWeightKg, intensity);
@@ -59,15 +66,28 @@ export function WorkoutDetailModal({ exercise, onClose }) {
         {/* Header Bar */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-3.5 sm:p-6 bg-obsidian-900/95 backdrop-blur-md border-b border-amber-500/15 gap-2">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
-              <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className={`p-2 sm:p-2.5 rounded-xl border shrink-0 ${
+              isYoga
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+            }`}>
+              {isYoga ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />}
             </div>
             <div className="min-w-0 flex-1 pr-1">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
-                  {exercise.category}
+                <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                  isYoga
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                }`}>
+                  {exercise.equipmentLabel || (isYoga ? (isFace ? 'Hands, Breath & Mirror' : (isBall ? 'Stability & Exercise Ball' : 'Non-Slip Yoga Mat')) : exercise.category)}
                 </span>
                 <span className="text-[11px] sm:text-xs text-slate-400 shrink-0">{exercise.level}</span>
+                {exercise.sanskritName && (
+                  <span className="text-[10px] text-amber-400 font-serif italic hidden md:inline truncate">
+                    · {exercise.sanskritName}
+                  </span>
+                )}
                 {exercise.equipmentBrand && (
                   <span className="text-[10px] text-amber-400 font-mono hidden md:inline truncate">
                     · {exercise.equipmentBrand}
@@ -95,10 +115,12 @@ export function WorkoutDetailModal({ exercise, onClose }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-amber-400" />
-                3D Anatomical Muscle Motion & Biomechanical Guidance
+                <Compass className="w-4 h-4 text-amber-400" />
+                {isYoga ? 'Holistic Asana Alignment & Illuminated Muscles' : '3D Anatomical Muscle Motion & Biomechanical Guidance'}
               </h3>
-              <span className="text-[11px] text-slate-400">GymVisual 3D Engine · Illuminated Muscle Fibers</span>
+              <span className="text-[11px] text-slate-400">
+                {isYoga ? (isBall ? 'Stability Ball Decompression' : isFace ? 'Face Fascia Sculpt' : 'Yoga Mat Flow') : 'GymVisual 3D Engine · Illuminated Muscle Fibers'}
+              </span>
             </div>
             <Anatomical3DPlayer
               exercise={exercise}
@@ -110,10 +132,10 @@ export function WorkoutDetailModal({ exercise, onClose }) {
           {/* Navigation Tabs for Biomechanical Modalities */}
           <div className="flex border-b border-white/10 gap-2 overflow-x-auto pb-2 scrollbar-none">
             {[
-              { id: 'biomechanics', label: '3D Motion & Vectors', icon: Compass },
-              { id: 'pyramid', label: 'Weight Ratio & Overload', icon: TrendingUp },
-              { id: 'setup', label: 'Machine Setup & Alignment', icon: CheckCircle2 },
-              { id: 'mistakes', label: 'Angle & Joint Shear Simulator', icon: AlertTriangle },
+              { id: 'biomechanics', label: isYoga ? 'Asana Flow & Alignment' : '3D Motion & Vectors', icon: Compass },
+              { id: 'pyramid', label: isYoga ? 'Breath & Hold Progression' : 'Weight Ratio & Overload', icon: TrendingUp },
+              { id: 'setup', label: isYoga ? (isFace ? 'Facial Space & Mirror' : (isBall ? 'Stability Ball Setup' : 'Yoga Mat Grounding')) : 'Machine Setup & Alignment', icon: CheckCircle2 },
+              { id: 'mistakes', label: isYoga ? 'Joint Angle & Spine Ease' : 'Angle & Joint Shear Simulator', icon: AlertTriangle },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -254,9 +276,63 @@ export function WorkoutDetailModal({ exercise, onClose }) {
             />
           )}
 
-          {/* TAB 3: MACHINE SETUP & ERGONOMIC ADJUSTMENTS */}
+          {/* TAB 3: MACHINE SETUP / YOGA MAT & STABILITY BALL ALIGNMENT */}
           {activeTab === 'setup' && (
-            <MachineSetupVisualizer exercise={exercise} />
+            isYoga ? (
+              <div className="p-5 rounded-2xl bg-obsidian-850 border border-emerald-500/30 space-y-4 shadow-xl">
+                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 flex items-center justify-center font-bold text-lg shrink-0">
+                    {isFace ? '✨' : isBall ? '⚪' : '🧘‍♀️'}
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                      {isFace ? 'Face Yoga Studio Setup' : isBall ? 'Stability Ball Setup & Traction' : 'Yoga Mat Grounding & Alignment'}
+                    </span>
+                    <h3 className="text-base font-extrabold text-white">
+                      Holistic Environment & Biomechanics
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    Step-by-Step Setup:
+                  </h4>
+                  <div className="space-y-2">
+                    {(exercise.setupSteps || [
+                      'Unroll a clean, non-slip yoga mat on a quiet flat floor.',
+                      'Ground barefoot through all four corners of feet; align pelvic neutrality.',
+                      'Engage Ujjayi nasal breath with steady 4-second inhalation and exhalation.',
+                    ]).map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-200">
+                        <span className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {exercise.formSteps && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      Mindful Asana Execution:
+                    </h4>
+                    <div className="space-y-2">
+                      {exercise.formSteps.map((step, idx) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <MachineSetupVisualizer exercise={exercise} />
+            )
           )}
 
           {/* TAB 4: LIVE ANGLE & JOINT SHEAR SIMULATOR / WRONG ANGLES & INJURY TRAPS */}

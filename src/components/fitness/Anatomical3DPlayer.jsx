@@ -14,8 +14,28 @@ import {
   Zap,
 } from 'lucide-react';
 
-const FALLBACK_GIF =
-  'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
+function getFallbackGif(exercise) {
+  const cat = (exercise?.category || '').toLowerCase();
+  const muscle = (exercise?.muscleCategory || exercise?.muscle || '').toLowerCase();
+  const name = (exercise?.name || '').toLowerCase();
+
+  if (cat === 'face_yoga' || muscle.includes('face') || name.includes('jawline')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif';
+  }
+  if (cat === 'yoga' || exercise?.equipment === 'yogamat' || exercise?.equipment === 'exercise_ball' || name.includes('yoga') || name.includes('surya') || name.includes('flow')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif';
+  }
+  if (muscle.includes('core') || muscle.includes('abs') || name.includes('crunch') || name.includes('plank')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
+  }
+  if (muscle.includes('leg') || muscle.includes('quad') || muscle.includes('glute') || name.includes('squat')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif';
+  }
+  if (muscle.includes('back') || muscle.includes('lat') || name.includes('row')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/suspended-row.gif';
+  }
+  return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
+}
 
 function getMuscleTelemetry(exercise, jointAngle) {
   const muscleGroup = (exercise?.muscleCategory || exercise?.muscle || '').toLowerCase();
@@ -131,7 +151,8 @@ export function Anatomical3DPlayer({
   const [jointAngle, setJointAngle] = useState(45); // default 45° optimal angle
   const [formMode, setFormMode] = useState('optimal'); // 'optimal' | 'flawed'
 
-  const gifUrl = exercise?.gifUrl || FALLBACK_GIF;
+  const fallbackSrc = getFallbackGif(exercise);
+  const gifUrl = exercise?.gifUrl || fallbackSrc;
   const isAngleHazard = jointAngle > 65;
   const telemetry = getMuscleTelemetry(exercise, jointAngle);
 
@@ -187,13 +208,13 @@ export function Anatomical3DPlayer({
         <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
           <img
             key={exercise?.id || gifUrl}
-            src={imgError ? FALLBACK_GIF : gifUrl}
+            src={imgError ? fallbackSrc : gifUrl}
             alt={exercise?.name || 'Exercise Biomechanics'}
             onLoad={() => setImgLoaded(true)}
             onError={(e) => {
               if (!imgError) {
                 setImgError(true);
-                e.currentTarget.src = FALLBACK_GIF;
+                e.currentTarget.src = fallbackSrc;
               }
             }}
             className="h-[320px] sm:h-[420px] w-auto max-w-full object-contain scale-105 sm:scale-120 transition-all duration-500 dark-3d-animation drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]"
@@ -234,75 +255,127 @@ export function Anatomical3DPlayer({
             </div>
           )}
 
-          {/* MODE 2: WEIGHT RATIO & OVERLOAD PERIMETER HUD (UNOBSTRUCTED CENTER) */}
+          {/* MODE 2: WEIGHT RATIO OR BREATH HOLD DURATION HUD */}
           {activeTab === 'pyramid' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Ratio Badges */}
               <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
                 <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-amber-500/30 text-amber-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2 max-w-full truncate">
                   <TrendingUp className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="truncate">{bwRatio}x Mass Ratio · Working Load: {estWorkingWeight}kg</span>
+                  <span className="truncate">
+                    {isYogaOrFace
+                      ? `Somatic Mind-Body Synchrony · Deep Fascial Elongation`
+                      : `${bwRatio}x Mass Ratio · Working Load: ${estWorkingWeight}kg`}
+                  </span>
                 </span>
 
                 <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md shrink-0">
-                  Est. 1RM ~{est1RM}kg
+                  {isYogaOrFace ? 'Parasympathetic Focus' : `Est. 1RM ~${est1RM}kg`}
                 </span>
               </div>
 
-              {/* Bottom Overload 4-Phase Ribbon */}
+              {/* Bottom Overload or Breath Duration Ribbon */}
               <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs max-w-full">
                 <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 shrink-0">
                   <Layers className="w-3.5 h-3.5 text-amber-400" />
-                  Pyramid Overload Progression:
+                  {isYogaOrFace ? 'Hold & Breath Progression:' : 'Pyramid Overload Progression:'}
                 </span>
                 <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs overflow-x-auto max-w-full py-0.5">
                   <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-slate-300 shrink-0">
-                    Set 1: 50%
+                    {isYogaOrFace ? 'Phase 1: 5 Breaths' : 'Set 1: 50%'}
                   </span>
                   <span className="text-slate-600">➔</span>
                   <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-200 shrink-0">
-                    Set 2: 70%
+                    {isYogaOrFace ? 'Phase 2: 8 Breaths' : 'Set 2: 70%'}
                   </span>
                   <span className="text-slate-600">➔</span>
                   <span className="px-2 py-0.5 rounded bg-obsidian-850 border border-white/10 text-amber-300 shrink-0">
-                    Set 3: 80%
+                    {isYogaOrFace ? 'Phase 3: 12 Breaths' : 'Set 3: 80%'}
                   </span>
                   <span className="text-slate-600">➔</span>
                   <span className="px-2.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold shrink-0">
-                    Top: 88%
+                    {isYogaOrFace ? 'Deep Hold: 15 Breaths' : 'Top: 88%'}
                   </span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* MODE 3: MACHINE SETUP & ALIGNMENT PERIMETER HUD (UNOBSTRUCTED CENTER) */}
+          {/* MODE 3: MACHINE SETUP OR YOGA MAT / BALL ALIGNMENT HUD */}
           {activeTab === 'setup' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Setup Check */}
               <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
                 <span className="px-3 py-1.5 rounded-xl bg-black/85 border border-emerald-500/30 text-emerald-300 backdrop-blur-md shadow-md text-xs font-semibold flex items-center gap-2 max-w-full truncate">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="truncate">Machine Axis & Ergonomic Lock: Calibrated</span>
+                  <span className="truncate">
+                    {exercise?.equipment === 'exercise_ball'
+                      ? 'Stability Ball & Pelvic Traction: Anchored'
+                      : exercise?.category === 'face_yoga'
+                      ? 'Hands, Mirror & Facial Alignment: Ready'
+                      : isYogaOrFace
+                      ? 'Non-Slip Yoga Mat & Barefoot Grounding: Aligned'
+                      : 'Machine Axis & Ergonomic Lock: Calibrated'}
+                  </span>
                 </span>
 
                 <span className="px-3 py-1.5 rounded-xl text-xs font-mono uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md shrink-0">
-                  {exercise?.equipment || 'Equipment'} Safety Cam
+                  {exercise?.equipmentLabel || (isYogaOrFace ? 'Zen Space' : (exercise?.equipment || 'Equipment'))}
                 </span>
               </div>
 
               {/* Bottom Checklist Ribbon */}
               <div className="bg-black/90 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3 text-xs flex-wrap max-w-full">
                 <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
-                    ✓ Seat Pin Locked
-                  </span>
-                  <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
-                    ✓ Scapulae Retracted
-                  </span>
-                  <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
-                    ✓ Joint-Cam Alignment
-                  </span>
+                  {exercise?.equipment === 'exercise_ball' ? (
+                    <>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Ball Anchored on Mat
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ 360° Axial Decompression
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Core Transverse Balance
+                      </span>
+                    </>
+                  ) : exercise?.category === 'face_yoga' ? (
+                    <>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Clean Hands & Slip
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Eye-Level Mirror Symmetry
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Unclenched Jaw Molars
+                      </span>
+                    </>
+                  ) : isYogaOrFace ? (
+                    <>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Barefoot Floor Grounding
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Pelvic Mula Bandha Lock
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Ujjayi Breath Rhythm
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Seat Pin Locked
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Scapulae Retracted
+                      </span>
+                      <span className="text-[11px] text-emerald-300 flex items-center gap-1 font-medium">
+                        ✓ Joint-Cam Alignment
+                      </span>
+                    </>
+                  )}
                 </div>
                 <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">100% Stability</span>
               </div>

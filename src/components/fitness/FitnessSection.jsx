@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   X,
+  Sun,
+  Smile,
 } from 'lucide-react';
 import { MASTER_EXERCISE_CATALOG, DIFFICULTY_LEVELS } from '../../data/allExercisesMaster';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
@@ -26,16 +28,20 @@ import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
 import { GlassCard } from '../common/GlassCard';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
 import { HomeWorkoutHub } from './HomeWorkoutHub';
+import { YogaSanctuaryHub } from './YogaSanctuaryHub';
 import { useApp } from '../../context/AppContext';
 
 const EQUIPMENT_FILTERS = [
   { id: 'all', label: 'All Equipment' },
+  { id: 'yogamat', label: 'Yoga Mat (Non-Slip)' },
+  { id: 'exercise_ball', label: 'Stability & Exercise Ball' },
+  { id: 'face_hands', label: 'Hands, Breath & Face' },
+  { id: 'bodyweight', label: 'Bodyweight (Zero Equipment)' },
   { id: 'dumbbell', label: 'Free Weight Dumbbells' },
   { id: 'barbell', label: 'Olympic Barbells & EZ' },
   { id: 'machine', label: 'Gym Machines & Lever' },
   { id: 'cable', label: 'Cables & Bands' },
   { id: 'smith', label: 'Smith Machine' },
-  { id: 'bodyweight', label: 'Calisthenics & Bodyweight' },
   { id: 'sled', label: 'Sled, Kettlebell & Functional' },
 ];
 
@@ -60,9 +66,13 @@ export function FitnessSection() {
     deleteWorkout,
     setIsWeightModalOpen,
     setIsPlanModalOpen,
+    fitnessSubTab: contextFitnessSubTab,
+    setFitnessSubTab: contextSetFitnessSubTab,
   } = useApp();
 
-  const [fitnessSubTab, setFitnessSubTab] = useState('home_hub'); // 'home_hub' | 'archive'
+  const [localFitnessSubTab, setLocalFitnessSubTab] = useState('yoga'); // 'yoga' | 'home_hub' | 'archive'
+  const fitnessSubTab = contextFitnessSubTab || localFitnessSubTab;
+  const setFitnessSubTab = contextSetFitnessSubTab || setLocalFitnessSubTab;
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMuscle, setSelectedMuscle] = useState('All Muscles');
@@ -126,7 +136,23 @@ export function FitnessSection() {
 
       // Equipment filter
       let matchesEquipment = true;
-      if (selectedEquipment === 'machine') {
+      if (selectedEquipment === 'yogamat') {
+        matchesEquipment = item.equipment === 'yogamat' || item.subCategory === 'yoga_mat';
+      } else if (selectedEquipment === 'exercise_ball') {
+        matchesEquipment =
+          item.equipment === 'exercise_ball' ||
+          item.subCategory === 'exercise_ball' ||
+          (item.name && item.name.toLowerCase().includes('ball')) ||
+          (item.gifUrl && item.gifUrl.includes('ball'));
+      } else if (selectedEquipment === 'face_hands') {
+        matchesEquipment = item.equipment === 'face_hands' || item.category === 'face_yoga';
+      } else if (selectedEquipment === 'bodyweight') {
+        matchesEquipment =
+          item.equipment === 'bodyweight' ||
+          item.equipment === 'mat' ||
+          item.equipment === 'none' ||
+          item.category === 'home_workout';
+      } else if (selectedEquipment === 'machine') {
         matchesEquipment = item.equipment === 'machine' || item.equipment === 'lever';
       } else if (selectedEquipment === 'cable') {
         matchesEquipment = item.equipment === 'cable' || item.equipment === 'band';
@@ -200,37 +226,52 @@ export function FitnessSection() {
         </div>
       </div>
 
-      {/* PRIMARY FITNESS NAVIGATION: HOME WORKOUT HUB (30-DAY CHALLENGES) vs 3D MOVEMENT ARCHIVE */}
-      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-lg shadow-inner">
+      {/* PRIMARY FITNESS NAVIGATION: YOGA SANCTUARY vs HOME WORKOUT HUB vs 3D MOVEMENT ARCHIVE */}
+      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-xl shadow-inner gap-1">
+        <button
+          onClick={() => setFitnessSubTab('yoga')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+            fitnessSubTab === 'yoga'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg font-extrabold'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Sun className={`w-4 h-4 ${fitnessSubTab === 'yoga' ? 'text-white' : 'text-emerald-400'}`} />
+          <span>🧘‍♀️ Yoga Studio</span>
+        </button>
+
         <button
           onClick={() => setFitnessSubTab('home_hub')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
             fitnessSubTab === 'home_hub'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <Flame className={`w-4 h-4 ${fitnessSubTab === 'home_hub' ? 'text-black fill-current' : 'text-amber-400'}`} />
-          <span>Home Workouts (30 Days)</span>
+          <span>🔥 Home (30 Days)</span>
         </button>
 
         <button
           onClick={() => setFitnessSubTab('archive')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
             fitnessSubTab === 'archive'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <Dumbbell className={`w-4 h-4 ${fitnessSubTab === 'archive' ? 'text-black' : 'text-amber-400'}`} />
-          <span>3D Master Archive ({fullExerciseCatalog.length.toLocaleString()}+)</span>
+          <span>⚡ 3D Gym ({fullExerciseCatalog.length.toLocaleString()}+)</span>
         </button>
       </div>
 
-      {/* VIEW 1: LEAP FITNESS HOME WORKOUT HUB */}
+      {/* VIEW 1: YOGA & FACE SANCTUARY (MAT, BALL & FACE ASANAS) */}
+      {fitnessSubTab === 'yoga' && <YogaSanctuaryHub />}
+
+      {/* VIEW 2: LEAP FITNESS HOME WORKOUT HUB */}
       {fitnessSubTab === 'home_hub' && <HomeWorkoutHub />}
 
-      {/* VIEW 2: 3D MOVEMENT ARCHIVE & SEARCH */}
+      {/* VIEW 3: 3D MOVEMENT ARCHIVE & SEARCH */}
       {fitnessSubTab === 'archive' && (
         <div className="space-y-6">
           {/* ACTIVE TRANSFORMATION GOAL PLAN BANNER (30 / 60 / 90 DAYS) */}
