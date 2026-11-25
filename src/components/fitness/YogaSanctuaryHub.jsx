@@ -18,6 +18,7 @@ import {
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { GuidedWorkoutPlayerModal } from './GuidedWorkoutPlayerModal';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
+import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
 
 export function YogaSanctuaryHub() {
   // Sanctuary section: 'yoga_mat' | 'exercise_ball' | 'face_yoga'
@@ -279,70 +280,78 @@ export function YogaSanctuaryHub() {
       </div>
 
       {/* 5. ROUTINE LISTING CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {studioRoutines.map((pose) => (
-          <div
-            key={pose.id}
-            onClick={() => setSelectedPose(pose)}
-            className="p-4 rounded-2xl bg-obsidian-850 border border-white/10 hover:border-amber-400/50 transition duration-200 cursor-pointer group flex flex-col justify-between space-y-3 shadow-md active:scale-[0.99]"
-          >
-            <div className="flex items-start gap-3.5">
-              {/* 3D Motion Preview Stage */}
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl bg-black/80 overflow-hidden border border-white/5 shrink-0 flex items-center justify-center p-1.5">
-                <img
-                  src={pose.gifUrl}
-                  alt={pose.name}
-                  onError={(e) => {
-                    if (!e.currentTarget.dataset.err) {
-                      e.currentTarget.dataset.err = 'true';
-                      e.currentTarget.src =
-                        'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
-                    }
-                  }}
-                  className="w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition"
-                  loading="lazy"
-                />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {studioRoutines.map((pose) => {
+          const isFaceYoga =
+            pose.category === 'face_yoga' ||
+            pose.subCategory === 'face_yoga' ||
+            pose.equipment === 'face_hands';
+          const fallbackYogaGif =
+            pose.subCategory === 'exercise_ball'
+              ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
+              : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif';
+
+          return (
+            <div
+              key={pose.id}
+              onClick={() => setSelectedPose(pose)}
+              className="rounded-2xl bg-obsidian-850 border border-white/10 hover:border-amber-400/50 transition duration-200 cursor-pointer group flex flex-col justify-between overflow-hidden shadow-lg active:scale-[0.99]"
+            >
+              {/* Prominent 3D Obsidian Spotlight Stage (GymVisual 3D GIFs for Mat & Ball Yoga; Expressive Canvas for Face Yoga) */}
+              <div className="relative h-44 w-full bg-[#050608] overflow-hidden border-b border-white/5 flex items-center justify-center p-2">
+                {isFaceYoga ? (
+                  <YogaAnatomicalCanvas exercise={pose} compact />
+                ) : (
+                  <img
+                    src={pose.gifUrl}
+                    alt={pose.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      if (!e.currentTarget.dataset.err) {
+                        e.currentTarget.dataset.err = 'true';
+                        e.currentTarget.src = fallbackYogaGif;
+                      }
+                    }}
+                    className="max-h-full w-auto object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
+                  />
+                )}
+                <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-amber-500/30 text-[10px] font-bold text-amber-300 backdrop-blur-sm">
+                  {pose.equipmentLabel}
+                </div>
+                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-white/10 text-[10px] font-mono text-slate-300 backdrop-blur-sm">
+                  {pose.level}
+                </div>
               </div>
 
-              {/* Title, Sanskrit & Equipment Badge */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {pose.equipmentLabel}
-                  </span>
-                  <span className="text-[9px] text-slate-400 font-mono">
-                    {pose.level}
-                  </span>
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                  <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition truncate">
+                    {pose.name}
+                  </h4>
+                  {pose.sanskritName && (
+                    <span className="text-[11px] text-amber-400/90 font-serif italic block truncate mt-0.5">
+                      {pose.sanskritName}
+                    </span>
+                  )}
+                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mt-1.5">
+                    {pose.tagline}
+                  </p>
                 </div>
 
-                <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 transition mt-1 truncate">
-                  {pose.name}
-                </h4>
-
-                {pose.sanskritName && (
-                  <span className="text-[11px] text-amber-400/90 font-serif italic block truncate">
-                    {pose.sanskritName}
+                <div className="pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1 text-slate-300 truncate pr-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="truncate">{pose.environment}</span>
                   </span>
-                )}
+                  <div className="flex items-center gap-1 text-amber-400 font-bold group-hover:translate-x-0.5 transition shrink-0">
+                    <span>View Asana</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
               </div>
             </div>
-
-            <p className="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
-              {pose.tagline}
-            </p>
-
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400">
-              <span className="flex items-center gap-1 text-slate-300">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                {pose.environment}
-              </span>
-              <div className="flex items-center gap-1 text-amber-400 font-bold group-hover:translate-x-0.5 transition">
-                <span>View Asana</span>
-                <ChevronRight className="w-3 h-3" />
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 6. GUIDED SESSION RUNNER MODAL */}

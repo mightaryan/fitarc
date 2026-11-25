@@ -3,10 +3,19 @@
 
 export const TARGET_AREAS = [
   { id: 'belly_fat', label: 'Belly Fat & Core Shred', icon: 'Flame', desc: 'Target stubborn lower belly & visceral abdominal fat' },
-  { id: 'thigh_fat', label: 'Thigh & Glute Sculpt', icon: 'Zap', desc: 'Tone inner/outer thighs and lift glutes' },
+  { id: 'hiit_600', label: '400-600 kcal Extreme HIIT', icon: 'Zap', desc: 'High-octane metabolic compound circuits to melt 400-600 kcal in one set' },
+  { id: 'calisthenics', label: 'Calisthenics & Relative Power', icon: 'Award', desc: 'Bodyweight mastery: Planche, pull-ups, dips, L-sits & flags' },
+  { id: 'thigh_fat', label: 'Thigh & Glute Sculpt', icon: 'Target', desc: 'Tone inner/outer thighs and lift glutes' },
   { id: 'back_fat', label: 'Back Fat & Posture Toning', icon: 'Shield', desc: 'Eliminate bra-line rolls and sculpt V-taper posture' },
   { id: 'overall_fat', label: 'Full Body Fat Loss', icon: 'Activity', desc: 'Whole body metabolic deficit & lean definition' },
   { id: 'yoga_face', label: 'Yoga & Face Sculpt', icon: 'Sparkles', desc: 'Holistic spine mobility, lymphatic drainage & jawline lift' },
+];
+
+export const WORKOUT_LOCATIONS = [
+  { id: 'home', label: 'Home Living Room', icon: 'Home', badge: 'Zero Equipment', desc: 'Pure bodyweight on floor, living room mat, sofa or chair' },
+  { id: 'gym', label: 'Commercial Gym', icon: 'Dumbbell', badge: 'Full Machinery', desc: 'Machines, barbells, cables, dumbbells & heavy free weights' },
+  { id: 'calisthenics', label: 'Calisthenics Park', icon: 'Zap', badge: 'Bars & Rings', desc: 'Pull-up bars, parallel dip bars, rings & bodyweight levers' },
+  { id: 'yoga', label: 'Yoga Sanctuary', icon: 'Sun', badge: 'Mat & Ball', desc: 'Barefoot on non-slip yoga mat, stability ball & facial hands' },
 ];
 
 export const TRANSFORMATION_PLANS = [
@@ -360,6 +369,143 @@ export const TRANSFORMATION_PLANS = [
       '15m Face Yoga master sequence',
       '30m Full Body Asana flow',
       'Log daily photo in Vault for body fat & face symmetry'
+    ]
+  },
+
+  // 400-600 KCAL EXTREME HIIT INCINERATOR
+  {
+    id: 'hiit-600-30',
+    targetArea: 'hiit_600',
+    durationDays: 30,
+    title: '30-Day 400-600 kcal Extreme HIIT Blitz',
+    badge: 'High-Octane Incinerator',
+    dailyCalorieDeficit: 600,
+    dailySugarLimitGrams: 18,
+    workoutDaysPerWeek: 5,
+    focus: 'Maximal EPOC afterburn and metabolic output burning 400-600 kcal in one set',
+    description: 'High-intensity compound circuits combining burpees, jump squats, mountain climber escalations, and sprint intervals.',
+    recommendedExercises: [
+      'semi-squat-jump-male',
+      'bodyweight-drop-jump-squat',
+      'push-up-to-side-plank'
+    ],
+    dailyChecklist: [
+      'Complete 35m 500 kcal HIIT circuit',
+      'Hydrate with 3.5L electrolyte water',
+      'Keep refined sugar under 18g',
+      'Maintain explosive concentric cadence'
+    ]
+  },
+  {
+    id: 'hiit-600-60',
+    targetArea: 'hiit_600',
+    durationDays: 60,
+    title: '60-Day Elite Metabolic Furnace',
+    badge: 'Athletic Conditioning',
+    dailyCalorieDeficit: 550,
+    dailySugarLimitGrams: 20,
+    workoutDaysPerWeek: 5,
+    focus: 'Unstoppable VO2 max engine and rapid subcutaneous adipose melt',
+    description: 'Progressive multi-round tabata intervals delivering 500-600 kcal burns and continuous all-day fat oxidation.',
+    recommendedExercises: [
+      'semi-squat-jump-male',
+      'push-up-to-side-plank',
+      'flag'
+    ],
+    dailyChecklist: [
+      'Complete 40m 550 kcal HIIT circuit',
+      'Hit 2.0g protein per kg bodyweight',
+      'Log workout output into Fitness Log'
+    ]
+  },
+  {
+    id: 'hiit-600-90',
+    targetArea: 'hiit_600',
+    durationDays: 90,
+    title: '90-Day Master Calorie Incinerator',
+    badge: 'Olympic Conditioning',
+    dailyCalorieDeficit: 500,
+    dailySugarLimitGrams: 22,
+    workoutDaysPerWeek: 5,
+    focus: 'Single-digit body fat conditioning with peak cardiovascular power',
+    description: 'The pinnacle of high-intensity functional conditioning: 600+ kcal daily burns and total metabolic supremacy.',
+    recommendedExercises: [
+      'semi-squat-jump-male',
+      'full-planche',
+      'flag'
+    ],
+    dailyChecklist: [
+      'Complete 45m 600 kcal master HIIT circuit',
+      'Track resting heart rate & recovery in Vault',
+      'Maintain 8 hours restorative sleep'
+    ]
+  },
+
+  // CALISTHENICS & RELATIVE POWER
+  {
+    id: 'calisthenics-30',
+    targetArea: 'calisthenics',
+    durationDays: 30,
+    title: '30-Day Calisthenic Power & Push/Pull',
+    badge: 'Relative Strength',
+    dailyCalorieDeficit: 400,
+    dailySugarLimitGrams: 25,
+    workoutDaysPerWeek: 4,
+    focus: 'Scapular depression, strict pull-up strength & parallel bar dip power',
+    description: 'Foundational gymnastic strength protocol utilizing zero weights: build relative power with strict bodyweight control.',
+    recommendedExercises: [
+      'biceps-pull-up',
+      'push-up-to-side-plank',
+      'l-sit-on-floor'
+    ],
+    dailyChecklist: [
+      'Complete 30m calisthenics upper body session',
+      'Practice 3x 15s hollow body holds',
+      'Log daily weigh-in'
+    ]
+  },
+  {
+    id: 'calisthenics-60',
+    targetArea: 'calisthenics',
+    durationDays: 60,
+    title: '60-Day Bar Mastery & L-Sit/Dragon Flag',
+    badge: 'Gymnastic Progression',
+    dailyCalorieDeficit: 350,
+    dailySugarLimitGrams: 25,
+    workoutDaysPerWeek: 4,
+    focus: 'Strict muscle-up progressions, straight-arm levers & dense core armor',
+    description: 'Advance from basic bars to static core leverage: master L-sits, dragon flags, and explosive pull-ups.',
+    recommendedExercises: [
+      'frog-planche',
+      'l-sit-on-floor',
+      'biceps-narrow-pull-ups'
+    ],
+    dailyChecklist: [
+      'Complete 40m intermediate bar progression',
+      'Practice 3x 20s L-sit or tuck planche holds',
+      'Hit 2.2g protein per kg'
+    ]
+  },
+  {
+    id: 'calisthenics-90',
+    targetArea: 'calisthenics',
+    durationDays: 90,
+    title: '90-Day Full Planche & Human Flag Mastery',
+    badge: 'Elite Bodyweight King',
+    dailyCalorieDeficit: 300,
+    dailySugarLimitGrams: 25,
+    workoutDaysPerWeek: 5,
+    focus: 'Straddle planche, full planche, and human flag static hold dominance',
+    description: 'The supreme relative strength achievement: defying gravity through tendon density and hollow-body tension.',
+    recommendedExercises: [
+      'full-planche',
+      'flag',
+      'straddle-planche'
+    ],
+    dailyChecklist: [
+      'Complete 45m elite calisthenics skill session',
+      'Perform isometric static hold tests',
+      'Verify joint and tendon health with rest'
     ]
   }
 ];

@@ -85,6 +85,15 @@ export function HomeWorkoutHub() {
       icon: '🔥',
     },
     {
+      id: 'hiit_furnace_600',
+      label: '400-600 kcal HIIT',
+      tag: 'Extreme Burn',
+      color: 'from-amber-600/25 via-rose-600/15 to-obsidian-900',
+      border: 'border-amber-500/50',
+      activeGlow: 'shadow-[0_0_20px_rgba(245,158,11,0.45)]',
+      icon: '⚡',
+    },
+    {
       id: 'chest_man_boobs',
       label: 'No Man Boobs',
       tag: 'Chest Sculpt',
@@ -148,7 +157,7 @@ export function HomeWorkoutHub() {
                 Zero Equipment
               </span>
               <span className="text-[11px] text-slate-400 font-semibold hidden sm:inline">
-                ★ 4.9 Rating · 590+ 3D Movements
+                ★ 4.9 Rating · 670+ Zero-Rig Home Movements
               </span>
             </div>
 
@@ -189,7 +198,7 @@ export function HomeWorkoutHub() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
           {TROUBLE_ZONE_CARDS.map((card) => {
             const isSelected = selectedPlanId === card.id;
             return (
@@ -398,15 +407,15 @@ export function HomeWorkoutHub() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {activeExercises.map((exercise, idx) => (
             <div
               key={exercise.id || idx}
               onClick={() => setSelectedExerciseForModal(exercise)}
-              className="p-3.5 rounded-2xl bg-obsidian-850 border border-white/10 hover:border-amber-500/40 transition duration-200 cursor-pointer group flex items-center gap-3.5 shadow-md active:scale-[0.98]"
+              className="rounded-3xl bg-obsidian-850 border border-white/10 hover:border-amber-500/40 transition duration-200 cursor-pointer group flex flex-col justify-between overflow-hidden shadow-lg active:scale-[0.98]"
             >
-              {/* 3D Animated Thumbnail */}
-              <div className="w-16 h-16 rounded-xl bg-black/80 overflow-hidden border border-white/5 shrink-0 flex items-center justify-center p-1">
+              {/* Large 3D Animated Obsidian Stage (Matching Gym Cards) */}
+              <div className="relative h-44 bg-[#050608] overflow-hidden flex items-center justify-center p-2 border-b border-white/5">
                 <img
                   src={exercise.gifUrl}
                   alt={exercise.name}
@@ -417,35 +426,38 @@ export function HomeWorkoutHub() {
                         'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
                     }
                   }}
-                  className="w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition"
+                  className="max-h-full w-auto object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
                 />
-              </div>
 
-              {/* Title & Reps */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] font-mono font-bold text-amber-400">
+                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/80 text-amber-400 border border-amber-500/30 backdrop-blur-md">
                     #{idx + 1}
                   </span>
                   {exercise.lowImpact && (
-                    <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-950/90 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
                       Low Impact
                     </span>
                   )}
                 </div>
-                <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition mt-0.5">
-                  {exercise.name}
-                </h4>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
-                  <span className="font-semibold text-slate-300">{exercise.defaultReps || '15 Reps'}</span>
-                  <span>·</span>
-                  <span>{exercise.muscleCategory || 'Core'}</span>
+
+                <div className="absolute bottom-2.5 right-2.5 p-2 rounded-xl bg-black/80 text-amber-400 border border-white/10 group-hover:bg-amber-500 group-hover:text-black transition shadow-lg">
+                  <Play className="w-3.5 h-3.5 fill-current" />
                 </div>
               </div>
 
-              <div className="p-2 rounded-xl bg-black/60 text-slate-400 group-hover:text-amber-400 group-hover:bg-amber-500/10 transition shrink-0">
-                <Play className="w-3.5 h-3.5 fill-current" />
+              {/* Exercise Telemetry Footer */}
+              <div className="p-3.5 flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition">
+                    {exercise.name}
+                  </h4>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                    <span className="font-semibold text-amber-300">{exercise.defaultReps || '15 Reps'}</span>
+                    <span>·</span>
+                    <span className="truncate">{exercise.muscleCategory || 'Core'}</span>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

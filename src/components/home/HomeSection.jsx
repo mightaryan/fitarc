@@ -27,6 +27,47 @@ import { GuidedWorkoutPlayerModal } from '../fitness/GuidedWorkoutPlayerModal';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { MASTER_EXERCISE_CATALOG } from '../../data/allExercisesMaster';
 import { TROUBLE_ZONE_PLANS, HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
+import { YogaAnatomicalCanvas } from '../fitness/YogaAnatomicalCanvas';
+
+function FeaturedPreviewImage({ exercise, src, fallbackSrc, alt }) {
+  const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const isFaceYoga =
+    exercise?.category === 'face_yoga' ||
+    exercise?.subCategory === 'face_yoga' ||
+    exercise?.equipment === 'face_hands';
+
+  if (isFaceYoga) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#050608]">
+        <YogaAnatomicalCanvas exercise={exercise} compact animate />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <div className="w-5 h-5 rounded-full border-2 border-amber-400/40 border-t-amber-400 animate-spin" />
+        </div>
+      )}
+      <img
+        src={hasError ? (fallbackSrc || 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif') : src}
+        alt={alt}
+        onLoad={() => setIsLoaded(true)}
+        onError={() => {
+          if (!hasError) setHasError(true);
+        }}
+        className={`w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition-all duration-300 ${
+          isLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        loading="lazy"
+      />
+    </div>
+  );
+}
 
 export function HomeSection() {
   const {
@@ -112,7 +153,7 @@ export function HomeSection() {
         title: 'Morning Flow: Surya Namaskar',
         subtitle: '15 min · Full Body Mobility Flow',
         tag: 'Yoga Flow',
-        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/posterior-step-to-overhead-reach.gif',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif',
         color: 'from-amber-500/20 to-orange-500/10',
         borderColor: 'border-amber-500/30',
         badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
@@ -142,7 +183,7 @@ export function HomeSection() {
         title: 'Sofa Bulgarian Split Squat',
         subtitle: '18 min · Zero Equipment Home Leg Burn',
         tag: 'Home Workout',
-        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/split-squats.gif',
         color: 'from-emerald-500/20 to-teal-500/10',
         borderColor: 'border-emerald-500/30',
         badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
@@ -443,10 +484,11 @@ export function HomeSection() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
           {[
             { id: 'belly_fat', label: 'Lose Belly Fat', tag: 'Core Chisel', icon: '🔥', color: 'from-rose-500/20 to-orange-500/10', border: 'border-rose-500/30' },
-            { id: 'chest_man_boobs', label: 'No Man Boobs', tag: 'Chest Sculpt', icon: '⚡', color: 'from-amber-500/20 to-yellow-500/10', border: 'border-amber-500/30' },
+            { id: 'hiit_furnace_600', label: '400-600 kcal HIIT', tag: 'Extreme Burn', icon: '⚡', color: 'from-amber-600/25 to-rose-600/15', border: 'border-amber-500/40' },
+            { id: 'chest_man_boobs', label: 'No Man Boobs', tag: 'Chest Sculpt', icon: '🛡️', color: 'from-amber-500/20 to-yellow-500/10', border: 'border-amber-500/30' },
             { id: 'arm_fat', label: 'Lose Arm Fat', tag: 'Tricep Tone', icon: '💪', color: 'from-blue-500/20 to-cyan-500/10', border: 'border-blue-500/30' },
             { id: 'shape_full_body', label: 'Shape Full Body', tag: 'HIIT Burn', icon: '🏃', color: 'from-emerald-500/20 to-teal-500/10', border: 'border-emerald-500/30' },
             { id: 'legs_glutes', label: 'Butt & Glutes', tag: 'Legs Lift', icon: '✨', color: 'from-pink-500/20 to-purple-500/10', border: 'border-pink-500/30' },
@@ -480,7 +522,7 @@ export function HomeSection() {
           <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Quick Launchpad
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Action 1: Home Workouts */}
           <button
             onClick={() => {
@@ -496,23 +538,26 @@ export function HomeSection() {
               <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
                 Home Workouts
               </h4>
-              <p className="text-[11px] text-slate-400">590+ Zero-Equipment</p>
+              <p className="text-[11px] text-slate-400">670+ Zero-Equipment</p>
             </div>
           </button>
 
-          {/* Action 2: AI Food Photo Scanner */}
+          {/* Action 2: Calisthenics Mastery */}
           <button
-            onClick={() => setIsMealScannerOpen(true)}
+            onClick={() => {
+              setFitnessSubTab?.('calisthenics');
+              setActiveTab('fitness');
+            }}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
           >
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
-              <Camera className="w-5 h-5" />
+              <Zap className="w-5 h-5 fill-amber-500 text-amber-400" />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                AI Meal Scanner
+                Calisthenics Hub
               </h4>
-              <p className="text-[11px] text-slate-400">Snap Photo for Macros</p>
+              <p className="text-[11px] text-slate-400">Bars, Levers & Planche</p>
             </div>
           </button>
 
@@ -535,7 +580,23 @@ export function HomeSection() {
             </div>
           </button>
 
-          {/* Action 4: Body Fat & BMI Vault */}
+          {/* Action 4: AI Food Photo Scanner */}
+          <button
+            onClick={() => setIsMealScannerOpen(true)}
+            className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
+          >
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
+              <Camera className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
+                AI Meal Scanner
+              </h4>
+              <p className="text-[11px] text-slate-400">Snap Photo for Macros</p>
+            </div>
+          </button>
+
+          {/* Action 5: Body Fat & BMI Vault */}
           <button
             onClick={() => openAuthModal('biometrics')}
             className="p-4 rounded-2xl bg-obsidian-850 border border-amber-500/20 hover:border-amber-400 hover:bg-amber-500/10 transition group text-left space-y-2 active:scale-95 shadow-md"
@@ -586,21 +647,14 @@ export function HomeSection() {
             >
               <div className="space-y-3">
                 {/* 3D Preview Stage */}
-                <div className="relative w-full h-36 rounded-2xl bg-black/60 overflow-hidden border border-white/5 flex items-center justify-center p-2">
-                  <img
+                <div className="relative w-full h-36 rounded-2xl bg-[#050608] overflow-hidden border border-white/5 flex items-center justify-center p-1">
+                  <FeaturedPreviewImage
+                    exercise={item.exercise}
                     src={item.exercise.gifUrl}
+                    fallbackSrc={item.fallbackGif}
                     alt={item.title}
-                    onError={(e) => {
-                      if (!e.currentTarget.dataset.fallbackApplied) {
-                        e.currentTarget.dataset.fallbackApplied = 'true';
-                        e.currentTarget.src =
-                          'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
-                      }
-                    }}
-                    className="w-full h-full object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
                   />
-                  <div className="absolute top-2 left-2">
+                  <div className="absolute top-2 left-2 z-10">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${item.badgeColor}`}>
                       {item.tag}
                     </span>

@@ -24,11 +24,14 @@ import {
 import { MASTER_EXERCISE_CATALOG, DIFFICULTY_LEVELS } from '../../data/allExercisesMaster';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
+import { CALISTHENICS_EXERCISES } from '../../data/calisthenicsExercises';
 import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
 import { GlassCard } from '../common/GlassCard';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
 import { HomeWorkoutHub } from './HomeWorkoutHub';
 import { YogaSanctuaryHub } from './YogaSanctuaryHub';
+import { CalisthenicsHub } from './CalisthenicsHub';
+import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
 import { useApp } from '../../context/AppContext';
 
 const EQUIPMENT_FILTERS = [
@@ -82,9 +85,14 @@ export function FitnessSection() {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Combined catalog of 590+ Home Workouts, 225+ Full Body Yoga, and 1,323+ 3D Gym Lifts
+  // Combined catalog of 670+ Home Workouts, 166+ Yoga & Face routines, 129+ Calisthenics movements, and 1,323+ 3D Gym Lifts
   const fullExerciseCatalog = useMemo(() => {
-    return [...HOME_WORKOUTS_EXPANDED, ...YOGA_AND_HOME_WORKOUTS, ...MASTER_EXERCISE_CATALOG];
+    return [
+      ...HOME_WORKOUTS_EXPANDED,
+      ...YOGA_AND_HOME_WORKOUTS,
+      ...CALISTHENICS_EXERCISES,
+      ...MASTER_EXERCISE_CATALOG,
+    ];
   }, []);
 
   // Active filter count for badge
@@ -226,11 +234,11 @@ export function FitnessSection() {
         </div>
       </div>
 
-      {/* PRIMARY FITNESS NAVIGATION: YOGA SANCTUARY vs HOME WORKOUT HUB vs 3D MOVEMENT ARCHIVE */}
-      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-xl shadow-inner gap-1">
+      {/* PRIMARY FITNESS NAVIGATION: YOGA vs HOME vs CALISTHENICS vs 3D GYM ARCHIVE */}
+      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-3xl shadow-inner gap-1 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setFitnessSubTab('yoga')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
             fitnessSubTab === 'yoga'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg font-extrabold'
               : 'text-slate-400 hover:text-white'
@@ -242,7 +250,7 @@ export function FitnessSection() {
 
         <button
           onClick={() => setFitnessSubTab('home_hub')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
             fitnessSubTab === 'home_hub'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
               : 'text-slate-400 hover:text-white'
@@ -253,8 +261,20 @@ export function FitnessSection() {
         </button>
 
         <button
+          onClick={() => setFitnessSubTab('calisthenics')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+            fitnessSubTab === 'calisthenics'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Zap className={`w-4 h-4 ${fitnessSubTab === 'calisthenics' ? 'text-black' : 'text-amber-400'}`} />
+          <span>🤸 Calisthenics Hub</span>
+        </button>
+
+        <button
           onClick={() => setFitnessSubTab('archive')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
             fitnessSubTab === 'archive'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
               : 'text-slate-400 hover:text-white'
@@ -270,6 +290,9 @@ export function FitnessSection() {
 
       {/* VIEW 2: LEAP FITNESS HOME WORKOUT HUB */}
       {fitnessSubTab === 'home_hub' && <HomeWorkoutHub />}
+
+      {/* VIEW 3: CALISTHENICS HUB & BODYWEIGHT MASTERY */}
+      {fitnessSubTab === 'calisthenics' && <CalisthenicsHub />}
 
       {/* VIEW 3: 3D MOVEMENT ARCHIVE & SEARCH */}
       {fitnessSubTab === 'archive' && (
@@ -508,16 +531,25 @@ export function FitnessSection() {
             >
               {/* Card Mini 3D Animated Thumbnail with Dark Gold Obsidian Frame */}
               <div className="relative h-56 overflow-hidden bg-gradient-to-b from-[#141824] via-[#0a0c12] to-[#06070a] rounded-t-2xl flex items-center justify-center p-3">
-                <img
-                  key={item.id || item.gifUrl}
-                  src={item.gifUrl}
-                  alt={item.name}
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
-                  }}
-                  className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
-                />
+                {(item.category === 'face_yoga' || item.subCategory === 'face_yoga' || item.equipment === 'face_hands') ? (
+                  <YogaAnatomicalCanvas exercise={item} compact />
+                ) : (
+                  <img
+                    key={item.id || item.gifUrl}
+                    src={item.gifUrl}
+                    alt={item.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        item.equipment === 'exercise_ball'
+                          ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
+                          : item.category === 'yoga' || item.equipment === 'yogamat'
+                          ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif'
+                          : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
+                    }}
+                    className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
+                  />
+                )}
 
                 {/* Ambient glow highlight */}
                 <div className="absolute inset-0 bg-radial-gold opacity-15 pointer-events-none" />

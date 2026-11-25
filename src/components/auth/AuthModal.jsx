@@ -6,9 +6,7 @@ import {
   ShieldCheck,
   Lock,
   ArrowRight,
-  UserCheck,
   Sparkles,
-  KeyRound,
   CheckCircle2,
   Users,
   Smartphone,
@@ -20,14 +18,20 @@ import {
   Camera,
   Upload,
   RefreshCw,
-  TrendingDown,
-  Info,
   Crown,
-  Award,
-  Zap,
   Check,
+  History,
+  Utensils,
+  Dumbbell,
+  Trash2,
+  Search,
+  Database,
+  Calendar,
+  Plus,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { buildDailyHistoryRecords, formatHistoryDateLabel } from '../../utils/vaultHistoryHelpers';
+import { getRelativeDateString } from '../../data/athleteVaultDatabase';
 
 export const ATHLETE_TIERS = [
   {
@@ -41,13 +45,12 @@ export const ATHLETE_TIERS = [
     price: 'Lifetime Elite Access',
     description: 'The definitive gold-standard membership for elite athletes and serious lifters.',
     perks: [
-      'Full 1,800+ 3D Biomechanical Visualizer Library',
+      'Full 2,200+ 3D Biomechanical & Yoga Archive',
       'Instant AI Torso Vision Body Fat Scanner',
-      'Leap Fitness No-Jumping Home Workout Hub & Runner',
-      'Joint Angle & Subacromial Shear Simulator',
-      'Instant AI Meal & Macro Photo Analyzer',
-      '30/60/90-Day Trouble Zone Transformation Protocols',
-      'Apple Fitness Activity Rings & Dynamic Calorie Burn',
+      'Zero-Rig Home Workouts & 600 kcal HIIT Hub',
+      'Calisthenics Static Hold & Planche Studio',
+      'Instant AI Meal & Sugar Photo Analyzer',
+      'Multi-User Athlete Vault & History Ledger',
     ],
   },
   {
@@ -58,46 +61,29 @@ export const ATHLETE_TIERS = [
     borderColor: 'border-sky-500/40',
     bgGlow: 'bg-sky-500/15',
     textGlow: 'text-sky-300',
-    price: 'Pro Athlete Tier',
-    description: 'Advanced tracking and overload telemetry for competitive bodybuilding and sports.',
+    price: 'Pro Plan',
+    description: 'Precision nutrition, hypertrophy sets, and full workout telemetry.',
     perks: [
-      'Full 3D Exercise Movement Archive',
-      'Pyramid Overload Tension Calculator',
-      'Macro & Calorie Target Calibrator',
-      'Weekly Body Composition & Weight Graphing',
+      'Progressive Overload Pyramid Engine',
+      'Smart Calorie & Daily Sugar Cap Sync',
+      'Home 30-Day Trouble Zone Plans',
+      'Multi-Profile Cloud Vault Switching',
     ],
   },
   {
-    id: 'intermediate_lifter',
-    name: 'Intermediate Lifter',
-    badge: 'Progressive Track',
+    id: 'starter',
+    name: 'Verified Starter',
+    badge: 'Standard Membership',
     color: 'from-emerald-400 to-teal-600',
     borderColor: 'border-emerald-500/40',
     bgGlow: 'bg-emerald-500/15',
     textGlow: 'text-emerald-300',
-    price: 'Standard Tier',
-    description: 'Focused workout tracking, zero-equipment routines, and nutrition logging.',
+    price: 'Complimentary',
+    description: 'Essential tracking foundation for bodyweight fitness and weight progress.',
     perks: [
-      'Complete Home Workout Hub & Daily Routines',
-      'Daily Workout & Gym Log Tracker',
-      'Basic Body Mass Index (BMI) & Body Fat Tracker',
-      'Daily Weight & Calorie Deficit Log',
-    ],
-  },
-  {
-    id: 'foundation_novice',
-    name: 'Foundation Novice',
-    badge: 'Entry Point',
-    color: 'from-slate-400 to-slate-600',
-    borderColor: 'border-slate-500/40',
-    bgGlow: 'bg-slate-500/15',
-    textGlow: 'text-slate-300',
-    price: 'Free Access',
-    description: 'Essential beginner routines and habit-building foundation.',
-    perks: [
-      'Foundational Bodyweight Exercises',
-      'Daily Calorie Log',
-      'Daily Weight Log with Snooze Function',
+      'Home Workout Hub & Yoga Flows',
+      'Daily Weight Tracker with Snooze',
+      '500+ Whole Food Macros Index',
     ],
   },
 ];
@@ -140,21 +126,27 @@ export function AuthModal({ isOpen, onClose }) {
   const {
     user,
     setUser,
-    bmi,
     logBodyFat,
     setIsPlanModalOpen,
     loginWithPhone,
     loginWithEmail,
     switchUserProfile,
     getAllSavedProfiles,
+    loggedWorkouts,
+    loggedMeals,
+    weightHistory,
+    logWorkout,
+    logMeal,
+    deleteWorkout,
+    deleteMeal,
+    resetDemoData,
     authModalTab,
-    setAuthModalTab,
     updateMemberTier,
     triggerConfetti,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState(authModalTab || 'biometrics'); // 'biometrics' | 'tier' | 'plan' | 'auth'
-  const [authMethod, setAuthMethod] = useState('phone'); // 'phone' | 'email'
+  const [activeTab, setActiveTab] = useState(authModalTab || 'biometrics'); // 'biometrics' | 'directory' | 'history' | 'tier' | 'auth'
+  const [authMethod, setAuthMethod] = useState('phone');
   const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [emailAddress, setEmailAddress] = useState('');
@@ -167,63 +159,180 @@ export function AuthModal({ isOpen, onClose }) {
   const [statusMessage, setStatusMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sync with context's requested tab when modal opens
-  useEffect(() => {
-    if (authModalTab) {
-      setActiveTab(authModalTab);
+  // Vault DB & History sub-states
+  const [directorySearch, setDirectorySearch] = useState('');
+  const [historySubTab, setHistorySubTab] = useState('daily'); // 'daily' | 'workouts' | 'meals' | 'weight'
+  const [historySearch, setHistorySearch] = useState('');
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState('all'); // 'all' | 'YYYY-MM-DD'
+  const [showPastEntryForm, setShowPastEntryForm] = useState(false);
+  const [pastEntryKind, setPastEntryKind] = useState('workout'); // 'workout' | 'meal'
+  const [pastEntryDate, setPastEntryDate] = useState(() => getRelativeDateString(-1));
+  const [pastEntryName, setPastEntryName] = useState('');
+  const [pastEntryCategory, setPastEntryCategory] = useState('gym');
+  const [pastEntryMinutes, setPastEntryMinutes] = useState('35');
+  const [pastEntryCalories, setPastEntryCalories] = useState('280');
+  const [pastEntryMealType, setPastEntryMealType] = useState('lunch');
+  const [pastEntryProtein, setPastEntryProtein] = useState('30');
+  const [pastEntryCarbs, setPastEntryCarbs] = useState('38');
+  const [pastEntrySugar, setPastEntrySugar] = useState('4');
+  const [pastEntryFats, setPastEntryFats] = useState('12');
+
+  const handleSavePastEntry = (e) => {
+    e.preventDefault();
+    const cleanName = pastEntryName.trim();
+    if (!cleanName) return;
+    const chosenDate = pastEntryDate || getRelativeDateString(0);
+    const caloriesNum = Math.max(0, Math.round(Number(pastEntryCalories) || 0));
+
+    if (pastEntryKind === 'workout') {
+      logWorkout({
+        date: chosenDate,
+        exerciseName: cleanName,
+        category: pastEntryCategory || 'home_workout',
+        durationMinutes: Math.max(5, Math.round(Number(pastEntryMinutes) || 30)),
+        intensity: 'moderate',
+        caloriesBurned: caloriesNum || 220,
+        muscleGrowthScore: Math.max(10, Math.round((caloriesNum || 220) * 0.18)),
+        primaryMuscles: ['Full Body'],
+        loggedAt: 'Vault Log',
+      });
+    } else {
+      logMeal({
+        date: chosenDate,
+        title: cleanName,
+        mealType: pastEntryMealType || 'lunch',
+        calories: caloriesNum || 420,
+        protein: Math.max(0, Math.round(Number(pastEntryProtein) || 0)),
+        carbs: Math.max(0, Math.round(Number(pastEntryCarbs) || 0)),
+        sugar: Math.max(0, Math.round(Number(pastEntrySugar) || 0)),
+        fats: Math.max(0, Math.round(Number(pastEntryFats) || 0)),
+        photoUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=75',
+        score: 9.0,
+        loggedAt: 'Vault Log',
+      });
     }
-  }, [authModalTab, isOpen]);
+
+    setPastEntryName('');
+    setShowPastEntryForm(false);
+    setSelectedHistoryDate(chosenDate);
+  };
 
   // Photo AI Scanner state
   const [physiquePhoto, setPhysiquePhoto] = useState(PHYSIQUE_PRESETS[0].photoUrl);
   const [isScanningPhoto, setIsScanningPhoto] = useState(false);
   const [scanResult, setScanResult] = useState(null);
 
-  if (!isOpen) return null;
+  // Sync requested tab when modal opens
+  useEffect(() => {
+    if (authModalTab) {
+      setActiveTab(authModalTab);
+    }
+  }, [authModalTab, isOpen]);
 
-  const savedProfiles = getAllSavedProfiles ? getAllSavedProfiles() : [];
+  // Sync local biometric inputs whenever user switches or telemetry changes
+  useEffect(() => {
+    setCurrentWeightInput(user.currentWeight || 75.0);
+    setHeightInput(user.height || 180);
+    setManualFatInput(user.bodyFat || 16.5);
+  }, [user?.id, user?.currentWeight, user?.height, user?.bodyFat, isOpen]);
 
-  // Live BMI calculation from local inputs
+  // All useMemo hooks MUST appear BEFORE any conditional early return!
   const liveBmi = useMemo(() => {
     const h = (parseFloat(heightInput) || 180) / 100;
     const w = parseFloat(currentWeightInput) || 75;
     return Math.round((w / (h * h)) * 10) / 10;
   }, [heightInput, currentWeightInput]);
 
+  const savedProfiles = useMemo(() => {
+    return getAllSavedProfiles ? getAllSavedProfiles() : [];
+  }, [getAllSavedProfiles]);
+
+  const filteredDirectory = useMemo(() => {
+    const q = directorySearch.toLowerCase().trim();
+    if (!q) return savedProfiles;
+    return savedProfiles.filter(
+      (p) =>
+        p.name?.toLowerCase().includes(q) ||
+        p.specialty?.toLowerCase().includes(q) ||
+        p.memberTier?.toLowerCase().includes(q) ||
+        p.email?.toLowerCase().includes(q)
+    );
+  }, [savedProfiles, directorySearch]);
+
+  const dailyHistory = useMemo(() => {
+    return buildDailyHistoryRecords({
+      loggedWorkouts,
+      loggedMeals,
+      weightHistory,
+      bodyFatHistory: user?.bodyFatHistory || [],
+      searchQuery: historySearch,
+      selectedDate: selectedHistoryDate,
+    });
+  }, [loggedWorkouts, loggedMeals, weightHistory, user?.bodyFatHistory, historySearch, selectedHistoryDate]);
+
+  const filteredWorkouts = useMemo(() => {
+    const q = historySearch.toLowerCase().trim();
+    return [...(loggedWorkouts || [])]
+      .filter((w) => {
+        if (selectedHistoryDate !== 'all' && w.date !== selectedHistoryDate) return false;
+        if (!q) return true;
+        return (
+          (w.exerciseName || w.name || '').toLowerCase().includes(q) ||
+          w.category?.toLowerCase().includes(q) ||
+          w.date?.includes(q)
+        );
+      })
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }, [loggedWorkouts, historySearch, selectedHistoryDate]);
+
+  const filteredMeals = useMemo(() => {
+    const q = historySearch.toLowerCase().trim();
+    return [...(loggedMeals || [])]
+      .filter((m) => {
+        if (selectedHistoryDate !== 'all' && m.date !== selectedHistoryDate) return false;
+        if (!q) return true;
+        return (
+          (m.title || m.name || '').toLowerCase().includes(q) ||
+          m.mealType?.toLowerCase().includes(q) ||
+          m.date?.includes(q)
+        );
+      })
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }, [loggedMeals, historySearch, selectedHistoryDate]);
+
+  if (!isOpen) return null;
+
   const getBmiCategory = (val) => {
-    if (val < 18.5) return { label: 'Underweight', color: 'text-sky-400', barPos: '15%' };
-    if (val <= 24.9) return { label: 'Optimal / Healthy', color: 'text-emerald-400', barPos: '45%' };
-    if (val <= 29.9) return { label: 'Athletic Mass / Overweight', color: 'text-amber-400', barPos: '72%' };
-    return { label: 'High BMI', color: 'text-rose-400', barPos: '90%' };
+    if (val < 18.5) return { label: 'Underweight', color: 'text-sky-400' };
+    if (val <= 24.9) return { label: 'Optimal / Healthy', color: 'text-emerald-400' };
+    if (val <= 29.9) return { label: 'Athletic Mass / Overweight', color: 'text-amber-400' };
+    return { label: 'High BMI', color: 'text-rose-400' };
   };
 
   const bmiCat = getBmiCategory(liveBmi);
 
   // Body Fat breakdown calculations
   const currentFatPercent = user.bodyFat || 16.5;
-  const fatMassKg = Math.round(((user.currentWeight || 75) * (currentFatPercent / 100)) * 10) / 10;
+  const fatMassKg = Math.round((user.currentWeight || 75) * (currentFatPercent / 100) * 10) / 10;
   const leanMassKg = Math.round(((user.currentWeight || 75) - fatMassKg) * 10) / 10;
 
-  // Handle Height & Weight Update
   const handleSaveMetrics = () => {
     setUser((prev) => ({
       ...prev,
       height: parseFloat(heightInput) || prev.height,
       currentWeight: parseFloat(currentWeightInput) || prev.currentWeight,
     }));
-    setStatusMessage({ type: 'success', text: 'Biometrics updated! BMI recalculated.' });
-    setTimeout(() => setStatusMessage(null), 1500);
+    setStatusMessage({ type: 'success', text: 'Biometrics updated & synced to Vault!' });
+    setTimeout(() => setStatusMessage(null), 1800);
   };
 
-  // Handle Manual Fat % Update
   const handleSaveManualFat = (e) => {
     e.preventDefault();
     logBodyFat(manualFatInput, null, 'manual', 'Manual body fat calibration');
-    setStatusMessage({ type: 'success', text: `Body fat set to ${manualFatInput}%!` });
-    setTimeout(() => setStatusMessage(null), 1500);
+    setStatusMessage({ type: 'success', text: `Body fat calibrated to ${manualFatInput}%!` });
+    setTimeout(() => setStatusMessage(null), 1800);
   };
 
-  // Handle Physique Photo Upload
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -236,35 +345,33 @@ export function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  // Trigger AI Physique Vision Scan
-  const triggerAiPhysiqueScan = (photoUrl = physiquePhoto) => {
+  const triggerAiPhysiqueScan = (photoUrl = physiquePhoto, targetEst = null) => {
     setIsScanningPhoto(true);
     setScanResult(null);
 
     setTimeout(() => {
       setIsScanningPhoto(false);
-      // Realistic computer-vision body fat estimation variance
-      const randomVariance = (Math.random() * 2 - 1).toFixed(1);
-      const estFat = Math.max(8.5, Math.min(32, parseFloat((15.5 + parseFloat(randomVariance)).toFixed(1))));
+      const baseEst = targetEst || (user.bodyFat || 16.5);
+      const randomVariance = targetEst ? 0 : (Math.random() * 1.4 - 0.7);
+      const estFat = Math.max(8.0, Math.min(34, parseFloat((baseEst + randomVariance).toFixed(1))));
 
       const result = {
         estimatedFat: estFat,
         confidence: '94% Confidence',
-        iliacCrestRatio: '0.82 (Tapered Waistline)',
-        abdominalDefinition: estFat < 16 ? 'Defined Rectus Abdominis' : 'Soft Linear Tone',
-        leanMass: Math.round(((user.currentWeight || 75) * (1 - estFat / 100)) * 10) / 10,
-        fatMass: Math.round(((user.currentWeight || 75) * (estFat / 100)) * 10) / 10,
+        iliacCrestRatio: estFat < 16 ? '0.80 (Tapered V-Line)' : '0.86 (Balanced Core)',
+        abdominalDefinition: estFat < 16 ? 'Defined Rectus Abdominis' : estFat < 21 ? 'Soft Linear Tone' : 'Developing Core Foundation',
+        leanMass: Math.round((user.currentWeight || 75) * (1 - estFat / 100) * 10) / 10,
+        fatMass: Math.round((user.currentWeight || 75) * (estFat / 100) * 10) / 10,
         photoUrl,
       };
 
       setScanResult(result);
       logBodyFat(estFat, photoUrl, 'ai_scan', 'AI Torso Vision Scan');
-      setStatusMessage({ type: 'success', text: `AI Scan Complete: Estimated ${estFat}% Body Fat!` });
+      setStatusMessage({ type: 'success', text: `AI Scan Complete: ${estFat}% Body Fat logged to Vault!` });
       setTimeout(() => setStatusMessage(null), 2500);
-    }, 1600);
+    }, 1000);
   };
 
-  // Handle phone login
   const handleRequestOtp = (e) => {
     e.preventDefault();
     if (!phoneNumber || phoneNumber.replace(/\D/g, '').length < 7) {
@@ -276,8 +383,8 @@ export function AuthModal({ isOpen, onClose }) {
       setIsSubmitting(false);
       setOtpStep(true);
       setOtpValue('8888');
-      setStatusMessage({ type: 'success', text: `Verification code sent to ${countryCode} ${phoneNumber} (Use 8888)` });
-    }, 600);
+      setStatusMessage({ type: 'success', text: `SMS code sent to ${countryCode} ${phoneNumber} (Use 8888)` });
+    }, 450);
   };
 
   const handleVerifyPhone = (e) => {
@@ -287,13 +394,12 @@ export function AuthModal({ isOpen, onClose }) {
       const fullPhone = `${countryCode} ${phoneNumber.trim()}`;
       loginWithPhone(fullPhone, otpValue, fullName || `Athlete ${phoneNumber.slice(-4)}`, parseFloat(currentWeightInput) || 75.0);
       setIsSubmitting(false);
-      setStatusMessage({ type: 'success', text: 'Authenticated! Profile loaded.' });
-      setTimeout(() => {
-        onClose();
-        setOtpStep(false);
-        setStatusMessage(null);
-      }, 700);
-    }, 700);
+      setOtpStep(false);
+      setPhoneNumber('');
+      setFullName('');
+      setStatusMessage({ type: 'success', text: 'New athlete saved & loaded into Vault!' });
+      setTimeout(() => setStatusMessage(null), 1800);
+    }, 450);
   };
 
   const handleEmailAuth = (e) => {
@@ -306,43 +412,39 @@ export function AuthModal({ isOpen, onClose }) {
     setTimeout(() => {
       loginWithEmail(emailAddress.trim(), 'pass', fullName || emailAddress.split('@')[0], parseFloat(currentWeightInput) || 75.0);
       setIsSubmitting(false);
-      setStatusMessage({ type: 'success', text: 'Signed in! Profile loaded.' });
-      setTimeout(() => {
-        onClose();
-        setStatusMessage(null);
-      }, 700);
-    }, 700);
+      setEmailAddress('');
+      setFullName('');
+      setStatusMessage({ type: 'success', text: 'Account signed in & synced to Vault!' });
+      setTimeout(() => setStatusMessage(null), 1800);
+    }, 450);
   };
 
   const handleSelectProfile = (profileId) => {
     switchUserProfile(profileId);
-    setStatusMessage({ type: 'success', text: 'Profile switched!' });
-    setTimeout(() => {
-      onClose();
-      setStatusMessage(null);
-    }, 500);
+    setStatusMessage({ type: 'success', text: 'Loaded athlete profile & full history from Vault!' });
+    setTimeout(() => setStatusMessage(null), 1800);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl max-h-[92vh] glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl max-h-[92vh] glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
         {/* Modal Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-6 bg-obsidian-900/95 backdrop-blur-md border-b border-amber-500/15">
+        <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-5 bg-obsidian-900/95 backdrop-blur-md border-b border-amber-500/15">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-black shadow-gold-glow-sm">
               <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                  Athlete Vault & Telemetry
+                  Athlete Vault · {savedProfiles.length} Profiles
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/35 flex items-center gap-1">
                   <Crown className="w-2.5 h-2.5" />
                   {user.memberTier || 'Gold Elite Pro'}
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+              <h2 className="text-base sm:text-xl font-black text-white tracking-tight">
                 {user.name || 'Athlete Profile'}
               </h2>
             </div>
@@ -351,65 +453,41 @@ export function AuthModal({ isOpen, onClose }) {
           <button
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+            aria-label="Close Vault"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* TOP LEVEL NAVIGATION TABS */}
-        <div className="flex p-1.5 bg-black/60 border-b border-white/5 gap-1 shrink-0 px-2 sm:px-4 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => setActiveTab('biometrics')}
-            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              activeTab === 'biometrics'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Vault & BMI</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('tier')}
-            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              activeTab === 'tier'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Crown className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Tier & Perks</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('plan')}
-            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              activeTab === 'plan'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Target className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Active Plan</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('auth')}
-            className={`flex-1 min-w-[95px] py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              activeTab === 'auth'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Login & Vault</span>
-          </button>
+        {/* TOP LEVEL VAULT NAVIGATION TABS */}
+        <div className="flex p-1.5 bg-black/60 border-b border-white/5 gap-1 shrink-0 px-2 sm:px-4 overflow-x-auto scrollbar-none">
+          {[
+            { id: 'biometrics', label: 'Vault & BMI', icon: Activity },
+            { id: 'directory', label: `Athletes (${savedProfiles.length})`, icon: Users },
+            { id: 'history', label: `History (${(loggedWorkouts?.length || 0) + (loggedMeals?.length || 0)})`, icon: History },
+            { id: 'tier', label: 'Tiers', icon: Crown },
+            { id: 'auth', label: 'Plan & Login', icon: Lock },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 min-w-[92px] py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 space-y-5 overflow-y-auto">
-          {/* Status Alert */}
           {statusMessage && (
             <div
               className={`p-3 rounded-2xl text-xs flex items-center gap-2 border animate-in fade-in duration-200 ${
@@ -431,7 +509,7 @@ export function AuthModal({ isOpen, onClose }) {
           {/* TAB 1: BIOMETRICS, BMI & PHOTO BODY FAT ESTIMATOR */}
           {/* ======================================================== */}
           {activeTab === 'biometrics' && (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* SECTION A: LIVE BMI CALCULATOR & GAUGE */}
               <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/25 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
@@ -493,6 +571,12 @@ export function AuthModal({ isOpen, onClose }) {
                     />
                   </div>
                 </div>
+                <button
+                  onClick={handleSaveMetrics}
+                  className="w-full py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/25 transition"
+                >
+                  Save & Sync Height / Weight to Vault
+                </button>
               </div>
 
               {/* SECTION B: BODY FAT % TRACKER & COMPOSITION BREAKDOWN */}
@@ -512,7 +596,6 @@ export function AuthModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                {/* Lean Mass vs Fat Mass Pillars */}
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="p-3 rounded-xl bg-black/40 border border-white/5">
                     <span className="text-[10px] uppercase font-semibold text-slate-400 block">Lean Body Mass</span>
@@ -526,18 +609,15 @@ export function AuthModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                {/* Quick Manual Entry Form */}
                 <form onSubmit={handleSaveManualFat} className="flex gap-2 pt-1">
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      step="0.1"
-                      placeholder="Calibrate Fat % (e.g. 15.2)"
-                      value={manualFatInput}
-                      onChange={(e) => setManualFatInput(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl glass-input text-xs text-white placeholder-slate-500 font-mono"
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="Calibrate Fat % (e.g. 15.2)"
+                    value={manualFatInput}
+                    onChange={(e) => setManualFatInput(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-white placeholder-slate-500 font-mono"
+                  />
                   <button
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold hover:bg-amber-500/30 transition"
@@ -548,8 +628,8 @@ export function AuthModal({ isOpen, onClose }) {
               </div>
 
               {/* SECTION C: AI TORSO / PHYSIQUE PHOTO BODY FAT ESTIMATOR */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
                       <Camera className="w-4 h-4" />
@@ -559,6 +639,22 @@ export function AuthModal({ isOpen, onClose }) {
                       <span className="text-[10px] text-slate-400">Computer Vision Abdominal & Iliac Scan</span>
                     </div>
                   </div>
+                </div>
+
+                {/* Preset Physiques */}
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {PHYSIQUE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => {
+                        setPhysiquePhoto(preset.photoUrl);
+                        triggerAiPhysiqueScan(preset.photoUrl, preset.estFat);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-black/50 border border-white/10 hover:border-amber-400 text-[11px] font-semibold text-slate-300 whitespace-nowrap shrink-0 transition"
+                    >
+                      {preset.label} (~{preset.estFat}%)
+                    </button>
+                  ))}
                 </div>
 
                 {/* Photo Preview & Scan Overlay */}
@@ -571,20 +667,18 @@ export function AuthModal({ isOpen, onClose }) {
                     />
                   )}
 
-                  {/* Laser Scanning Animation */}
                   {isScanningPhoto && (
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center space-y-2">
-                      <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_15px_#fbbf24] animate-pulse" />
-                      <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Scanning Torso Geometry & Adipose Thickness...</span>
-                      </div>
+                    <div className="absolute inset-0 bg-black/65 backdrop-blur-sm flex flex-col items-center justify-center space-y-2">
+                      <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
+                      <span className="text-xs font-bold text-amber-300">
+                        Scanning Torso Geometry & Adipose Thickness...
+                      </span>
                     </div>
                   )}
 
                   {!isScanningPhoto && (
                     <div className="absolute bottom-2 right-2 flex gap-1.5">
-                      <label className="px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 text-[11px] font-bold text-amber-300 cursor-pointer hover:bg-black transition flex items-center gap-1 active:scale-95">
+                      <label className="px-3 py-1.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/20 text-[11px] font-bold text-amber-300 cursor-pointer hover:bg-black transition flex items-center gap-1 active:scale-95">
                         <Upload className="w-3 h-3" />
                         <span>Upload Photo</span>
                         <input
@@ -605,7 +699,6 @@ export function AuthModal({ isOpen, onClose }) {
                   )}
                 </div>
 
-                {/* Scan Result Breakdown */}
                 {scanResult && (
                   <div className="p-3.5 rounded-xl bg-black/50 border border-emerald-500/30 space-y-2 animate-in fade-in duration-300">
                     <div className="flex items-center justify-between">
@@ -615,7 +708,6 @@ export function AuthModal({ isOpen, onClose }) {
                       </span>
                       <span className="text-[10px] font-mono text-slate-400">{scanResult.confidence}</span>
                     </div>
-
                     <div className="flex items-baseline justify-between pt-1">
                       <div>
                         <span className="text-xl font-black text-amber-300">{scanResult.estimatedFat}%</span>
@@ -623,7 +715,6 @@ export function AuthModal({ isOpen, onClose }) {
                       </div>
                       <span className="text-xs text-emerald-300 font-medium">{scanResult.abdominalDefinition}</span>
                     </div>
-
                     <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 pt-1 border-t border-white/5">
                       <div>Waist-to-Hip Ratio: <strong className="text-white">{scanResult.iliacCrestRatio}</strong></div>
                       <div>Estimated Lean Mass: <strong className="text-white">{scanResult.leanMass} kg</strong></div>
@@ -635,7 +726,586 @@ export function AuthModal({ isOpen, onClose }) {
           )}
 
           {/* ======================================================== */}
-          {/* TAB 2: ATHLETE MEMBERSHIP TIER & PERKS */}
+          {/* TAB 2: MULTI-USER ATHLETE DATABASE DIRECTORY */}
+          {/* ======================================================== */}
+          {activeTab === 'directory' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                    <Database className="w-3 h-3" /> FitArc Cloud Athlete Vault
+                  </span>
+                  <h3 className="text-base font-extrabold text-white">
+                    {savedProfiles.length} Stored Athletes with Full Histories
+                  </h3>
+                </div>
+                <button
+                  onClick={() => {
+                    resetDemoData();
+                    setStatusMessage({ type: 'success', text: 'Full 8-Athlete Vault Database restored!' });
+                    setTimeout(() => setStatusMessage(null), 2000);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 text-[11px] font-bold text-amber-300 flex items-center gap-1.5 self-start transition"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Restore Full DB</span>
+                </button>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search athletes by name, specialty, tier or goal..."
+                  value={directorySearch}
+                  onChange={(e) => setDirectorySearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                />
+              </div>
+
+              {/* Athlete Profiles Cards */}
+              <div className="space-y-2.5">
+                {filteredDirectory.map((p) => {
+                  const isActive = user?.id === p.id;
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => handleSelectProfile(p.id)}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 flex items-center justify-between gap-3 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-amber-500/15 to-obsidian-900 border-amber-400 shadow-gold-glow-sm'
+                          : 'bg-obsidian-850/90 border-white/10 hover:border-amber-500/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
+                          isActive
+                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-black'
+                            : 'bg-black/60 border border-amber-500/30 text-amber-300'
+                        }`}>
+                          {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="text-sm font-bold text-white truncate">{p.name}</h4>
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-white/10 text-amber-300 border border-white/10">
+                              {p.memberTier}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                            {p.specialty} · <strong className="text-slate-200">{p.currentWeight}kg</strong> · BMI {p.bmi} · {p.bodyFat}% BF
+                          </p>
+                          <div className="flex items-center gap-3 mt-1 text-[10px] font-mono text-slate-400">
+                            <span className="text-amber-300 font-semibold">{p.workoutCount} workouts</span>
+                            <span>·</span>
+                            <span className="text-emerald-300 font-semibold">{p.mealCount} meals</span>
+                            <span>·</span>
+                            <span>{p.totalCaloriesBurnedAllTime} kcal logged</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {isActive ? (
+                          <span className="px-2.5 py-1 rounded-xl bg-amber-400 text-black text-[10px] font-extrabold uppercase flex items-center gap-1">
+                            <Check className="w-3 h-3 stroke-[3]" /> Active
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-500 text-slate-200 hover:text-black text-[11px] font-bold transition">
+                            Load Vault
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 3: COMPLETE EXERCISE, MEAL & WEIGHT HISTORY LOGS */}
+          {/* ======================================================== */}
+          {activeTab === 'history' && (
+            <div className="space-y-4">
+              {/* History Sub-navigation */}
+              <div className="flex flex-wrap sm:flex-nowrap p-1 rounded-2xl bg-black/60 border border-white/10 gap-1">
+                <button
+                  onClick={() => setHistorySubTab('daily')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    historySubTab === 'daily'
+                      ? 'bg-amber-500 text-black'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Daily Records ({dailyHistory.availableDates.length})</span>
+                </button>
+                <button
+                  onClick={() => setHistorySubTab('workouts')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    historySubTab === 'workouts'
+                      ? 'bg-amber-500 text-black font-extrabold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Dumbbell className="w-3.5 h-3.5" />
+                  <span>Exercises ({loggedWorkouts?.length || 0})</span>
+                </button>
+                <button
+                  onClick={() => setHistorySubTab('meals')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    historySubTab === 'meals'
+                      ? 'bg-amber-500 text-black font-extrabold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Meals ({loggedMeals?.length || 0})</span>
+                </button>
+                <button
+                  onClick={() => setHistorySubTab('weight')}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    historySubTab === 'weight'
+                      ? 'bg-amber-500 text-black font-extrabold'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>Weight ({weightHistory?.length || 0})</span>
+                </button>
+              </div>
+
+              {historySubTab !== 'weight' && (
+                <div className="relative">
+                  <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder={`Filter ${historySubTab} history by name or date...`}
+                    value={historySearch}
+                    onChange={(e) => setHistorySearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                  />
+                </div>
+              )}
+
+              {/* Workout History List */}
+              {/* Date Filter Chips & Quick Past-Day Log Toggle */}
+              {historySubTab !== 'weight' && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+                    <button
+                      onClick={() => setSelectedHistoryDate('all')}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
+                        selectedHistoryDate === 'all'
+                          ? 'bg-amber-500 text-black border-amber-400'
+                          : 'bg-black/40 text-slate-300 border-white/10 hover:border-amber-500/40'
+                      }`}
+                    >
+                      All Days ({dailyHistory.availableDates.length})
+                    </button>
+                    {dailyHistory.availableDates.map((d) => (
+                      <button
+                        key={d.date}
+                        onClick={() => setSelectedHistoryDate(d.date)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
+                          selectedHistoryDate === d.date
+                            ? 'bg-amber-500/25 text-amber-300 border-amber-400'
+                            : 'bg-black/40 text-slate-400 border-white/10 hover:text-white'
+                        }`}
+                      >
+                        {d.label} ({d.workoutCount}W · {d.mealCount}M)
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowPastEntryForm((v) => !v)}
+                      className="ml-auto px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 flex items-center gap-1 shrink-0 transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{showPastEntryForm ? 'Close' : 'Log Past Day'}</span>
+                    </button>
+                  </div>
+
+                  {showPastEntryForm && (
+                    <form
+                      onSubmit={handleSavePastEntry}
+                      className="p-3.5 rounded-2xl bg-black/50 border border-amber-500/25 space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
+                          Record Exercise or Meal for Any Day
+                        </span>
+                        <div className="flex items-center gap-1 bg-obsidian-900 p-1 rounded-xl border border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => setPastEntryKind('workout')}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                              pastEntryKind === 'workout' ? 'bg-amber-500 text-black' : 'text-slate-400'
+                            }`}
+                          >
+                            Exercise
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPastEntryKind('meal')}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                              pastEntryKind === 'meal' ? 'bg-amber-500 text-black' : 'text-slate-400'
+                            }`}
+                          >
+                            Meal
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input
+                          type="date"
+                          max={getRelativeDateString(0)}
+                          value={pastEntryDate}
+                          onChange={(e) => setPastEntryDate(e.target.value)}
+                          className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          required
+                        />
+                        <input
+                          type="text"
+                          value={pastEntryName}
+                          onChange={(e) => setPastEntryName(e.target.value)}
+                          placeholder={pastEntryKind === 'workout' ? 'Exercise name (e.g., incline press)' : 'Meal name (e.g., grilled salmon bowl)'}
+                          className="glass-input px-3 py-2 text-xs text-white rounded-xl sm:col-span-2"
+                          required
+                        />
+                      </div>
+
+                      {pastEntryKind === 'workout' ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          <select
+                            value={pastEntryCategory}
+                            onChange={(e) => setPastEntryCategory(e.target.value)}
+                            className="glass-input px-2.5 py-2 text-xs text-white rounded-xl"
+                          >
+                            <option value="gym">Gym / Machines</option>
+                            <option value="freeweights">Freeweights</option>
+                            <option value="home_workout">Home Workout</option>
+                            <option value="yoga">Yoga Flow</option>
+                            <option value="face_yoga">Face Yoga</option>
+                            <option value="calisthenics">Calisthenics</option>
+                          </select>
+                          <input
+                            type="number"
+                            min="5"
+                            max="240"
+                            value={pastEntryMinutes}
+                            onChange={(e) => setPastEntryMinutes(e.target.value)}
+                            placeholder="Minutes"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                          <input
+                            type="number"
+                            min="10"
+                            max="2000"
+                            value={pastEntryCalories}
+                            onChange={(e) => setPastEntryCalories(e.target.value)}
+                            placeholder="kcal burned"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                          <select
+                            value={pastEntryMealType}
+                            onChange={(e) => setPastEntryMealType(e.target.value)}
+                            className="glass-input px-2.5 py-2 text-xs text-white rounded-xl"
+                          >
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snacks">Snacks</option>
+                          </select>
+                          <input
+                            type="number"
+                            min="20"
+                            max="3000"
+                            value={pastEntryCalories}
+                            onChange={(e) => setPastEntryCalories(e.target.value)}
+                            placeholder="kcal"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            value={pastEntryProtein}
+                            onChange={(e) => setPastEntryProtein(e.target.value)}
+                            placeholder="Protein g"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            value={pastEntryCarbs}
+                            onChange={(e) => setPastEntryCarbs(e.target.value)}
+                            placeholder="Carbs g"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            value={pastEntrySugar}
+                            onChange={(e) => setPastEntrySugar(e.target.value)}
+                            placeholder="Sugar g"
+                            className="glass-input px-3 py-2 text-xs text-white rounded-xl"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex justify-end">
+                        <button
+                          type="submit"
+                          className="gold-btn px-4 py-1.5 rounded-xl text-xs font-bold"
+                        >
+                          Save to Vault History
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* UNIFIED DAILY RECORDS VIEW (EXERCISES + MEALS PER DAY) */}
+              {historySubTab === 'daily' && (
+                <div className="space-y-3 max-h-[370px] overflow-y-auto pr-1">
+                  {dailyHistory.days.length === 0 ? (
+                    <div className="text-center py-8 text-xs text-slate-400">
+                      No exercise or meal records match that filter.
+                    </div>
+                  ) : (
+                    dailyHistory.days.map((day) => (
+                      <div
+                        key={day.date}
+                        className="p-3.5 rounded-2xl bg-black/45 border border-white/10 space-y-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/10">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-black text-white">{day.label}</span>
+                              <span className="text-[10px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded-md">
+                                {day.date}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25">
+                              {day.workouts.length} Ex · {day.caloriesBurned} kcal burned
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                              {day.meals.length} Meals · {day.caloriesConsumed} kcal · {day.protein}g P · {day.sugar}g sugar
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                          {/* Exercises for Day */}
+                          <div className="space-y-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                              <Dumbbell className="w-3 h-3" />
+                              <span>Exercises ({day.workouts.length})</span>
+                            </div>
+                            {day.workouts.length === 0 ? (
+                              <div className="text-[11px] text-slate-500 italic p-2 rounded-xl bg-black/30 border border-white/5">
+                                Rest / recovery day
+                              </div>
+                            ) : (
+                              day.workouts.map((w) => (
+                                <div
+                                  key={w.id}
+                                  className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-obsidian-900/80 border border-white/5"
+                                >
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-white truncate">
+                                      {w.exerciseName || w.name}
+                                    </div>
+                                    <div className="text-[10px] text-slate-400">
+                                      {w.durationMinutes} min · {w.caloriesBurned} kcal · {w.loggedAt || w.time || 'Logged'}
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => deleteWorkout(w.id)}
+                                    className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition shrink-0"
+                                    title="Remove workout"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          {/* Meals for Day */}
+                          <div className="space-y-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                              <Utensils className="w-3 h-3" />
+                              <span>Meals ({day.meals.length})</span>
+                            </div>
+                            {day.meals.length === 0 ? (
+                              <div className="text-[11px] text-slate-500 italic p-2 rounded-xl bg-black/30 border border-white/5">
+                                No meals recorded for this date
+                              </div>
+                            ) : (
+                              day.meals.map((m) => (
+                                <div
+                                  key={m.id}
+                                  className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-obsidian-900/80 border border-white/5"
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    {(m.photoUrl || m.photo) && (
+                                      <img
+                                        src={m.photoUrl || m.photo}
+                                        alt={m.title || m.name}
+                                        className="w-8 h-8 rounded-lg object-cover border border-white/10 shrink-0"
+                                      />
+                                    )}
+                                    <div className="min-w-0">
+                                      <div className="text-xs font-bold text-white truncate">
+                                        {m.title || m.name}
+                                      </div>
+                                      <div className="text-[10px] text-slate-400">
+                                        {m.mealType} · {m.calories} kcal · {m.protein}g P · {m.sugar ?? 0}g sugar
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => deleteMeal(m.id)}
+                                    className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition shrink-0"
+                                    title="Remove meal"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {historySubTab === 'workouts' && (
+                <div className="space-y-2">
+                  {filteredWorkouts.length === 0 ? (
+                    <p className="text-center text-xs text-slate-400 py-6">No logged workouts found.</p>
+                  ) : (
+                    filteredWorkouts.map((w) => (
+                      <div key={w.id} className="p-3 rounded-2xl bg-obsidian-850 border border-white/10 flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                            <span className="text-amber-400 font-bold">{formatHistoryDateLabel(w.date)} · {w.date}</span>
+                            <span>·</span>
+                            <span className="uppercase">{w.category}</span>
+                            <span>·</span>
+                            <span>{w.loggedAt}</span>
+                          </div>
+                          <h4 className="text-xs sm:text-sm font-bold text-white truncate mt-0.5">{w.exerciseName}</h4>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {w.durationMinutes} min · {w.primaryMuscles?.join(', ') || 'Full Body'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <span className="text-xs font-extrabold text-amber-300">+{w.caloriesBurned} kcal</span>
+                          <button
+                            onClick={() => deleteWorkout(w.id)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                            aria-label="Delete workout"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Meal History List */}
+              {historySubTab === 'meals' && (
+                <div className="space-y-2">
+                  {filteredMeals.length === 0 ? (
+                    <p className="text-center text-xs text-slate-400 py-6">No logged meals found.</p>
+                  ) : (
+                    filteredMeals.map((m) => (
+                      <div key={m.id} className="p-3 rounded-2xl bg-obsidian-850 border border-white/10 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {m.photoUrl && (
+                            <img src={m.photoUrl} alt={m.title} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-white/10" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                              <span className="text-emerald-400 font-bold">{formatHistoryDateLabel(m.date)} · {m.date}</span>
+                              <span>·</span>
+                              <span className="uppercase">{m.mealType}</span>
+                              <span>·</span>
+                              <span>{m.loggedAt}</span>
+                            </div>
+                            <h4 className="text-xs sm:text-sm font-bold text-white truncate mt-0.5">{m.title}</h4>
+                            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              {m.protein}g P · {m.carbs}g C · <span className="text-amber-300">{m.sugar ?? 4}g Sugar</span> · {m.fats}g F
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs font-extrabold text-white">{m.calories} kcal</span>
+                          <button
+                            onClick={() => deleteMeal(m.id)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                            aria-label="Delete meal"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Weight & Body Fat Logs */}
+              {historySubTab === 'weight' && (
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Weight History</span>
+                    {[...(weightHistory || [])].reverse().map((w, idx) => (
+                      <div key={idx} className="p-2.5 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="font-mono text-amber-300 font-bold">{w.date}</span>
+                          <span className="text-slate-400 ml-2">{w.note}</span>
+                        </div>
+                        <span className="font-black text-white">{w.weight} kg</span>
+                      </div>
+                    ))}
+                  </div>
+                  {(user.bodyFatHistory || []).length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-white/10">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Body Fat Scans</span>
+                      {user.bodyFatHistory.map((b, idx) => (
+                        <div key={idx} className="p-2.5 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between text-xs">
+                          <div>
+                            <span className="font-mono text-emerald-300 font-bold">{b.date}</span>
+                            <span className="text-slate-400 ml-2">{b.note}</span>
+                          </div>
+                          <span className="font-black text-amber-300">{b.bodyFat}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 4: ATHLETE MEMBERSHIP TIER & PERKS */}
           {/* ======================================================== */}
           {activeTab === 'tier' && (
             <div className="space-y-4">
@@ -655,339 +1325,231 @@ export function AuthModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                  Select Athlete Tier & Access Level:
-                </span>
-
-                <div className="grid grid-cols-1 gap-3">
-                  {ATHLETE_TIERS.map((tier) => {
-                    const isSelected = (user.memberTier || 'Gold Elite Pro').toLowerCase().includes(tier.name.toLowerCase().split(' ')[0]);
-                    return (
-                      <div
-                        key={tier.id}
-                        className={`p-4 rounded-2xl border transition-all duration-200 relative overflow-hidden ${
-                          isSelected
-                            ? `${tier.bgGlow} ${tier.borderColor} shadow-gold-glow-sm`
-                            : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-base font-extrabold text-white tracking-tight">
-                                {tier.name}
-                              </span>
-                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-white/10 border border-white/10 ${tier.textGlow}`}>
-                                {tier.badge}
-                              </span>
-                            </div>
-                            <p className="text-xs text-slate-300 leading-snug">
-                              {tier.description}
-                            </p>
+              <div className="grid grid-cols-1 gap-3">
+                {ATHLETE_TIERS.map((tier) => {
+                  const isSelected = (user.memberTier || 'Gold Elite Pro').toLowerCase().includes(tier.name.toLowerCase().split(' ')[0]);
+                  return (
+                    <div
+                      key={tier.id}
+                      className={`p-4 rounded-2xl border transition-all duration-200 ${
+                        isSelected
+                          ? `${tier.bgGlow} ${tier.borderColor} shadow-gold-glow-sm`
+                          : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-base font-extrabold text-white tracking-tight">{tier.name}</span>
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-white/10 border border-white/10 ${tier.textGlow}`}>
+                              {tier.badge}
+                            </span>
                           </div>
-
-                          <button
-                            onClick={() => {
-                              updateMemberTier(tier.name);
-                              setStatusMessage({ type: 'success', text: `Athlete Tier switched to ${tier.name}!` });
-                              if (triggerConfetti) triggerConfetti();
-                              setTimeout(() => setStatusMessage(null), 2000);
-                            }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 active:scale-95 flex items-center gap-1 ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-gold-glow-sm'
-                                : 'bg-white/10 text-slate-200 hover:bg-white/20'
-                            }`}
-                          >
-                            {isSelected ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>Active</span>
-                              </>
-                            ) : (
-                              <span>Activate</span>
-                            )}
-                          </button>
+                          <p className="text-xs text-slate-300 leading-snug">{tier.description}</p>
                         </div>
 
-                        {/* Perks Grid */}
-                        <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                          {tier.perks.map((perk, pIdx) => (
-                            <div key={pIdx} className="flex items-center gap-2 text-[11px] text-slate-300">
-                              <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-amber-400' : 'text-slate-500'}`} />
-                              <span className="truncate">{perk}</span>
-                            </div>
-                          ))}
-                        </div>
+                        <button
+                          onClick={() => {
+                            updateMemberTier(tier.name);
+                            setStatusMessage({ type: 'success', text: `Athlete Tier switched to ${tier.name}!` });
+                            if (triggerConfetti) triggerConfetti();
+                            setTimeout(() => setStatusMessage(null), 2000);
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 active:scale-95 flex items-center gap-1 ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-gold-glow-sm'
+                              : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                          }`}
+                        >
+                          {isSelected ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              <span>Active</span>
+                            </>
+                          ) : (
+                            <span>Activate</span>
+                          )}
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
+
+                      <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {tier.perks.map((perk, pIdx) => (
+                          <div key={pIdx} className="flex items-center gap-2 text-[11px] text-slate-300">
+                            <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-amber-400' : 'text-slate-500'}`} />
+                            <span className="truncate">{perk}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* ======================================================== */}
-          {/* TAB 3: ACTIVE TRANSFORMATION PLAN (30 / 60 / 90 DAYS) */}
-          {/* ======================================================== */}
-          {activeTab === 'plan' && (
-            <div className="space-y-5">
-              {user.activePlan ? (
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-4 shadow-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        {user.activePlan.badge || 'Sprint Protocol'}
-                      </span>
-                      <h3 className="text-base sm:text-lg font-bold text-white mt-1">
-                        {user.activePlan.title}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xl font-black text-amber-300">Day {user.activePlan.currentDay || 5}</span>
-                      <span className="text-[10px] text-slate-400 block font-semibold">of {user.activePlan.durationDays} Days</span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] font-semibold text-slate-400">
-                      <span>Timeline Completion</span>
-                      <span className="text-amber-300">
-                        {Math.round(((user.activePlan.currentDay || 5) / user.activePlan.durationDays) * 100)}%
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-black/60 overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full"
-                        style={{ width: `${Math.min(100, ((user.activePlan.currentDay || 5) / user.activePlan.durationDays) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Plan Daily Metrics */}
-                  <div className="grid grid-cols-3 gap-2 text-center pt-1">
-                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                      <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Deficit</span>
-                      <span className="text-xs font-bold text-amber-300">-{user.activePlan.dailyCalorieDeficit || 450} kcal</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                      <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Sugar Limit</span>
-                      <span className="text-xs font-bold text-emerald-300">&lt; {user.activePlan.dailySugarLimitGrams || 25}g</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-black/40 border border-white/5">
-                      <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold">Workouts</span>
-                      <span className="text-xs font-bold text-sky-300">{user.activePlan.workoutDaysPerWeek || 5}x/wk</span>
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <button
-                    onClick={() => {
-                      onClose();
-                      setIsPlanModalOpen(true);
-                    }}
-                    className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 shadow-gold-glow"
-                  >
-                    <Target className="w-4 h-4" />
-                    <span>Change or Select Different Plan</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-8 space-y-3">
-                  <p className="text-xs text-slate-400">No active transformation plan selected.</p>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      setIsPlanModalOpen(true);
-                    }}
-                    className="gold-btn px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2"
-                  >
-                    <Target className="w-4 h-4" />
-                    <span>Choose 30, 60 or 90 Day Plan</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* TAB 3: ACCOUNT, PROFILES & AUTHENTICATION */}
+          {/* TAB 5: ACTIVE TRANSFORMATION PLAN & CREATE / SIGN IN ACCOUNT */}
           {/* ======================================================== */}
           {activeTab === 'auth' && (
             <div className="space-y-5">
-              {/* Method Selector (Phone vs Email) */}
-              <div className="flex p-1 rounded-2xl bg-black/60 border border-white/10">
-                <button
-                  onClick={() => {
-                    setAuthMethod('phone');
-                    setOtpStep(false);
-                    setStatusMessage(null);
-                  }}
-                  className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 ${
-                    authMethod === 'phone'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4" />
-                  <span>Phone (SMS OTP)</span>
-                </button>
+              {/* Active Plan Card */}
+              {user.activePlan && (
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                        Active Transformation Protocol ({user.activePlan.workoutLocation || 'home'})
+                      </span>
+                      <h3 className="text-sm sm:text-base font-bold text-white mt-0.5">{user.activePlan.title}</h3>
+                    </div>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        setIsPlanModalOpen(true);
+                      }}
+                      className="px-3 py-1.5 rounded-xl gold-btn text-xs font-bold shrink-0"
+                    >
+                      Change Plan
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                <button
-                  onClick={() => {
-                    setAuthMethod('email');
-                    setStatusMessage(null);
-                  }}
-                  className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 ${
-                    authMethod === 'email'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Email Address</span>
-                </button>
-              </div>
+              {/* Create / Login Profile Form */}
+              <div className="space-y-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+                  Create New Vault Athlete or Sign In:
+                </span>
 
-              {/* Phone Login Form */}
-              {authMethod === 'phone' && (
+                <div className="flex p-1 rounded-2xl bg-black/60 border border-white/10">
+                  <button
+                    onClick={() => {
+                      setAuthMethod('phone');
+                      setOtpStep(false);
+                      setStatusMessage(null);
+                    }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                      authMethod === 'phone'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    <span>Phone (SMS)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthMethod('email');
+                      setStatusMessage(null);
+                    }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                      authMethod === 'email'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>Email Address</span>
+                  </button>
+                </div>
+
                 <div>
-                  {!otpStep ? (
-                    <form onSubmit={handleRequestOtp} className="space-y-4">
-                      <div>
-                        <label className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block mb-1.5">
-                          Your Phone Number
-                        </label>
-                        <div className="flex gap-2">
-                          <div className="relative">
-                            <select
-                              value={countryCode}
-                              onChange={(e) => setCountryCode(e.target.value)}
-                              className="appearance-none pl-3 pr-7 py-3 rounded-xl glass-input text-xs sm:text-sm text-white font-medium cursor-pointer"
-                            >
-                              {COUNTRY_CODES.map((c) => (
-                                <option key={c.code} value={c.code} className="bg-obsidian-900 text-white">
-                                  {c.flag} {c.code}
-                                </option>
-                              ))}
-                            </select>
-                            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                          </div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                    Athlete Full Name (for new account)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Jordan Mercer"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                  />
+                </div>
 
-                          <div className="relative flex-1">
-                            <Phone className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                            <input
-                              type="tel"
-                              placeholder="e.g. 98765 43210"
-                              value={phoneNumber}
-                              onChange={(e) => setPhoneNumber(e.target.value)}
-                              className="w-full pl-10 pr-4 py-3 rounded-xl glass-input text-sm text-white placeholder-slate-500 font-mono"
-                              required
-                            />
-                          </div>
+                {authMethod === 'phone' ? (
+                  !otpStep ? (
+                    <form onSubmit={handleRequestOtp} className="space-y-3">
+                      <div className="flex gap-2">
+                        <div className="relative">
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="appearance-none pl-3 pr-7 py-2.5 rounded-xl glass-input text-xs text-white font-medium cursor-pointer"
+                          >
+                            {COUNTRY_CODES.map((c) => (
+                              <option key={c.code} value={c.code} className="bg-obsidian-900 text-white">
+                                {c.flag} {c.code}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+
+                        <div className="relative flex-1">
+                          <Phone className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="tel"
+                            placeholder="98765 43210"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 font-mono"
+                            required
+                          />
                         </div>
                       </div>
-
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full gold-btn py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
+                        className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
                       >
                         <span>Send 4-Digit SMS Code</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </form>
                   ) : (
-                    <form onSubmit={handleVerifyPhone} className="space-y-4">
-                      <div>
-                        <label className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block mb-1.5">
-                          Enter 4-Digit Verification Code
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={4}
-                          value={otpValue}
-                          onChange={(e) => setOtpValue(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl glass-input text-center text-lg font-mono font-bold tracking-widest text-amber-300"
-                          autoFocus
-                          required
-                        />
-                      </div>
-
+                    <form onSubmit={handleVerifyPhone} className="space-y-3">
+                      <input
+                        type="text"
+                        maxLength={4}
+                        value={otpValue}
+                        onChange={(e) => setOtpValue(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl glass-input text-center text-base font-mono font-bold tracking-widest text-amber-300"
+                        required
+                      />
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full gold-btn py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
+                        className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Verify & Sign In</span>
+                        <span>Verify & Save to Vault</span>
                       </button>
                     </form>
-                  )}
-                </div>
-              )}
-
-              {/* Email Login Form */}
-              {authMethod === 'email' && (
-                <form onSubmit={handleEmailAuth} className="space-y-4">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block mb-1.5">
-                      Your Email Address
-                    </label>
+                  )
+                ) : (
+                  <form onSubmit={handleEmailAuth} className="space-y-3">
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Mail className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
                         placeholder="athlete@fitarc.elite"
                         value={emailAddress}
                         onChange={(e) => setEmailAddress(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl glass-input text-sm text-white placeholder-slate-500"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
                         required
                       />
                     </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full gold-btn py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 active:scale-95"
-                  >
-                    <span>Instant Secure Sign In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-
-              {/* Saved Profiles Switcher */}
-              {savedProfiles.length > 1 && (
-                <div className="pt-2 border-t border-white/5 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
-                    Switch Active Athlete Profile:
-                  </span>
-                  <div className="space-y-1.5">
-                    {savedProfiles.map((p) => (
-                      <div
-                        key={p.id}
-                        onClick={() => handleSelectProfile(p.id)}
-                        className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition ${
-                          user?.id === p.id
-                            ? 'bg-amber-500/15 border-amber-400 text-amber-300'
-                            : 'bg-black/40 border-white/5 text-slate-300 hover:border-amber-500/30'
-                        }`}
-                      >
-                        <span className="text-xs font-bold">{p.name}</span>
-                        {user?.id === p.id && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-black font-extrabold uppercase">
-                            Active
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <span>Create / Sign In to Vault</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           )}
         </div>

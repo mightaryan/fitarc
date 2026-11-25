@@ -12,14 +12,20 @@ import {
   ArrowRight,
   TrendingDown,
   Target,
+  Award,
+  Home,
+  Dumbbell,
+  Sun,
+  MapPin,
 } from 'lucide-react';
-import { TARGET_AREAS, TRANSFORMATION_PLANS } from '../../data/transformationPlans';
+import { TARGET_AREAS, TRANSFORMATION_PLANS, WORKOUT_LOCATIONS } from '../../data/transformationPlans';
 import { useApp } from '../../context/AppContext';
 
 export function PlanSelectorModal({ isOpen, onClose }) {
   const { user, selectTransformationPlan } = useApp();
   const [selectedArea, setSelectedArea] = useState(user.activePlan?.targetArea || 'belly_fat');
   const [selectedDuration, setSelectedDuration] = useState(user.activePlan?.durationDays || 30);
+  const [selectedLocation, setSelectedLocation] = useState(user.activePlan?.workoutLocation || 'home');
 
   if (!isOpen) return null;
 
@@ -28,14 +34,19 @@ export function PlanSelectorModal({ isOpen, onClose }) {
   ) || TRANSFORMATION_PLANS[0];
 
   const handleActivatePlan = () => {
-    selectTransformationPlan(currentPlan);
+    selectTransformationPlan({
+      ...currentPlan,
+      workoutLocation: selectedLocation,
+    });
     onClose();
   };
 
   const getAreaIcon = (id) => {
     switch (id) {
       case 'belly_fat': return <Flame className="w-4 h-4 text-amber-400" />;
-      case 'thigh_fat': return <Zap className="w-4 h-4 text-emerald-400" />;
+      case 'hiit_600': return <Zap className="w-4 h-4 text-rose-400" />;
+      case 'calisthenics': return <Award className="w-4 h-4 text-amber-400" />;
+      case 'thigh_fat': return <Target className="w-4 h-4 text-emerald-400" />;
       case 'back_fat': return <Shield className="w-4 h-4 text-sky-400" />;
       case 'overall_fat': return <Activity className="w-4 h-4 text-rose-400" />;
       case 'yoga_face': return <Sparkles className="w-4 h-4 text-amber-300" />;
@@ -43,8 +54,18 @@ export function PlanSelectorModal({ isOpen, onClose }) {
     }
   };
 
+  const getLocationIcon = (id) => {
+    switch (id) {
+      case 'home': return <Home className="w-4 h-4 text-amber-400" />;
+      case 'gym': return <Dumbbell className="w-4 h-4 text-sky-400" />;
+      case 'calisthenics': return <Award className="w-4 h-4 text-emerald-400" />;
+      case 'yoga': return <Sun className="w-4 h-4 text-amber-300" />;
+      default: return <MapPin className="w-4 h-4 text-amber-400" />;
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="relative w-full max-w-xl max-h-[92vh] glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-6 bg-obsidian-900/90 backdrop-blur-md border-b border-amber-500/15">
@@ -130,15 +151,54 @@ export function PlanSelectorModal({ isOpen, onClose }) {
             </div>
           </div>
 
+          {/* STEP 3: CHOOSE WORKOUT LOCATION */}
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-2">
+              Step 3: Choose Your Workout Location & Environment
+            </span>
+            <div className="grid grid-cols-2 gap-2.5">
+              {WORKOUT_LOCATIONS.map((loc) => (
+                <button
+                  key={loc.id}
+                  onClick={() => setSelectedLocation(loc.id)}
+                  className={`p-3 rounded-2xl border text-left transition-all active:scale-95 flex flex-col justify-between ${
+                    selectedLocation === loc.id
+                      ? 'bg-amber-500/20 border-amber-400 text-white shadow-gold-glow-sm'
+                      : 'bg-obsidian-850/80 border-white/5 text-slate-300 hover:border-amber-500/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <div className="flex items-center gap-1.5">
+                      {getLocationIcon(loc.id)}
+                      <span className="text-xs font-bold leading-tight">{loc.label}</span>
+                    </div>
+                    {selectedLocation === loc.id && (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                    )}
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/40 text-amber-300 border border-white/5 inline-block self-start font-mono">
+                    {loc.badge}
+                  </span>
+                  <p className="text-[10px] text-slate-400 mt-1 line-clamp-1">{loc.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* SELECTED PLAN HIGHLIGHT PREVIEW */}
           {currentPlan && (
             <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {currentPlan.badge}
-                  </span>
-                  <h3 className="text-base sm:text-lg font-bold text-white mt-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {currentPlan.badge}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      {WORKOUT_LOCATIONS.find((l) => l.id === selectedLocation)?.label || 'Home'}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-white mt-1.5">
                     {currentPlan.title}
                   </h3>
                 </div>

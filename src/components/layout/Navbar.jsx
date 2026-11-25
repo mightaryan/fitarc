@@ -16,17 +16,11 @@ export function Navbar() {
     activeTab,
     setActiveTab,
     user,
-    workoutLogs,
+    totalCaloriesBurned,
     setIsWeightModalOpen,
-    isAuthModalOpen,
-    setIsAuthModalOpen,
     openAuthModal,
     setIsMealScannerOpen,
   } = useApp();
-
-  const totalCaloriesBurned = useMemo(() => {
-    return (workoutLogs || []).reduce((acc, log) => acc + (log.caloriesBurned || 0), 0);
-  }, [workoutLogs]);
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-amber-500/20 backdrop-blur-xl transition-all">

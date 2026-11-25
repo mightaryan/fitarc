@@ -27,6 +27,7 @@ export function OverviewDashboard() {
     setActiveTab,
     setIsWeightModalOpen,
     setIsMealScannerOpen,
+    openAuthModal,
   } = useApp();
 
   // Weight trajectory analytics
@@ -74,7 +75,14 @@ export function OverviewDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <button
+            onClick={() => openAuthModal('history')}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-white/5 hover:bg-amber-500/10 border border-white/10 hover:border-amber-500/30 text-slate-200 hover:text-amber-300 transition"
+          >
+            <Calendar className="w-4 h-4 text-amber-400" />
+            <span>Vault History</span>
+          </button>
           <button
             onClick={() => setIsWeightModalOpen(true)}
             className="gold-btn-outline px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2"

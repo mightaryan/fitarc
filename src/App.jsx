@@ -10,6 +10,7 @@ import { HomeSection } from './components/home/HomeSection';
 import { DailyWeightModal } from './components/weight/DailyWeightModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { PlanSelectorModal } from './components/plans/PlanSelectorModal';
+import { MealPhotoScanner } from './components/food/MealPhotoScanner';
 
 function AppContent() {
   const {
@@ -20,6 +21,8 @@ function AppContent() {
     setIsAuthModalOpen,
     isPlanModalOpen,
     setIsPlanModalOpen,
+    isMealScannerOpen,
+    setIsMealScannerOpen,
   } = useApp();
 
   return (
@@ -58,6 +61,13 @@ function AppContent() {
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}
       />
+
+      {/* Global AI Meal Photo Scanner Modal (Accessible from every page & dock) */}
+      {isMealScannerOpen && (
+        <MealPhotoScanner
+          onClose={() => setIsMealScannerOpen(false)}
+        />
+      )}
     </div>
   );
 }

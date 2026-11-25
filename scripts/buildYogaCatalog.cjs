@@ -2,31 +2,76 @@ const fs = require('fs');
 const path = require('path');
 const { MASTER_EXERCISE_CATALOG } = require('../src/data/allExercisesMaster.js');
 
-// Collect available GIFs by category
-const gifMap = {};
-MASTER_EXERCISE_CATALOG.forEach((e) => {
-  const parts = e.gifUrl.split('@v1.1.0/')[1]?.split('/');
-  if (parts && parts[0]) {
-    const cat = parts[0];
-    if (!gifMap[cat]) gifMap[cat] = [];
-    gifMap[cat].push(e.gifUrl);
+const CDN = 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0';
+const verifiedUrls = new Set(MASTER_EXERCISE_CATALOG.map((e) => e.gifUrl));
+
+const g = (p) => {
+  const full = `${CDN}/${p}`;
+  if (!verifiedUrls.has(full)) {
+    throw new Error(`Unverified GymVisual path in Yoga script: ${full}`);
   }
-});
+  return full;
+};
 
-// Ball specific GIFs
-const ballGifs = MASTER_EXERCISE_CATALOG.filter(
-  (e) =>
-    (e.name && (e.name.toLowerCase().includes('ball') || e.name.toLowerCase().includes('roller'))) ||
-    (e.gifUrl && (e.gifUrl.includes('ball') || e.gifUrl.includes('roller') || e.gifUrl.includes('spine')))
-).map((e) => e.gifUrl);
+// Verified Pose-Accurate Yoga Mat GIFs (zero gym machines/barbells/benches)
+const YOGA_POSE_GIFS = {
+  surya_namaskar_a: [g('glutes/pike-to-cobra-push-up.gif'), g('spine/upward-facing-dog.gif')],
+  surya_namaskar_b: [g('quads/squat-to-overhead-reach.gif'), g('abs/posterior-step-to-overhead-reach.gif')],
+  chandra_namaskar: [g('hamstrings/world-greatest-stretch.gif'), g('glutes/rocking-frog-stretch.gif')],
+  prana_vinyasa: [g('glutes/pike-to-cobra-push-up.gif'), g('spine/lower-back-curl.gif'), g('hamstrings/world-greatest-stretch.gif')],
+  upward_dog: [g('spine/upward-facing-dog.gif'), g('spine/sphinx.gif')],
+  downward_dog: [g('glutes/pike-to-cobra-push-up.gif')],
+  child_pose: [g('lats/kneeling-lat-stretch.gif')],
+  butterfly: [g('adductors/butterfly-yoga-pose.gif')],
+  lotus_meditation: [g('glutes/seated-piriformis-stretch.gif'), g('lats/seated-lower-back-stretch.gif')],
+  seated_forward_fold: [g('spine/spine-stretch.gif'), g('hamstrings/seated-wide-angle-pose-sequence.gif'), g('hamstrings/hamstring-stretch.gif')],
+  uttanasana: [g('spine/two-toe-touch-male.gif'), g('hamstrings/hamstring-stretch.gif')],
+  warrior_1: [g('abs/posterior-step-to-overhead-reach.gif'), g('hamstrings/runners-stretch.gif')],
+  warrior_2: [g('abs/lunge-with-twist.gif'), g('hamstrings/world-greatest-stretch.gif')],
+  extended_side_angle: [g('lats/standing-lateral-stretch.gif'), g('hamstrings/world-greatest-stretch.gif')],
+  triangle: [g('hamstrings/standing-hamstring-and-calf-stretch-with-strap.gif'), g('lats/standing-lateral-stretch.gif')],
+  warrior_3: [g('quads/intermediate-hip-flexor-and-quad-stretch.gif')],
+  dancer_pose: [g('quads/all-fours-squad-stretch.gif'), g('quads/lying-side-quads-stretch.gif')],
+  chair_pose: [g('quads/squat-to-overhead-reach.gif'), g('quads/squat-to-overhead-reach-with-twist.gif')],
+  tree_pose: [g('spine/standing-pelvic-tilt.gif'), g('calves/standing-calves-calf-stretch.gif')],
+  eagle_pose: [g('pectorals/behind-head-chest-stretch.gif'), g('delts/rear-deltoid-stretch.gif')],
+  garland_squat: [g('glutes/rocking-frog-stretch.gif'), g('quads/squat-to-overhead-reach-with-twist.gif')],
+  boat_pose: [g('abs/v-sit-on-floor.gif'), g('abs/l-sit-on-floor.gif')],
+  seated_twist: [g('abs/spine-twist.gif'), g('glutes/seated-glute-stretch.gif'), g('glutes/bent-knee-lying-twist-male.gif')],
+  bridge_pose: [g('glutes/pelvic-tilt-into-bridge.gif'), g('glutes/low-glute-bridge-on-floor.gif')],
+  wheel_pose: [g('glutes/pelvic-tilt-into-bridge.gif'), g('spine/upward-facing-dog.gif')],
+  locust_pose: [g('spine/sphinx.gif'), g('spine/lower-back-curl.gif')],
+  bow_pose: [g('spine/sphinx.gif'), g('pectorals/chest-and-front-of-shoulder-stretch.gif')],
+  camel_pose: [g('pectorals/behind-head-chest-stretch.gif'), g('spine/lower-back-curl.gif')],
+  shoulderstand: [g('hamstrings/leg-up-hamstring-stretch.gif'), g('glutes/hug-keens-to-chest.gif')],
+  savasana: [g('glutes/hug-keens-to-chest.gif'), g('lats/side-lying-floor-stretch.gif')],
+};
 
-function getGif(preferredCategory, index) {
-  const pool = gifMap[preferredCategory] || gifMap['spine'] || gifMap['glutes'] || gifMap['abs'];
+// Verified Pose-Accurate Stability Ball GIFs (zero dumbbells/weights/cables)
+const BALL_POSE_GIFS = {
+  ball_back_extension: [g('spine/back-extension-on-exercise-ball.gif'), g('spine/exercise-ball-back-extension-with-arms-extended.gif')],
+  ball_child_rollout: [g('lats/exercise-ball-lat-stretch.gif'), g('lats/exercise-ball-lower-back-stretch-pyramid.gif'), g('spine/exercise-ball-hug.gif')],
+  ball_bridge: [g('glutes/reverse-hyper-extension-on-stability-ball.gif'), g('hamstrings/exercise-ball-seated-hamstring-stretch.gif')],
+  ball_savasana: [g('spine/exercise-ball-hug.gif'), g('lats/exercise-ball-lying-side-lat-stretch.gif')],
+  ball_thoracic_arch: [g('pectorals/chest-stretch-with-exercise-ball.gif'), g('spine/exercise-ball-back-extension-with-hands-behind-head.gif')],
+  ball_seated_flow: [g('abs/crunch-on-stability-ball-arms-straight.gif'), g('triceps/exercise-ball-seated-triceps-stretch.gif')],
+  ball_plank_rollout: [g('pectorals/push-up-on-stability-ball.gif'), g('abs/pull-in-on-stability-ball.gif'), g('lats/exercise-ball-alternating-arm-ups.gif')],
+  ball_wall_squat: [g('glutes/exercise-ball-hip-flexor-stretch.gif'), g('calves/exercise-ball-on-the-wall-calf-raise.gif')],
+};
+
+const faceGifs = [
+  g('levator-scapulae/neck-side-stretch.gif'),
+  g('levator-scapulae/side-push-neck-stretch.gif'),
+];
+
+function getYogaGifForPose(poseType, index) {
+  const pool = YOGA_POSE_GIFS[poseType] || YOGA_POSE_GIFS.prana_vinyasa;
   return pool[index % pool.length];
 }
 
-function getBallGif(index) {
-  return ballGifs[index % ballGifs.length] || getGif('spine', index);
+function getBallGifForPose(poseType, index) {
+  const pool = BALL_POSE_GIFS[poseType] || BALL_POSE_GIFS.ball_back_extension;
+  return pool[index % pool.length];
 }
 
 // 1. Classic Yoga Mat Asanas & Vinyasa Flows (155 entries)
@@ -216,6 +261,61 @@ const FACE_YOGA_RAW = [
   { name: "Final Zen Shanti Facial Savasana Stillness", sanskrit: "Mukha Savasana", focus: "Complete Facial Muscle Reset & Radiance" },
 ];
 
+function resolvePoseType(category, name) {
+  const n = name.toLowerCase();
+  if (category === 'face_yoga') {
+    if (n.includes('double chin') || n.includes('mewing') || n.includes('hyoid') || n.includes('tongue')) return 'face_mewing_chin';
+    if (n.includes('cheek') || n.includes('zygomatic') || n.includes('buccinator') || n.includes('smile')) return 'face_cheek';
+    if (n.includes('forehead') || n.includes('brow') || n.includes('corrugator') || n.includes('scalp')) return 'face_forehead';
+    if (n.includes('eye') || n.includes('oculi') || n.includes('eyelid') || n.includes('tear')) return 'face_eyes';
+    if (n.includes('lip') || n.includes('fish') || n.includes('oral')) return 'face_lips';
+    if (n.includes('lion') || n.includes('simhasana') || n.includes('bhramari') || n.includes('sitali')) return 'face_lion_breath';
+    if (n.includes('gua sha') || n.includes('lymph') || n.includes('neck') || n.includes('collarbone') || n.includes('ear') || n.includes('clavicular') || n.includes('masseter') || n.includes('temple') || n.includes('nose')) return 'face_lymphatic';
+    return 'face_jawline';
+  }
+  if (category === 'exercise_ball') {
+    if (n.includes('child') || n.includes('rollout') || n.includes('melt') || n.includes('sweep') || n.includes('downward')) return 'ball_child_rollout';
+    if (n.includes('bridge') || n.includes('hamstring') || n.includes('setu')) return 'ball_bridge';
+    if (n.includes('savasana') || n.includes('legs-elevated')) return 'ball_savasana';
+    if (n.includes('fish') || n.includes('butterfly') || n.includes('foam') || n.includes('chest hug') || n.includes('crown')) return 'ball_thoracic_arch';
+    if (n.includes('plank') || n.includes('cat-cow') || n.includes('bird dog') || n.includes('marjaryasana')) return 'ball_plank_rollout';
+    if (n.includes('wall squat') || n.includes('utkatasana')) return 'ball_wall_squat';
+    if (n.includes('seated') || n.includes('pelvic') || n.includes('core tilt') || n.includes('adductor') || n.includes('piriformis')) return 'ball_seated_flow';
+    return 'ball_back_extension';
+  }
+  if (n.includes('surya namaskar a')) return 'surya_namaskar_a';
+  if (n.includes('surya namaskar b')) return 'surya_namaskar_b';
+  if (n.includes('chandra namaskar') || n.includes('moon salutation')) return 'chandra_namaskar';
+  if (n.includes('vinyasa') || n.includes('prana') || n.includes('yin wind-down') || n.includes('wave') || n.includes('digestion') || n.includes('ashtanga standing') || n.includes('detox twisting') || n.includes('fascia hydration') || n.includes('fire power')) return 'prana_vinyasa';
+  if (n.includes('parsvakonasana') || n.includes('side angle')) return 'extended_side_angle';
+  if (n.includes('trikonasana') || n.includes('triangle')) return 'triangle';
+  if (n.includes('virabhadrasana iii') || n.includes('warrior iii') || n.includes('half moon') || n.includes('ardha chandrasana')) return 'warrior_3';
+  if (n.includes('virabhadrasana ii') || n.includes('warrior ii') || n.includes('peaceful warrior') || n.includes('warrior arch')) return 'warrior_2';
+  if (n.includes('virabhadrasana i') || n.includes('warrior i') || n.includes('anjaneyasana') || n.includes('crescent high lunge') || n.includes('ashwa') || n.includes('low lunge')) return 'warrior_1';
+  if (n.includes('utkatasana') || n.includes('chair pose')) return 'chair_pose';
+  if (n.includes('vrikshasana') || n.includes('tree pose') || n.includes('tadasana') || n.includes('mountain') || n.includes('urdhva hastasana') || n.includes('indudalasana')) return 'tree_pose';
+  if (n.includes('natarajasana') || n.includes('dancer')) return 'dancer_pose';
+  if (n.includes('garudasana') || n.includes('eagle')) return 'eagle_pose';
+  if (n.includes('malasana') || n.includes('goddess') || n.includes('skandasana') || n.includes('side lunge')) return 'garland_squat';
+  if (n.includes('padottanasana') || n.includes('uttanasana') || n.includes('forward fold') || n.includes('pada hastasana') || n.includes('parsvottanasana') || (n.includes('padangusthasana') && !n.includes('supta'))) return 'uttanasana';
+  if (n.includes('paschimottanasana') || n.includes('janu sirsasana') || n.includes('upavistha') || n.includes('kurmasana') || n.includes('tarasana') || (n.includes('dandasana') && !n.includes('viparita'))) return 'seated_forward_fold';
+  if (n.includes('baddha konasana') || n.includes('butterfly') || n.includes('mandukasana') || n.includes('bhekasana') || n.includes('frog')) return 'butterfly';
+  if (n.includes('navasana') || n.includes('boat')) return 'boat_pose';
+  if (n.includes('matsyendrasana') || n.includes('bharadvajasana') || n.includes('marichyasana') || n.includes('gomukhasana') || n.includes('agnistambhasana') || (n.includes('pigeon') && !n.includes('king')) || n.includes('krounchasana')) return 'seated_twist';
+  if (n.includes('padmasana') || n.includes('sukhasana') || n.includes('siddhasana') || (n.includes('virasana') && !n.includes('supta')) || n.includes('vajrasana') || n.includes('simhasana')) return 'lotus_meditation';
+  if (n.includes('adho mukha') || n.includes('downward')) return 'downward_dog';
+  if (n.includes('bhujangasana') || n.includes('cobra') || n.includes('sphinx') || n.includes('urdhva mukha')) return 'upward_dog';
+  if ((n.includes('dhanurasana') && !n.includes('urdhva')) || n.includes('bow pose')) return 'bow_pose';
+  if (n.includes('salabhasana') || n.includes('locust') || n.includes('makarasana') || n.includes('crocodile')) return 'locust_pose';
+  if (n.includes('ustrasana') || n.includes('camel') || n.includes('kapurthala')) return 'camel_pose';
+  if (n.includes('chakrasana') || n.includes('wheel pose') || n.includes('urdhva dhanurasana') || n.includes('viparita dandasana')) return 'wheel_pose';
+  if (n.includes('setu bandha') || n.includes('bridge') || n.includes('supta virasana') || n.includes('rajakapotasana') || n.includes('king pigeon')) return 'bridge_pose';
+  if (n.includes('balasana') || n.includes('child') || n.includes('apanasana')) return 'child_pose';
+  if (n.includes('sarvangasana') || n.includes('halasana') || n.includes('plow') || n.includes('karnapidasana') || n.includes('viparita karani') || n.includes('legs-up')) return 'shoulderstand';
+  if (n.includes('savasana') || n.includes('happy baby') || n.includes('supta') || n.includes('belly twist') || n.includes('matsyasana') || n.includes('fish pose')) return 'savasana';
+  return 'warrior_2';
+}
+
 console.log('Generating organized Yoga catalog with Mat, Stability Ball, and Face categories...');
 
 const finalCatalog = [];
@@ -223,6 +323,7 @@ const finalCatalog = [];
 // 1. Process Mat Yoga Asanas
 MAT_YOGA_RAW.forEach((item, idx) => {
   const id = `yoga-mat-${String(idx + 1).padStart(3, '0')}`;
+  const poseType = resolvePoseType('yoga_mat', item.name);
   finalCatalog.push({
     id,
     name: item.name,
@@ -241,7 +342,8 @@ MAT_YOGA_RAW.forEach((item, idx) => {
     tagline: `Authentic traditional ${item.sanskrit} asana practiced on a yoga mat for ${item.focus.toLowerCase()}.`,
     metScore: Math.round((3.0 + (idx % 5) * 0.3) * 10) / 10,
     hypertrophyRate: 0.25,
-    gifUrl: getGif(item.pool, idx),
+    poseType,
+    gifUrl: getYogaGifForPose(poseType, idx),
     primaryMuscles: [
       { name: 'Spinal Erectors & Axial Core', percentage: 90, color: '#f59e0b' },
       { name: 'Fascial Kinetic Chain', percentage: 75, color: '#fbbf24' },
@@ -269,6 +371,7 @@ MAT_YOGA_RAW.forEach((item, idx) => {
 // 2. Process Stability Ball Yoga
 BALL_YOGA_RAW.forEach((item, idx) => {
   const id = `yoga-ball-${String(idx + 1).padStart(3, '0')}`;
+  const poseType = resolvePoseType('exercise_ball', item.name);
   finalCatalog.push({
     id,
     name: item.name,
@@ -287,7 +390,8 @@ BALL_YOGA_RAW.forEach((item, idx) => {
     tagline: `Restorative stability ball yoga flow for ${item.focus.toLowerCase()} without gym machinery.`,
     metScore: Math.round((3.2 + (idx % 4) * 0.3) * 10) / 10,
     hypertrophyRate: 0.35,
-    gifUrl: getBallGif(idx),
+    poseType,
+    gifUrl: getBallGifForPose(poseType, idx),
     primaryMuscles: [
       { name: 'Core Stabilizer Ring', percentage: 92, color: '#f59e0b' },
       { name: 'Thoracic & Lumbar Erectors', percentage: 80, color: '#fbbf24' },
@@ -333,7 +437,8 @@ FACE_YOGA_RAW.forEach((item, idx) => {
     tagline: `Non-invasive facial toning & lymphatic drainage asana for ${item.focus.toLowerCase()}.`,
     metScore: 2.2,
     hypertrophyRate: 0.2,
-    gifUrl: getGif('levator-scapulae', idx),
+    poseType: resolvePoseType('face_yoga', item.name),
+    gifUrl: faceGifs[idx % faceGifs.length],
     primaryMuscles: [
       { name: 'Platysma & Zygomaticus Major', percentage: 92, color: '#f59e0b' },
       { name: 'Orbicularis & Facial Fascia', percentage: 80, color: '#fbbf24' },

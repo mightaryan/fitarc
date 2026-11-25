@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
   Activity,
@@ -13,6 +13,7 @@ import {
   Scale,
   Zap,
 } from 'lucide-react';
+import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
 
 function getFallbackGif(exercise) {
   const cat = (exercise?.category || '').toLowerCase();
@@ -22,14 +23,17 @@ function getFallbackGif(exercise) {
   if (cat === 'face_yoga' || muscle.includes('face') || name.includes('jawline')) {
     return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif';
   }
-  if (cat === 'yoga' || exercise?.equipment === 'yogamat' || exercise?.equipment === 'exercise_ball' || name.includes('yoga') || name.includes('surya') || name.includes('flow')) {
+  if (exercise?.subCategory === 'exercise_ball' || exercise?.equipment === 'exercise_ball') {
     return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif';
+  }
+  if (cat === 'yoga' || exercise?.equipment === 'yogamat' || name.includes('yoga') || name.includes('surya') || name.includes('flow')) {
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif';
   }
   if (muscle.includes('core') || muscle.includes('abs') || name.includes('crunch') || name.includes('plank')) {
     return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
   }
   if (muscle.includes('leg') || muscle.includes('quad') || muscle.includes('glute') || name.includes('squat')) {
-    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif';
+    return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/split-squats.gif';
   }
   if (muscle.includes('back') || muscle.includes('lat') || name.includes('row')) {
     return 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/suspended-row.gif';
@@ -150,16 +154,32 @@ export function Anatomical3DPlayer({
   const [imgError, setImgError] = useState(false);
   const [jointAngle, setJointAngle] = useState(45); // default 45° optimal angle
   const [formMode, setFormMode] = useState('optimal'); // 'optimal' | 'flawed'
+  const imgRef = useRef(null);
 
   const fallbackSrc = getFallbackGif(exercise);
   const gifUrl = exercise?.gifUrl || fallbackSrc;
   const isAngleHazard = jointAngle > 65;
   const telemetry = getMuscleTelemetry(exercise, jointAngle);
+  const isFaceYogaStage =
+    exercise?.category === 'face_yoga' ||
+    exercise?.subCategory === 'face_yoga' ||
+    exercise?.equipment === 'face_hands';
+  const isYogaOrFace =
+    isFaceYogaStage ||
+    exercise?.category === 'yoga' ||
+    exercise?.equipment === 'yogamat' ||
+    exercise?.equipment === 'exercise_ball';
 
-  // Reset image load state whenever active exercise changes
+  // Reset image load state cleanly when exercise/URL changes, handling already-cached images immediately
   useEffect(() => {
-    setImgLoaded(false);
     setImgError(false);
+    if (imgRef.current?.complete && imgRef.current?.naturalWidth > 0) {
+      setImgLoaded(true);
+    } else {
+      setImgLoaded(false);
+      const timer = setTimeout(() => setImgLoaded(true), 1500);
+      return () => clearTimeout(timer);
+    }
   }, [exercise?.id, gifUrl]);
 
   // Sync angle defaults when tab changes
@@ -194,8 +214,8 @@ export function Anatomical3DPlayer({
         {/* Subtle radial gold spotlight glow */}
         <div className="absolute inset-0 bg-radial-gold opacity-15 pointer-events-none" />
 
-        {/* Loading skeleton */}
-        {!imgLoaded && !imgError && (
+        {/* Loading skeleton (only for external GIFs; Face Yoga canvas renders immediately) */}
+        {!isFaceYogaStage && !imgLoaded && !imgError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-obsidian-950/90 z-10">
             <div className="w-10 h-10 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
             <span className="text-xs font-semibold text-amber-300 tracking-wider">
@@ -204,21 +224,28 @@ export function Anatomical3DPlayer({
           </div>
         )}
 
-        {/* Center 3D Anatomical Athlete Image: Scaled up, crisp, prominent & 100% unobstructed */}
+        {/* Center 3D Anatomical Athlete Stage: Realistic Face Yoga Canvas OR GymVisual 3D Player */}
         <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
-          <img
-            key={exercise?.id || gifUrl}
-            src={imgError ? fallbackSrc : gifUrl}
-            alt={exercise?.name || 'Exercise Biomechanics'}
-            onLoad={() => setImgLoaded(true)}
-            onError={(e) => {
-              if (!imgError) {
-                setImgError(true);
-                e.currentTarget.src = fallbackSrc;
-              }
-            }}
-            className="h-[320px] sm:h-[420px] w-auto max-w-full object-contain scale-105 sm:scale-120 transition-all duration-500 dark-3d-animation drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]"
-          />
+          {isFaceYogaStage ? (
+            <div className="w-full h-[350px] sm:h-[440px]">
+              <YogaAnatomicalCanvas exercise={exercise} />
+            </div>
+          ) : (
+            <img
+              ref={imgRef}
+              key={exercise?.id || gifUrl}
+              src={imgError ? fallbackSrc : gifUrl}
+              alt={exercise?.name || 'Exercise Biomechanics'}
+              onLoad={() => setImgLoaded(true)}
+              onError={(e) => {
+                if (!imgError) {
+                  setImgError(true);
+                  e.currentTarget.src = fallbackSrc;
+                }
+              }}
+              className="h-[320px] sm:h-[420px] w-auto max-w-full object-contain scale-105 sm:scale-120 transition-all duration-500 dark-3d-animation drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)]"
+            />
+          )}
 
           {/* MODE 1: BIOMECHANICS PERIMETER HUD (UNOBSTRUCTED CENTER) */}
           {activeTab === 'biomechanics' && (
@@ -255,8 +282,8 @@ export function Anatomical3DPlayer({
             </div>
           )}
 
-          {/* MODE 2: WEIGHT RATIO OR BREATH HOLD DURATION HUD */}
-          {activeTab === 'pyramid' && (
+          {/* MODE 2: WEIGHT RATIO & OVERLOAD (Strength / Gym / Home / Calisthenics Only) */}
+          {!isYogaOrFace && activeTab === 'pyramid' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Ratio Badges */}
               <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
@@ -301,8 +328,8 @@ export function Anatomical3DPlayer({
             </div>
           )}
 
-          {/* MODE 3: MACHINE SETUP OR YOGA MAT / BALL ALIGNMENT HUD */}
-          {activeTab === 'setup' && (
+          {/* MODE 3: MACHINE SETUP & ALIGNMENT (Strength / Gym / Home / Calisthenics Only) */}
+          {!isYogaOrFace && activeTab === 'setup' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Setup Check */}
               <div className="flex items-center justify-between gap-2 flex-wrap max-w-full">
@@ -382,8 +409,8 @@ export function Anatomical3DPlayer({
             </div>
           )}
 
-          {/* MODE 4: ANGLE & JOINT SHEAR SIMULATOR PERIMETER HUD (UNOBSTRUCTED CENTER) */}
-          {activeTab === 'mistakes' && (
+          {/* MODE 4: ANGLE & JOINT SHEAR SIMULATOR (Strength / Gym / Home / Calisthenics Only) */}
+          {!isYogaOrFace && activeTab === 'mistakes' && (
             <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-between pointer-events-none">
               {/* Top Alert Badge */}
               <div className="flex items-center justify-between gap-2 flex-wrap pointer-events-auto max-w-full">

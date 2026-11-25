@@ -23,7 +23,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Surya Namaskar A asana practiced on a yoga mat for full body mobility & breath synchrony.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
+    "poseType": "surya_namaskar_a",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -76,7 +77,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Surya Namaskar B asana practiced on a yoga mat for cardiovascular heat & thigh strength.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif",
+    "poseType": "surya_namaskar_b",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/posterior-step-to-overhead-reach.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -129,7 +131,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Chandra Namaskar asana practiced on a yoga mat for parasympathetic reset & hip opening.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/arms-apart-circular-toe-touch-male.gif",
+    "poseType": "chandra_namaskar",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -182,7 +185,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Prana Vinyasa asana practiced on a yoga mat for spinal waves & diaphragm activation.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-hands-behind-head.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -235,7 +239,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Chandra Yin Vinyasa asana practiced on a yoga mat for deep fascia release & cortisol reduction.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/dumbbell-lying-femoral.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -288,7 +293,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Agni Vinyasa asana practiced on a yoga mat for visceral fat burn & core transverse lock.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/arm-slingers-hanging-bent-knee-legs.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -341,7 +347,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Virabhadra Vinyasa asana practiced on a yoga mat for pelvic opening & unilateral leg drive.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/band-one-arm-single-leg-split-squat.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -394,7 +401,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Merudanda Vinyasa asana practiced on a yoga mat for vertebral fluidity & synovial glide.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-prone-leg-raise.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -447,7 +455,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Svadhisthana Flow asana practiced on a yoga mat for psoas lengthening & pelvic mobility.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/band-pull-through.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -500,7 +509,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Manipura Vinyasa asana practiced on a yoga mat for metabolic acceleration & core torque.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/assisted-hanging-knee-raise.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -553,7 +563,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Anahata Vinyasa asana practiced on a yoga mat for pectoral expansion & shoulder freedom.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/bodyweight-squatting-row.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -606,7 +617,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ashtanga Chikitsa asana practiced on a yoga mat for foundation alignment & drishti gaze.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/bodyweight-standing-calf-raise.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -659,7 +671,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parivrtta Vinyasa asana practiced on a yoga mat for spinal detox & internal organ compression.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/assisted-motion-russian-twist.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -712,7 +725,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Sandhi Vinyasa asana practiced on a yoga mat for collagen renewal & synovial pumping.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/sphinx.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -765,7 +779,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Tadasana asana practiced on a yoga mat for grounding & neutral pelvic tilt.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/cable-standing-one-leg-calf-raise.gif",
+    "poseType": "tree_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/standing-pelvic-tilt.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -818,7 +833,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Vrikshasana asana practiced on a yoga mat for unilateral proprioception & core.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/calf-push-stretch-with-hands-against-wall.gif",
+    "poseType": "tree_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/standing-calves-calf-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -871,7 +887,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Virabhadrasana I asana practiced on a yoga mat for hip flexor extension & quad power.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/barbell-split-squat-v-2.gif",
+    "poseType": "warrior_1",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/posterior-step-to-overhead-reach.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -924,7 +941,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Virabhadrasana II asana practiced on a yoga mat for adductor endurance & external rotation.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/barbell-squat-jump-step-rear-lunge.gif",
+    "poseType": "warrior_2",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -977,7 +995,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Virabhadrasana III asana practiced on a yoga mat for posterior chain balance & glute medius.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-full-squat-back-pov.gif",
+    "poseType": "warrior_3",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/intermediate-hip-flexor-and-quad-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1030,7 +1049,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Trikonasana asana practiced on a yoga mat for hamstring elongation & lateral spine.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/runners-stretch.gif",
+    "poseType": "triangle",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/standing-lateral-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1083,7 +1103,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parivrtta Trikonasana asana practiced on a yoga mat for thoracic rotation & it band release.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/band-straight-leg-deadlift.gif",
+    "poseType": "triangle",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/standing-hamstring-and-calf-stretch-with-strap.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1136,7 +1157,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parsvakonasana asana practiced on a yoga mat for intercostal reach & groin opening.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/cable-incline-pushdown.gif",
+    "poseType": "extended_side_angle",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1189,7 +1211,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parivrtta Parsvakonasana asana practiced on a yoga mat for deep visceral detox & quad stability.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/band-push-sit-up.gif",
+    "poseType": "extended_side_angle",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/standing-lateral-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1242,7 +1265,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Utkatasana asana practiced on a yoga mat for quadriceps hypertrophy & ankle mobility.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-supported-squat.gif",
+    "poseType": "chair_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/squat-to-overhead-reach-with-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1295,7 +1319,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Garudasana asana practiced on a yoga mat for scapular spread & pelvic equilibrium.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/cable-palm-rotational-row.gif",
+    "poseType": "eagle_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/behind-head-chest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1348,7 +1373,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Natarajasana asana practiced on a yoga mat for chest expansion & unilateral glute lock.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-high-bar-squat.gif",
+    "poseType": "dancer_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/lying-side-quads-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1401,7 +1427,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ardha Chandrasana asana practiced on a yoga mat for abductor power & spinal extension.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abductors/resistance-band-seated-hip-abduction.gif",
+    "poseType": "warrior_3",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/intermediate-hip-flexor-and-quad-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1454,7 +1481,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parivrtta Ardha Chandrasana asana practiced on a yoga mat for balance under rotational torque.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/hyperextension-on-bench.gif",
+    "poseType": "warrior_3",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/intermediate-hip-flexor-and-quad-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1507,7 +1535,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Prasarita Padottanasana A asana practiced on a yoga mat for adductor stretch & inverted calming.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/assisted-prone-hamstring.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1560,7 +1589,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Prasarita Padottanasana C asana practiced on a yoga mat for anterior deltoid & pectoral release.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/cable-rope-seated-row.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1613,7 +1643,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Padangusthasana asana practiced on a yoga mat for hamstring flexibility & hip flexor lock.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/barbell-straight-leg-deadlift.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1666,7 +1697,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Malasana asana practiced on a yoga mat for pelvic floor relaxation & sacral opening.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-lying-lifting-on-hip.gif",
+    "poseType": "garland_squat",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/squat-to-overhead-reach-with-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1719,7 +1751,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Goddess Pose asana practiced on a yoga mat for inner thigh fire & pelvic stability.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/resistance-band-leg-extension.gif",
+    "poseType": "garland_squat",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/rocking-frog-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1772,7 +1805,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Skandasana asana practiced on a yoga mat for ankle dorsiflexion & adductor freedom.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/lever-seated-hip-adduction.gif",
+    "poseType": "garland_squat",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/squat-to-overhead-reach-with-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1825,7 +1859,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Pada Hastasana asana practiced on a yoga mat for deep hamstring release & wrist decompression.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/glute-ham-raise.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1878,7 +1913,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Uttanasana asana practiced on a yoga mat for spine decompression & posterior elongation.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1931,7 +1967,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ardha Uttanasana asana practiced on a yoga mat for erector spinae & lat engaging.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/upward-facing-dog.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -1984,7 +2021,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ashwa Sanchalanasana asana practiced on a yoga mat for iliopsoas release & pelvic sinking.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-romanian-deadlift.gif",
+    "poseType": "warrior_1",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/runners-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2037,7 +2075,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Anjaneyasana asana practiced on a yoga mat for front body opening & thoracic arch.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/squat-jerk.gif",
+    "poseType": "warrior_1",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/posterior-step-to-overhead-reach.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2090,7 +2129,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parsvottanasana asana practiced on a yoga mat for unilateral hamstring & scapular bind.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/kick-out-sit.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2143,7 +2183,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Urdhva Hastasana asana practiced on a yoga mat for full body axial extension.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/close-grip-chin-up.gif",
+    "poseType": "tree_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/standing-pelvic-tilt.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2196,7 +2237,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Indudalasana asana practiced on a yoga mat for intercostals & oblique elongation.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cable-judo-flip.gif",
+    "poseType": "tree_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/standing-calves-calf-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2249,7 +2291,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Viparita Virabhadrasana asana practiced on a yoga mat for lateral rib expansion & front hip open.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lat-stretch.gif",
+    "poseType": "warrior_2",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/lunge-with-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2302,7 +2345,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Baddha Parsvakonasana asana practiced on a yoga mat for internal shoulder rotation & psoas stretch.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/dumbbell-one-arm-bent-over-row.gif",
+    "poseType": "extended_side_angle",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2355,7 +2399,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Dandasana asana practiced on a yoga mat for spinal neutrality & core bracing.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-hug.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2408,7 +2453,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Paschimottanasana asana practiced on a yoga mat for total posterior chain release.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/power-clean.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/spine-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2461,7 +2507,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Janu Sirsasana asana practiced on a yoga mat for asymmetric hamstring & lumbar release.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/reclining-big-toe-pose-with-rope.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/seated-wide-angle-pose-sequence.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2514,7 +2561,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Parivrtta Janu Sirsasana asana practiced on a yoga mat for quadratus lumborum & lats elongation.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/kipping-muscle-up.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2567,7 +2615,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Baddha Konasana asana practiced on a yoga mat for adductor relaxation & sacral freedom.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/assisted-side-lying-adductor-stretch.gif",
+    "poseType": "butterfly",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/butterfly-yoga-pose.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2620,7 +2669,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Supta Baddha Konasana asana practiced on a yoga mat for restorative pelvic drainage & heart open.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/cable-deadlift.gif",
+    "poseType": "butterfly",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/butterfly-yoga-pose.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2673,7 +2723,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Upavistha Konasana asana practiced on a yoga mat for inner thigh & pelvic floor freedom.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/cable-hip-adduction.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2726,7 +2777,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Gomukhasana asana practiced on a yoga mat for glute rotators & rotator cuff opening.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/ez-bar-reverse-grip-bent-over-row.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/spine-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2779,7 +2831,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Agnistambhasana asana practiced on a yoga mat for deep outer hip & piriformis release.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/curtsey-squat.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/seated-glute-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2832,7 +2885,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ardha Matsyendrasana asana practiced on a yoga mat for digestive stimulation & spinal health.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/standing-pelvic-tilt.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/bent-knee-lying-twist-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2885,7 +2939,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Bharadvajasana asana practiced on a yoga mat for thoracic mobility & sacroiliac relief.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/spine-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2938,7 +2993,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Marichyasana A asana practiced on a yoga mat for abdominal compression & hamstring reach.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/captains-chair-straight-leg-raise.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/seated-glute-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -2991,7 +3047,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Marichyasana C asana practiced on a yoga mat for liver & spleen stimulation.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/weighted-hyperextension-on-stability-ball.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/bent-knee-lying-twist-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3044,7 +3101,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Krounchasana asana practiced on a yoga mat for extreme hamstring stretch & straight spine.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/barbell-good-morning.gif",
+    "poseType": "seated_twist",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/spine-twist.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3097,7 +3155,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Tarasana asana practiced on a yoga mat for sacrum & sciatic nerve gentle release.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/dumbbell-one-arm-snatch.gif",
+    "poseType": "uttanasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3150,7 +3209,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Siddhasana asana practiced on a yoga mat for mula bandha activation & grounding.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/dumbbell-plyo-squat.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/seated-lower-back-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3203,7 +3263,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Padmasana asana practiced on a yoga mat for meditative hip equilibrium.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/dumbbell-rear-lunge.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/seated-piriformis-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3256,7 +3317,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ardha Padmasana asana practiced on a yoga mat for gentle external hip rotation.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/dumbbell-single-leg-deadlift-with-stepbox-support.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/seated-lower-back-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3309,7 +3371,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Sukhasana asana practiced on a yoga mat for diaphragmatic breathwave & grounding.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-rotation.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/seated-piriformis-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3362,7 +3425,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Virasana asana practiced on a yoga mat for anterior thigh & ankle mobility.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/barbell-wide-squat.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/seated-lower-back-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3415,7 +3479,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Supta Virasana asana practiced on a yoga mat for intense psoas & quad fascial opening.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/chair-leg-extended-stretch.gif",
+    "poseType": "bridge_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pelvic-tilt-into-bridge.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3468,7 +3533,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Vajrasana asana practiced on a yoga mat for post-meal bloodflow & pelvic drainage.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-step-up-lunge.gif",
+    "poseType": "prana_vinyasa",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/world-greatest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3521,7 +3587,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Navasana asana practiced on a yoga mat for transverse abdominis & hip flexor fire.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/decline-sit-up.gif",
+    "poseType": "boat_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/v-sit-on-floor.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3574,7 +3641,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ardha Navasana asana practiced on a yoga mat for deep core compression & pelvic lock.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/dumbbell-side-bend.gif",
+    "poseType": "boat_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/l-sit-on-floor.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3627,7 +3695,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Simhasana asana practiced on a yoga mat for throat chakra & platysma tension drain.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
+    "poseType": "lotus_meditation",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/seated-piriformis-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3680,7 +3749,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Kurmasana asana practiced on a yoga mat for pratyahara sensory withdrawal & hamstrings.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/lever-kneeling-leg-curl.gif",
+    "poseType": "seated_forward_fold",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/spine-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3733,7 +3803,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Bhekasana asana practiced on a yoga mat for knee flexibility & chest elevation.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/intermediate-hip-flexor-and-quad-stretch.gif",
+    "poseType": "butterfly",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/butterfly-yoga-pose.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3786,7 +3857,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Mandukasana asana practiced on a yoga mat for groin, adductor & sacral decompression.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/side-plank-hip-adduction.gif",
+    "poseType": "butterfly",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/butterfly-yoga-pose.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3839,7 +3911,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Bhujangasana asana practiced on a yoga mat for erector spinae & kidney awakening.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/standing-pelvic-tilt.gif",
+    "poseType": "upward_dog",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/upward-facing-dog.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3892,7 +3965,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Sphinx Pose asana practiced on a yoga mat for gentle sacral arch & thoracic glide.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/two-toe-touch-male.gif",
+    "poseType": "upward_dog",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/sphinx.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -3945,6 +4019,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Urdhva Mukha Svanasana asana practiced on a yoga mat for anterior body opening & wrist lock.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
+    "poseType": "upward_dog",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/upward-facing-dog.gif",
     "primaryMuscles": [
       {
@@ -3998,7 +4073,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Dhanurasana asana practiced on a yoga mat for full kinetic arch & visceral massage.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/weighted-hyperextension-on-stability-ball.gif",
+    "poseType": "bow_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/chest-and-front-of-shoulder-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4051,7 +4127,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ustrasana asana practiced on a yoga mat for psoas, chest & thyroid activation.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
+    "poseType": "camel_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/behind-head-chest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4104,7 +4181,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Urdhva Dhanurasana asana practiced on a yoga mat for peak thoracic arch & tricep power.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/band-straight-leg-deadlift.gif",
+    "poseType": "wheel_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/upward-facing-dog.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4157,7 +4235,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Setu Bandhasana asana practiced on a yoga mat for posterior chain drive & thyroid pressure.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hands-reversed-clasped-circular-toe-touch-male.gif",
+    "poseType": "bridge_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pelvic-tilt-into-bridge.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4210,7 +4289,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Salabhasana asana practiced on a yoga mat for lower back, glutes & hamstrings lift.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-hands-behind-head.gif",
+    "poseType": "locust_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4263,7 +4343,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Matsyasana asana practiced on a yoga mat for cervical extension & lung expansion.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-knees-off-ground.gif",
+    "poseType": "savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hug-keens-to-chest.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4316,7 +4397,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Rajakapotasana asana practiced on a yoga mat for supreme hip flexor & lat bind.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/jump-squat-v-2.gif",
+    "poseType": "bridge_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/low-glute-bridge-on-floor.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4369,7 +4451,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ustra Vinyasa asana practiced on a yoga mat for dynamic quad & lumbar wave.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/squat-jerk.gif",
+    "poseType": "camel_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/behind-head-chest-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4422,7 +4505,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Viparita Dandasana asana practiced on a yoga mat for scapular depression & intercostals.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-prone-leg-raise.gif",
+    "poseType": "wheel_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/upward-facing-dog.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4475,7 +4559,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Adho Mukha Svanasana asana practiced on a yoga mat for axial spine traction & calf release.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/hyperextension-on-bench.gif",
+    "poseType": "downward_dog",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4528,7 +4613,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Balasana asana practiced on a yoga mat for sacral decompression & third eye ground.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/hyperextension.gif",
+    "poseType": "child_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/kneeling-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4581,7 +4667,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Ananda Balasana asana practiced on a yoga mat for pelvic floor relaxation & groin ease.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/kettlebell-pistol-squat.gif",
+    "poseType": "child_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/kneeling-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4634,7 +4721,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Supta Padangusthasana asana practiced on a yoga mat for isolate hamstring without back strain.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/cable-assisted-inverse-leg-curl.gif",
+    "poseType": "savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/side-lying-floor-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4687,7 +4775,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Jathara Parivartanasana asana practiced on a yoga mat for visceral drainage & spinal rotation.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/hip-raise-bent-knee.gif",
+    "poseType": "savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hug-keens-to-chest.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4740,7 +4829,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Apanasana asana practiced on a yoga mat for lower back hug & ascending colon ease.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/inchworm-v-2.gif",
+    "poseType": "child_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/kneeling-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4793,7 +4883,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Savasana asana practiced on a yoga mat for full system cellular equilibrium & rest.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/spine-stretch.gif",
+    "poseType": "savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hug-keens-to-chest.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4846,7 +4937,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Makarasana asana practiced on a yoga mat for breathing wave into sacrum & low back.",
     "metScore": 3.3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/standing-pelvic-tilt.gif",
+    "poseType": "locust_pose",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/lower-back-curl.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4899,7 +4991,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Viparita Karani asana practiced on a yoga mat for venous return & lymphatic drainage.",
     "metScore": 3.6,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/lever-rotary-calf.gif",
+    "poseType": "shoulderstand",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/leg-up-hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -4952,7 +5045,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Sarvangasana asana practiced on a yoga mat for thyroid circulation & inverted flow.",
     "metScore": 3.9,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/barbell-pendlay-row.gif",
+    "poseType": "shoulderstand",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hug-keens-to-chest.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -5005,7 +5099,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Halasana asana practiced on a yoga mat for total posterior chain & autonomic calm.",
     "metScore": 4.2,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/weighted-hyperextension-on-stability-ball.gif",
+    "poseType": "shoulderstand",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/leg-up-hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -5058,7 +5153,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Authentic traditional Karnapidasana asana practiced on a yoga mat for sensory stillness & deep spinal curl.",
     "metScore": 3,
     "hypertrophyRate": 0.25,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
+    "poseType": "shoulderstand",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/hug-keens-to-chest.gif",
     "primaryMuscles": [
       {
         "name": "Spinal Erectors & Axial Core",
@@ -5111,7 +5207,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for thoracic opening & latissimus traction without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/band-assisted-wheel-rollerout.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5164,7 +5261,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for spinal decompression & intercostal reach without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/barbell-rollerout-from-bench.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5217,7 +5315,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for gluteus maximus & hamstring stabilization without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/barbell-rollerout.gif",
+    "poseType": "ball_bridge",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/reverse-hyper-extension-on-stability-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5270,7 +5369,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for postural kyphosis reversal on ball without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/barbell-standing-ab-rollerout.gif",
+    "poseType": "ball_thoracic_arch",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-hands-behind-head.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5323,7 +5423,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for gentle rotational torque & core alignment without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cable-russian-twists-on-stability-ball.gif",
+    "poseType": "ball_seated_flow",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball-arms-straight.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5376,7 +5477,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for pelvic rhythms & lumbar wave without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cable-side-bend-crunch-bosu-ball.gif",
+    "poseType": "ball_plank_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-alternating-arm-ups.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5429,7 +5531,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for zero-wrist shoulder traction & calf float without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball-arms-straight.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5482,7 +5585,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for sacral freedom & deep pelvic drainage without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5535,7 +5639,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for quadratus lumborum & ribcage glide without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/one-arm-slam-with-medicine-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5588,7 +5693,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for rhomboids, middle traps & low back without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/prone-twist-on-stability-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5641,7 +5747,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for sacroiliac joint fluidity & core sync without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/pull-in-on-stability-ball.gif",
+    "poseType": "ball_seated_flow",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball-arms-straight.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5694,7 +5801,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for deep venous drainage & psoas relaxation without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/roller-body-saw.gif",
+    "poseType": "ball_savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lying-side-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5747,7 +5855,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for glute medius & pelvic leveling without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/roller-reverse-crunch.gif",
+    "poseType": "ball_bridge",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/reverse-hyper-extension-on-stability-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5800,7 +5909,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for scapular separation & trapezius relief without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/spine-twist.gif",
+    "poseType": "ball_thoracic_arch",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-hands-behind-head.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5853,7 +5963,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for gluteal firing & sacroiliac alignment without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/stability-ball-crunch-full-range-hands-behind-head.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5906,7 +6017,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for shoulder impingement relief on ball without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/standing-wheel-rollerout.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -5959,7 +6071,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for deep transverse abdominis firing without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/weighted-overhead-crunch-on-stability-ball.gif",
+    "poseType": "ball_seated_flow",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball-arms-straight.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6012,7 +6125,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for groin release & deep diaphragmatic breath without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/weighted-seated-twist-on-stability-ball.gif",
+    "poseType": "ball_thoracic_arch",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-hands-behind-head.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6065,7 +6179,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for shoulder centration & serratus drive without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/weighted-side-bend-on-stability-ball.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lat-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6118,7 +6233,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for biceps femoris & posterior kinetic chain without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/wheel-rollerout.gif",
+    "poseType": "ball_bridge",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/exercise-ball-seated-hamstring-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6171,7 +6287,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for thyroid stimulation & cervical traction without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/cable-overhead-curl-on-exercise-ball.gif",
+    "poseType": "ball_thoracic_arch",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/chest-stretch-with-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6224,7 +6341,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for tensor fasciae latae & lateral hip without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-alternating-bicep-curl-with-leg-raised-on-exercise-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6277,7 +6395,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for quad hypertrophy with perfect spine support without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-alternating-seated-bicep-curl-on-exercise-ball.gif",
+    "poseType": "ball_wall_squat",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/exercise-ball-hip-flexor-stretch.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6330,7 +6449,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for thoracolumbar fascia & oblique stretch without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-bicep-curl-on-exercise-ball-with-leg-raised.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6383,7 +6503,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for parasympathetic down-regulation without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-biceps-curl-v-sit-on-bosu-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6436,7 +6557,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for anterior hip capsule release on ball without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-hammer-curl-on-exercise-ball.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lower-back-stretch-pyramid.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6489,7 +6611,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for achilles tendon mobility & venous return without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-kneeling-bicep-curl-exercise-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6542,7 +6665,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for thoracic mobility & kidney awakening without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-one-arm-concentration-curl-on-stability-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6595,7 +6719,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for full kinetic axial decompression without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-one-arm-seated-bicep-curl-on-exercise-ball.gif",
+    "poseType": "ball_child_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/exercise-ball-lower-back-stretch-pyramid.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6648,7 +6773,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for gentle posterior chain glide without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-preacher-curl-over-exercise-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6701,7 +6827,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for pelvic floor tone & vmo activation without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-seated-alternate-hammer-curl-on-exercise-ball.gif",
+    "poseType": "ball_seated_flow",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/crunch-on-stability-ball-arms-straight.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6754,7 +6881,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for chest expansion & nervous system reset without gym machinery.",
     "metScore": 4.1,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-seated-biceps-curl-on-stability-ball.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-back-extension-with-arms-extended.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6807,7 +6935,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for sciatic nerve flossing on ball without gym machinery.",
     "metScore": 3.2,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-seated-one-arm-bicep-curl-on-exercise-ball-with-leg-raised.gif",
+    "poseType": "ball_back_extension",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6860,7 +6989,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for contralateral neuromuscular balance without gym machinery.",
     "metScore": 3.5,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/weighted-seated-bicep-curl-on-stability-ball.gif",
+    "poseType": "ball_plank_rollout",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/push-up-on-stability-ball.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6913,7 +7043,8 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Restorative stability ball yoga flow for deep zen stillness & somatic integration without gym machinery.",
     "metScore": 3.8,
     "hypertrophyRate": 0.35,
-    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/exercise-ball-on-the-wall-calf-raise-tennis-ball-between-ankles.gif",
+    "poseType": "ball_savasana",
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/exercise-ball-hug.gif",
     "primaryMuscles": [
       {
         "name": "Core Stabilizer Ring",
@@ -6966,6 +7097,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for double chin elimination & jaw definition.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_jawline",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7019,6 +7151,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for mid-face volume & nasolabial smoothing.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_cheek",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7072,6 +7205,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for expression line softening & brow balance.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_forehead",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7125,6 +7259,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for crow's feet prevention & under-eye drain.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_forehead",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7178,6 +7313,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for cheek definition & deep facial drainage.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_cheek",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7231,6 +7367,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for neck firming & platysma fascial pull.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7284,6 +7421,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for lip definition & perioral tone.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lips",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7337,6 +7475,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for full facial bloodflow & tension relief.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lion_breath",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7390,6 +7529,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for submental muscle & hyoid bone lift.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_mewing_chin",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7443,6 +7583,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for puffiness removal & lymph drainage.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7496,6 +7637,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for microcirculation & dark circle relief.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_eyes",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7549,6 +7691,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for tmj clenching relief & head ease.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7602,6 +7745,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for clenching & bruxism relief.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7655,6 +7799,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for upper eyelid lift & frontal ease.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_forehead",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7708,6 +7853,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for sinus drainage & nasal symmetry.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7761,6 +7907,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for deep submental toning.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_mewing_chin",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7814,6 +7961,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for 11 line softening & forehead calm.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_forehead",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7867,6 +8015,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for collagen stimulation in cheeks.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_cheek",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -7920,6 +8069,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for thyroid vitality & neck tightening.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -7973,6 +8123,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for circumoral muscle elasticity.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lips",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8026,6 +8177,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for facial toning via scalp fascia.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_forehead",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8079,6 +8231,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for parasympathetic facial glow reset.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8132,6 +8285,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for thoracic lymphatic flush.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8185,6 +8339,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for mandibular contour sharpening.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_jawline",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8238,6 +8393,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for lip corner elevation & saccular tone.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_cheek",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8291,6 +8447,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for cellular hydration & inflammation cool.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_mewing_chin",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8344,6 +8501,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for tmj alignment & facial equilibrium.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8397,6 +8555,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for ptosis prevention & eye brightening.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_eyes",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8450,6 +8609,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for tear-trough plumping & tone.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_eyes",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8503,6 +8663,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for hollow cheekbone definition.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_cheek",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8556,6 +8717,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for deep neck line eradication.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lymphatic",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8609,6 +8771,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for forward head posture & double chin fix.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_jawline",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8662,6 +8825,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for skin elasticity & microcapillary flow.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_jawline",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {
@@ -8715,6 +8879,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for nitric oxide release & cellular radiance.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_lion_breath",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/side-push-neck-stretch.gif",
     "primaryMuscles": [
       {
@@ -8768,6 +8933,7 @@ export const YOGA_AND_HOME_WORKOUTS = [
     "tagline": "Non-invasive facial toning & lymphatic drainage asana for complete facial muscle reset & radiance.",
     "metScore": 2.2,
     "hypertrophyRate": 0.2,
+    "poseType": "face_jawline",
     "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif",
     "primaryMuscles": [
       {

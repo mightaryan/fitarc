@@ -2,16 +2,44 @@ const fs = require('fs');
 const path = require('path');
 const { MASTER_EXERCISE_CATALOG } = require('../src/data/allExercisesMaster.js');
 
-// Helper to filter master exercises by folder
+// Helper to filter master exercises by folder - STRICT TRUE HOME FLOOR / WALL / CHAIR ZERO-RIG DYNAMIC 3D EXERCISES ONLY!
+const HOME_DISALLOWED = [
+  'bench', 'machine', 'hyperextension', 'roman', '45-side', 'cable', 'lever',
+  'barbell', 'dumbbell', 'smith', 'weighted', 'pulldown', 'sled', 'kettlebell', 'svend',
+  'pull-up', 'pull up', 'chin-up', 'chin up', 'chin-ups', 'gorilla-chin', 'side-to-side-chin',
+  'hanging', 'muscle-up', 'kipping', 'parallel-bar', 'dip-cage', 'straight-bar',
+  'ring-dip', 'korean-dip', 'impossible-dip', 'captains-chair', 'skin-the-cat',
+  'vertical-leg-raise', 'side-hip-on-parallel', 'rocky-pull', 'gironda', 'rope-climb',
+  'bosu', 'medicine-ball', 'wheel-roller', 'roller-', 'suspended', 'with-straps', 'with-rope',
+  'balance-board', 'tire-flip', 'farmers-walk', 'snatch', 'power-clean', 'squat-jerk',
+  'stationary-bike', 'ski-ergometer', 'run-equipment', 'wheel-run', 'jump-rope', 'wind-sprints',
+  'decline-crunch', 'decline-sit-up', 'incline-leg-hip-raise', 'incline-twisting-sit-up',
+  'glute-ham-raise', 'on-box', 'box-jump', 'stability-ball', 'exercise-ball',
+  'flag', 'maltese', 'planche', 'stalder', 'on-staircase', 'reclining-big-toe-pose-with-rope',
+  'chest-dip', 'scapula-dips', 'one-arm-dip', 'triceps-dip.gif', 'triceps-press',
+  'inverted-row', 'wrist-roller', 'calf-stretch-with-rope', 'with-strap', 'handstand',
+  'standing-behind-neck-press', 'one-arm-towel-row', 'bodyweight-standing-one-arm-row',
+  'bodyweight-standing-row', 'bodyweight-squatting-row', 'bodyweight-standing-close-grip',
+  'deep-push-up', 'incline-reverse-grip', 'hands-bike', 'potty-squat',
+  'back-and-forth-step', 'short-stride-run', 'push-to-run', 'quick-feet',
+  'half-knee-bends', 'toe-touch', 'elbow-dips', 'elbow-lift-reverse', 'one-arm-against-wall',
+  'isometric-wipers', 'isometric-chest-squeeze', 'finger-curls', 'wrist-circles',
+  'stretch', 'left-hook-boxing'
+];
+
 const byFolder = {};
 MASTER_EXERCISE_CATALOG.forEach((ex) => {
+  if (ex.equipment !== 'bodyweight') return;
+  const s = (ex.name + ' ' + ex.slug + ' ' + ex.gifUrl).toLowerCase();
+  if (HOME_DISALLOWED.some((w) => s.includes(w))) return;
+  if (s.includes('assisted') && !s.includes('self-assisted')) return;
   const parts = ex.gifUrl.split('/');
   const folder = parts[parts.length - 2];
   if (!byFolder[folder]) byFolder[folder] = [];
   byFolder[folder].push(ex);
 });
 
-console.log('Building 520+ home exercises from authentic 3D GIF pools...');
+console.log('Building 520+ home exercises from authentic 3D GIF pools (STRICT ZERO-EQUIPMENT)...');
 
 const TARGET_AREAS = [
   {
@@ -54,7 +82,7 @@ const TARGET_AREAS = [
     id: 'arm_fat',
     label: 'Lose Arm Fat',
     subtitle: 'Triceps Chisel & Shoulder Tone',
-    folders: ['triceps', 'delts', 'biceps', 'forearms'],
+    folders: ['triceps', 'biceps', 'pectorals'],
     muscleCategory: 'Arms',
     primaryMuscleName: 'Triceps Brachii & Deltoid Cap',
     count: 85,
@@ -66,11 +94,11 @@ const TARGET_AREAS = [
     id: 'back_posture',
     label: 'Back & Posture Alignment',
     subtitle: 'Spine Health & Thoracic Opening',
-    folders: ['lats', 'upper-back', 'spine', 'traps'],
+    folders: ['spine', 'serratus-anterior', 'glutes'],
     muscleCategory: 'Back',
     primaryMuscleName: 'Latissimus Dorsi & Rhomboids',
     count: 65,
-    equipmentTypes: ['bodyweight', 'mat', 'towel', 'doorframe'],
+    equipmentTypes: ['bodyweight', 'mat', 'towel', 'wall'],
     lowImpactRatio: 0.95,
     tagline: 'Postural correction restoring scapular retraction and counteracting sedentary slouch.',
   },
@@ -87,10 +115,22 @@ const TARGET_AREAS = [
     tagline: 'Maximum EPOC oxygen consumption sprint burning calories for 24 hours post-workout.',
   },
   {
+    id: 'hiit_furnace_600',
+    label: '400-600 kcal Extreme HIIT',
+    subtitle: 'High-Octane Metabolic Incinerator',
+    folders: ['cardio', 'glutes', 'abs', 'pectorals'],
+    muscleCategory: 'Metabolic HIIT',
+    primaryMuscleName: 'Full Cardiovascular System & Kinetic Chain',
+    count: 80,
+    equipmentTypes: ['bodyweight', 'floor', 'mat'],
+    lowImpactRatio: 0.3,
+    tagline: 'Extreme compound interval training specifically formulated to burn 400 to 600 calories in one sustained set/session.',
+  },
+  {
     id: 'lazy_fitness',
     label: 'Lazy Bed & Couch Fitness',
     subtitle: 'Restorative & Bedtime Calorie Burn',
-    folders: ['abs', 'glutes', 'spine', 'triceps'],
+    folders: ['glutes', 'spine', 'adductors', 'abductors'],
     muscleCategory: 'Core & Mobility',
     primaryMuscleName: 'Deep Core Stabilizers & Gluteus Medius',
     count: 45,
@@ -101,11 +141,11 @@ const TARGET_AREAS = [
 ];
 
 const VARIANT_PREFIXES = [
-  'Dynamic', 'Isometric Hold', 'Pulse Tempo', 'Controlled Eccentric',
-  'Elevated', 'Floor Tucked', 'Paced', 'Extended Range',
-  'Explosive', 'Unilateral', 'Synchronized', 'Deep Flex',
-  'Restorative', 'High Activation', 'Sustained', 'Rhythmic',
-  'Postural', 'Sculpting', 'Low Impact', 'Pyramid Burn'
+  'Controlled', 'Slow Tempo', 'Bodyweight', 'Sculpting',
+  'Floor', 'Focused', 'Chisel', 'Extended',
+  'Explosive', 'Active', 'Rhythmic', 'Deep',
+  'Restorative', 'Athletic', 'Sustained', 'Steady',
+  'Postural', 'Form-First', 'Low Impact', 'Balanced'
 ];
 
 const allExercises = [];
@@ -378,6 +418,41 @@ const TROUBLE_ZONE_PLANS = [
         estimatedCalories: 190,
         restSeconds: 10,
         exerciseIds: allExercises.filter(e => e.targetArea === 'legs_glutes' && e.level === 'Advanced').slice(0, 15).map(e => e.id),
+      },
+    },
+  },
+  {
+    id: 'hiit_furnace_600',
+    title: '400-600 kcal Extreme HIIT Blitz',
+    badge: '400-600 kcal Melt',
+    description: 'High-octane metabolic compound circuits specifically formulated to melt 400 to 600 calories in one set with zero equipment.',
+    levels: {
+      beginner: {
+        name: 'Beginner (400 kcal Burn)',
+        subtitle: 'Interval Sprints & Kinetic Circuits',
+        exerciseCount: 16,
+        durationMinutes: 30,
+        estimatedCalories: 410,
+        restSeconds: 20,
+        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Beginner').slice(0, 16).map(e => e.id),
+      },
+      intermediate: {
+        name: 'Intermediate (500 kcal Burn)',
+        subtitle: 'Tabata Complexes & Plyo Burpees',
+        exerciseCount: 22,
+        durationMinutes: 38,
+        estimatedCalories: 515,
+        restSeconds: 15,
+        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Intermediate').slice(0, 22).map(e => e.id),
+      },
+      advanced: {
+        name: 'Advanced (600+ kcal Burn)',
+        subtitle: 'Continuous EPOC Incinerator Wave',
+        exerciseCount: 28,
+        durationMinutes: 45,
+        estimatedCalories: 620,
+        restSeconds: 10,
+        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Advanced').slice(0, 28).map(e => e.id),
       },
     },
   },

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
+import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
 
 // Simple Web Audio API Synthesizer for workout beeps & chimes (Zero external assets needed)
 const playSoundCue = (type = 'beep') => {
@@ -221,7 +222,7 @@ export function GuidedWorkoutPlayerModal({
   const ringProgress = currentSecondsTotal > 0 ? (secondsRemaining / currentSecondsTotal) * 100 : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-2xl animate-in fade-in duration-200">
       <div className="relative w-full max-w-xl h-full sm:h-auto sm:max-h-[95vh] bg-[#08090C] sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between p-4 bg-obsidian-900/90 border-b border-amber-500/15 shrink-0">
@@ -366,11 +367,17 @@ export function GuidedWorkoutPlayerModal({
 
                   {nextExercise && (
                     <div className="p-3 rounded-2xl bg-obsidian-850 border border-white/10 max-w-sm mx-auto flex items-center gap-3 text-left">
-                      <img
-                        src={nextExercise.gifUrl}
-                        alt={nextExercise.name}
-                        className="w-12 h-12 rounded-xl object-contain bg-black/80 shrink-0"
-                      />
+                      {(nextExercise.category === 'face_yoga' || nextExercise.subCategory === 'face_yoga' || nextExercise.equipment === 'face_hands') ? (
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#08090C] shrink-0">
+                          <YogaAnatomicalCanvas exercise={nextExercise} compact />
+                        </div>
+                      ) : (
+                        <img
+                          src={nextExercise.gifUrl}
+                          alt={nextExercise.name}
+                          className="w-12 h-12 rounded-xl object-contain dark-3d-animation bg-black/80 shrink-0"
+                        />
+                      )}
                       <div className="truncate">
                         <span className="text-[9px] uppercase tracking-wider text-amber-400 font-bold block">
                           Next Up:
@@ -391,18 +398,26 @@ export function GuidedWorkoutPlayerModal({
               ) : (
                 /* Active Exercise 3D Stage */
                 <div className="relative w-full h-full flex items-center justify-center">
-                  <img
-                    src={currentExercise?.gifUrl}
-                    alt={currentExercise?.name}
-                    onError={(e) => {
-                      if (!e.currentTarget.dataset.fallback) {
-                        e.currentTarget.dataset.fallback = 'true';
-                        e.currentTarget.src =
-                          'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
-                      }
-                    }}
-                    className="w-full h-full object-contain dark-3d-animation"
-                  />
+                  {(currentExercise?.category === 'face_yoga' || currentExercise?.subCategory === 'face_yoga' || currentExercise?.equipment === 'face_hands') ? (
+                    <YogaAnatomicalCanvas exercise={currentExercise} />
+                  ) : (
+                    <img
+                      src={currentExercise?.gifUrl}
+                      alt={currentExercise?.name}
+                      onError={(e) => {
+                        if (!e.currentTarget.dataset.fallback) {
+                          e.currentTarget.dataset.fallback = 'true';
+                          e.currentTarget.src =
+                            currentExercise?.subCategory === 'exercise_ball' || currentExercise?.equipment === 'exercise_ball'
+                              ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
+                              : currentExercise?.category === 'yoga' || currentExercise?.equipment === 'yogamat'
+                              ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif'
+                              : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif';
+                        }
+                      }}
+                      className="w-full h-full object-contain dark-3d-animation"
+                    />
+                  )}
 
                   {/* Countdown Overlay Badge */}
                   <div className="absolute top-3 right-3 px-3 py-1.5 rounded-2xl bg-black/85 backdrop-blur-md border border-amber-500/40 text-amber-300 font-mono text-base font-black flex items-center gap-1.5 shadow-xl">

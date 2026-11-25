@@ -1,135 +1,67 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { calculateWorkoutImpact } from '../data/fitnessData';
-import { evaluateMealNutrition, FOOD_SCAN_PRESETS } from '../data/foodData';
+import {
+  createSeededVault,
+  getRelativeDateString,
+  upgradeVaultWithSeededHistory,
+} from '../data/athleteVaultDatabase';
 
 const AppContext = createContext(null);
 
-const STORAGE_KEY = 'FITARC_APP_STATE_V1';
-const VAULT_KEY = 'FITARC_USERS_VAULT_V2';
-const ACTIVE_USER_ID_KEY = 'FITARC_ACTIVE_USER_ID_V2';
+const LEGACY_VAULT_KEY_V3 = 'FITARC_USERS_VAULT_V3';
+const LEGACY_ACTIVE_USER_ID_KEY_V3 = 'FITARC_ACTIVE_USER_ID_V3';
+const VAULT_KEY = 'FITARC_USERS_VAULT_V4';
+const ACTIVE_USER_ID_KEY = 'FITARC_ACTIVE_USER_ID_V4';
 
-const getTodayDateString = () => {
-  const d = new Date();
-  return d.toISOString().split('T')[0];
-};
+const getTodayDateString = () => getRelativeDateString(0);
 
-const DEFAULT_PROFILE = {
-  id: 'user_alex',
-  name: 'Alex Vance',
-  email: 'alex.vance@fitarc.elite',
-  phone: '+1 415-890-2341',
-  currentWeight: 78.5,
-  targetWeight: 74.0,
-  startWeight: 82.0,
-  height: 182,
-  age: 28,
-  gender: 'male',
-  unit: 'kg',
-  goal: 'fat_loss', // 'fat_loss' | 'muscle_gain' | 'recomp'
-  bodyFat: 16.5,
-  dailyCalorieTarget: 2200,
-  dailyWorkoutTargetMin: 45,
-  dailyWaterTargetLiters: 3.5,
-  isLoggedIn: true,
-  memberTier: 'Gold Elite Pro',
-  loginMethod: 'email',
-  activePlan: {
-    id: 'belly-fat-30',
-    targetArea: 'belly_fat',
-    durationDays: 30,
-    title: '30-Day Belly Fat Blitz',
-    badge: 'High Intensity Sprint',
-    startDate: '2026-11-20',
-    currentDay: 5,
-    dailyCalorieDeficit: 500,
-    dailySugarLimitGrams: 20,
-    workoutDaysPerWeek: 5,
-  },
-  bodyFatHistory: [
-    { date: '2026-11-18', bodyFat: 17.2, method: 'manual', note: 'Baseline scan' },
-    { date: '2026-11-24', bodyFat: 16.5, method: 'ai_scan', note: 'AI torso vision scan' }
-  ],
-};
+function getInitialVaultAndUser() {
+  const seeded = createSeededVault();
+  try {
+    const storedV4Raw = localStorage.getItem(VAULT_KEY);
+    if (storedV4Raw) {
+      const storedVault = JSON.parse(storedV4Raw) || {};
+      const mergedVault = { ...seeded, ...storedVault };
+      const savedActiveId = localStorage.getItem(ACTIVE_USER_ID_KEY) || 'user_alex';
+      const activeId = mergedVault[savedActiveId] ? savedActiveId : 'user_alex';
+      return { mergedVault, activeId };
+    }
 
-const SEED_WEIGHT_HISTORY = [
-  { date: '2026-11-18', weight: 79.8, note: 'Baseline Monday weigh-in' },
-  { date: '2026-11-19', weight: 79.5, note: 'Post leg-day' },
-  { date: '2026-11-20', weight: 79.2, note: 'Clean deficit' },
-  { date: '2026-11-21', weight: 79.0, note: 'Hydrated' },
-  { date: '2026-11-22', weight: 78.8, note: 'Weekend fasted' },
-  { date: '2026-11-23', weight: 78.6, note: 'Midweek progress' },
-  { date: '2026-11-24', weight: 78.5, note: 'Morning weigh-in' },
-];
-
-const SEED_WORKOUTS = [
-  {
-    id: 'w-1',
-    date: getTodayDateString(),
-    exerciseId: 'chest-press-machine',
-    exerciseName: 'Converging Chest Press Machine',
-    category: 'machines',
-    durationMinutes: 25,
-    intensity: 'high',
-    caloriesBurned: 195,
-    muscleGrowthScore: 52,
-    primaryMuscles: ['Pectoralis Major', 'Triceps Brachii'],
-    loggedAt: '10:30 AM',
-  },
-  {
-    id: 'w-2',
-    date: getTodayDateString(),
-    exerciseId: 'treadmill-incline-walk',
-    exerciseName: 'Incline Treadmill Fat-Burn Walk',
-    category: 'cardio',
-    durationMinutes: 20,
-    intensity: 'moderate',
-    caloriesBurned: 142,
-    muscleGrowthScore: 18,
-    primaryMuscles: ['Calves', 'Gluteus Maximus', 'Cardio Aerobic Base'],
-    loggedAt: '11:15 AM',
+    // One-time non-destructive migration from V3 vault to V4 with full multi-day exercise & meal history
+    const legacyRaw = localStorage.getItem(LEGACY_VAULT_KEY_V3);
+    const legacyVault = legacyRaw ? JSON.parse(legacyRaw) : null;
+    const upgradedVault = legacyVault ? upgradeVaultWithSeededHistory(legacyVault) : seeded;
+    const savedActiveId =
+      localStorage.getItem(ACTIVE_USER_ID_KEY) ||
+      localStorage.getItem(LEGACY_ACTIVE_USER_ID_KEY_V3) ||
+      'user_alex';
+    const activeId = upgradedVault[savedActiveId] ? savedActiveId : 'user_alex';
+    localStorage.setItem(VAULT_KEY, JSON.stringify(upgradedVault));
+    localStorage.setItem(ACTIVE_USER_ID_KEY, activeId);
+    return { mergedVault: upgradedVault, activeId };
+  } catch (e) {
+    return { mergedVault: seeded, activeId: 'user_alex' };
   }
-];
+}
 
-const SEED_MEALS = [
-  {
-    id: 'm-1',
-    date: getTodayDateString(),
-    mealType: 'breakfast',
-    title: 'Artisan Sourdough with Avocado & Poached Eggs',
-    calories: 420,
-    protein: 21,
-    carbs: 34,
-    fats: 22,
-    photoUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=900&auto=format&fit=crop&q=80',
-    rating: {
-      score: 9.4,
-      grade: 'A+',
-      badgeText: 'Golden Standard',
-      feedback: 'Excellent balance of bio-available protein and healthy fats.'
-    },
-    nextMealGuidance: {
-      chosen: 'lean_protein',
-      text: 'User requested Lean Protein Flush for lunch to hit target macros.',
-    },
-    loggedAt: '08:45 AM',
-  }
-];
+export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
+  const initialBootstrap = getInitialVaultAndUser();
+  const initialActive = initialBootstrap.mergedVault[initialBootstrap.activeId];
 
-export function AppProvider({ children }) {
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'fitness' | 'food' | 'dashboard'
-  const [fitnessSubTab, setFitnessSubTab] = useState('yoga'); // 'yoga' | 'home_hub' | 'archive'
-  const [user, setUser] = useState(DEFAULT_PROFILE);
+  const [fitnessSubTab, setFitnessSubTab] = useState('yoga'); // 'yoga' | 'home_hub' | 'calisthenics' | 'archive'
+  const [profilesVault, setProfilesVault] = useState(initialBootstrap.mergedVault);
+  const [user, setUser] = useState(initialActive.profile);
   const [fontSizeScale, setFontSizeScale] = useState('normal'); // 'normal' | 'medium' | 'large' | 'xlarge'
-  const [weightHistory, setWeightHistory] = useState(SEED_WEIGHT_HISTORY);
-  const [loggedWorkouts, setLoggedWorkouts] = useState(SEED_WORKOUTS);
-  const [loggedMeals, setLoggedMeals] = useState(SEED_MEALS);
-  const [snoozeUntil, setSnoozeUntil] = useState(null); // ISO Date string
+  const [weightHistory, setWeightHistory] = useState(initialActive.weightHistory || []);
+  const [loggedWorkouts, setLoggedWorkouts] = useState(initialActive.loggedWorkouts || []);
+  const [loggedMeals, setLoggedMeals] = useState(initialActive.loggedMeals || []);
+  const [snoozeUntil, setSnoozeUntil] = useState(initialActive.snoozeUntil || null);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
   const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
   const [selectedRecipeForModal, setSelectedRecipeForModal] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState('biometrics'); // 'biometrics' | 'tier' | 'plan' | 'auth'
+  const [authModalTab, setAuthModalTab] = useState(initialAuthTab); // 'biometrics' | 'directory' | 'history' | 'tier' | 'auth'
   const [isMealScannerOpen, setIsMealScannerOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
 
@@ -156,43 +88,7 @@ export function AppProvider({ children }) {
     document.documentElement.style.fontSize = scaleMap[fontSizeScale] || '100%';
   }, [fontSizeScale]);
 
-  // Multi-profile vault state
-  const [profilesVault, setProfilesVault] = useState(() => {
-    try {
-      const stored = localStorage.getItem(VAULT_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    return {
-      'user_alex': {
-        profile: DEFAULT_PROFILE,
-        weightHistory: SEED_WEIGHT_HISTORY,
-        loggedWorkouts: SEED_WORKOUTS,
-        loggedMeals: SEED_MEALS,
-        snoozeUntil: null,
-      }
-    };
-  });
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY) || 'user_alex';
-      const storedVault = localStorage.getItem(VAULT_KEY);
-      const vault = storedVault ? JSON.parse(storedVault) : profilesVault;
-      const activeData = vault[activeId] || vault['user_alex'];
-      if (activeData) {
-        setUser(activeData.profile);
-        setWeightHistory(activeData.weightHistory || []);
-        setLoggedWorkouts(activeData.loggedWorkouts || []);
-        setLoggedMeals(activeData.loggedMeals || []);
-        setSnoozeUntil(activeData.snoozeUntil || null);
-      }
-    } catch (e) {
-      console.warn('Could not read from local storage', e);
-    }
-  }, []);
-
-  // Save current active user data into profiles vault on any state change
+  // Save current active user data into profiles vault whenever active user state changes
   useEffect(() => {
     if (!user?.id) return;
     try {
@@ -205,7 +101,7 @@ export function AppProvider({ children }) {
             loggedWorkouts,
             loggedMeals,
             snoozeUntil,
-          }
+          },
         };
         localStorage.setItem(VAULT_KEY, JSON.stringify(updatedVault));
         localStorage.setItem(ACTIVE_USER_ID_KEY, user.id);
@@ -220,20 +116,13 @@ export function AppProvider({ children }) {
   useEffect(() => {
     const today = getTodayDateString();
     const hasLoggedToday = weightHistory.some((entry) => entry.date === today);
-
-    if (hasLoggedToday) {
-      return; // Already logged today
-    }
+    if (hasLoggedToday) return;
 
     if (snoozeUntil) {
       const snoozeDate = new Date(snoozeUntil);
-      const now = new Date();
-      if (now < snoozeDate) {
-        return; // Still snoozed
-      }
+      if (new Date() < snoozeDate) return;
     }
 
-    // Otherwise, trigger the daily weight modal prompt after a soft delay (1 second)
     const timer = setTimeout(() => {
       setIsWeightModalOpen(true);
     }, 1200);
@@ -241,7 +130,6 @@ export function AppProvider({ children }) {
     return () => clearTimeout(timer);
   }, [weightHistory, snoozeUntil]);
 
-  // Trigger celebration confetti
   const triggerConfetti = () => {
     try {
       confetti({
@@ -289,29 +177,40 @@ export function AppProvider({ children }) {
     setIsWeightModalOpen(false);
   };
 
-  // Add workout to log
+  // Add workout to log (supports Today or past-day date override)
   const logWorkout = (workoutData) => {
     const today = getTodayDateString();
     const newEntry = {
-      id: `w-${Date.now()}`,
-      date: today,
+      id: `w-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      date: workoutData?.date || today,
       ...workoutData,
-      loggedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      loggedAt:
+        workoutData?.loggedAt ||
+        workoutData?.time ||
+        new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-    setLoggedWorkouts((prev) => [newEntry, ...prev]);
+    setLoggedWorkouts((prev) =>
+      [newEntry, ...prev].sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    );
     triggerConfetti();
   };
 
-  // Add meal to log
+  // Add meal to log (supports Today or past-day date override)
   const logMeal = (mealData) => {
     const today = getTodayDateString();
     const newEntry = {
-      id: `m-${Date.now()}`,
-      date: today,
+      id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      date: mealData?.date || today,
+      sugar: mealData?.sugar ?? 4,
       ...mealData,
-      loggedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      loggedAt:
+        mealData?.loggedAt ||
+        mealData?.time ||
+        new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-    setLoggedMeals((prev) => [newEntry, ...prev]);
+    setLoggedMeals((prev) =>
+      [newEntry, ...prev].sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    );
     triggerConfetti();
   };
 
@@ -324,24 +223,43 @@ export function AppProvider({ children }) {
     setLoggedMeals((prev) => prev.filter((m) => m.id !== id));
   };
 
+  // Snapshot the active user's latest state into a vault map synchronously
+  const buildVaultWithActiveState = (baseVault = profilesVault) => {
+    const nextVault = { ...baseVault };
+    if (user?.id && user?.isLoggedIn) {
+      nextVault[user.id] = {
+        ...(nextVault[user.id] || {}),
+        profile: { ...user },
+        weightHistory,
+        loggedWorkouts,
+        loggedMeals,
+        snoozeUntil,
+      };
+    }
+    return nextVault;
+  };
+
+  // Helper to apply an entry from vault cleanly
+  const loadVaultEntry = (targetId, entry, updatedVaultSnapshot = null) => {
+    const safeVault = updatedVaultSnapshot || buildVaultWithActiveState();
+    setProfilesVault(safeVault);
+    localStorage.setItem(VAULT_KEY, JSON.stringify(safeVault));
+    setUser({ ...entry.profile, isLoggedIn: true });
+    setWeightHistory(entry.weightHistory || []);
+    setLoggedWorkouts(entry.loggedWorkouts || []);
+    setLoggedMeals(entry.loggedMeals || []);
+    setSnoozeUntil(entry.snoozeUntil || null);
+    localStorage.setItem(ACTIVE_USER_ID_KEY, targetId);
+  };
+
   // Login or Register via Phone Number
   const loginWithPhone = (phoneNumber, otpCode, fullName = '', startingWeight = 75.0) => {
     const cleanDigits = phoneNumber.replace(/\D/g, '');
     const profileId = `phone_${cleanDigits}`;
 
-    let currentVault = { ...profilesVault };
-    try {
-      const stored = localStorage.getItem(VAULT_KEY);
-      if (stored) currentVault = JSON.parse(stored);
-    } catch (e) {}
-
+    const currentVault = { ...profilesVault };
     if (currentVault[profileId]) {
-      const existing = currentVault[profileId];
-      setUser({ ...existing.profile, isLoggedIn: true });
-      setWeightHistory(existing.weightHistory || []);
-      setLoggedWorkouts(existing.loggedWorkouts || []);
-      setLoggedMeals(existing.loggedMeals || []);
-      setSnoozeUntil(existing.snoozeUntil || null);
+      loadVaultEntry(profileId, currentVault[profileId]);
     } else {
       const newProfile = {
         id: profileId,
@@ -349,41 +267,40 @@ export function AppProvider({ children }) {
         phone: phoneNumber,
         email: '',
         currentWeight: startingWeight,
-        targetWeight: Math.round((startingWeight * 0.95) * 10) / 10,
+        targetWeight: Math.round(startingWeight * 0.95 * 10) / 10,
         startWeight: startingWeight,
         height: 178,
         age: 26,
         gender: 'male',
         unit: 'kg',
         goal: 'muscle_gain',
+        bodyFat: 18.0,
         dailyCalorieTarget: 2300,
         dailyWorkoutTargetMin: 45,
         dailyWaterTargetLiters: 3.5,
         isLoggedIn: true,
-        memberTier: 'Verified Athlete',
+        memberTier: 'Pro Athlete',
         loginMethod: 'phone',
+        specialty: 'Custom Vault Profile',
+        bodyFatHistory: [
+          { date: getTodayDateString(), bodyFat: 18.0, method: 'manual', note: 'Initial baseline' },
+        ],
       };
       const initialWeightHistory = [
-        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' }
+        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' },
       ];
-      setUser(newProfile);
-      setWeightHistory(initialWeightHistory);
-      setLoggedWorkouts([]);
-      setLoggedMeals([]);
-      setSnoozeUntil(null);
-
-      currentVault[profileId] = {
+      const newEntry = {
         profile: newProfile,
         weightHistory: initialWeightHistory,
         loggedWorkouts: [],
         loggedMeals: [],
         snoozeUntil: null,
       };
-      setProfilesVault(currentVault);
-      localStorage.setItem(VAULT_KEY, JSON.stringify(currentVault));
+      const updated = { ...currentVault, [profileId]: newEntry };
+      setProfilesVault(updated);
+      localStorage.setItem(VAULT_KEY, JSON.stringify(updated));
+      loadVaultEntry(profileId, newEntry);
     }
-
-    localStorage.setItem(ACTIVE_USER_ID_KEY, profileId);
     triggerConfetti();
   };
 
@@ -392,19 +309,9 @@ export function AppProvider({ children }) {
     const cleanEmail = emailAddress.trim().toLowerCase();
     const profileId = `email_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`;
 
-    let currentVault = { ...profilesVault };
-    try {
-      const stored = localStorage.getItem(VAULT_KEY);
-      if (stored) currentVault = JSON.parse(stored);
-    } catch (e) {}
-
+    const currentVault = { ...profilesVault };
     if (currentVault[profileId]) {
-      const existing = currentVault[profileId];
-      setUser({ ...existing.profile, isLoggedIn: true });
-      setWeightHistory(existing.weightHistory || []);
-      setLoggedWorkouts(existing.loggedWorkouts || []);
-      setLoggedMeals(existing.loggedMeals || []);
-      setSnoozeUntil(existing.snoozeUntil || null);
+      loadVaultEntry(profileId, currentVault[profileId]);
     } else {
       const newProfile = {
         id: profileId,
@@ -412,60 +319,49 @@ export function AppProvider({ children }) {
         email: cleanEmail,
         phone: '',
         currentWeight: startingWeight,
-        targetWeight: Math.round((startingWeight * 0.95) * 10) / 10,
+        targetWeight: Math.round(startingWeight * 0.95 * 10) / 10,
         startWeight: startingWeight,
         height: 180,
         age: 27,
         gender: 'male',
         unit: 'kg',
         goal: 'fat_loss',
+        bodyFat: 18.0,
         dailyCalorieTarget: 2200,
         dailyWorkoutTargetMin: 45,
         dailyWaterTargetLiters: 3.5,
         isLoggedIn: true,
-        memberTier: 'Gold Pro Vault',
+        memberTier: 'Gold Elite Pro',
         loginMethod: 'email',
+        specialty: 'Custom Vault Profile',
+        bodyFatHistory: [
+          { date: getTodayDateString(), bodyFat: 18.0, method: 'manual', note: 'Initial baseline' },
+        ],
       };
       const initialWeightHistory = [
-        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' }
+        { date: getTodayDateString(), weight: startingWeight, note: 'Initial registration weigh-in' },
       ];
-      setUser(newProfile);
-      setWeightHistory(initialWeightHistory);
-      setLoggedWorkouts([]);
-      setLoggedMeals([]);
-      setSnoozeUntil(null);
-
-      currentVault[profileId] = {
+      const newEntry = {
         profile: newProfile,
         weightHistory: initialWeightHistory,
         loggedWorkouts: [],
         loggedMeals: [],
         snoozeUntil: null,
       };
-      setProfilesVault(currentVault);
-      localStorage.setItem(VAULT_KEY, JSON.stringify(currentVault));
+      const updated = { ...currentVault, [profileId]: newEntry };
+      setProfilesVault(updated);
+      localStorage.setItem(VAULT_KEY, JSON.stringify(updated));
+      loadVaultEntry(profileId, newEntry);
     }
-
-    localStorage.setItem(ACTIVE_USER_ID_KEY, profileId);
     triggerConfetti();
   };
 
-  // Switch to another profile
+  // Switch to any profile in the Athlete Vault Database
   const switchUserProfile = (targetUserId) => {
-    let currentVault = { ...profilesVault };
-    try {
-      const stored = localStorage.getItem(VAULT_KEY);
-      if (stored) currentVault = JSON.parse(stored);
-    } catch (e) {}
-
-    if (currentVault[targetUserId]) {
-      const target = currentVault[targetUserId];
-      setUser({ ...target.profile, isLoggedIn: true });
-      setWeightHistory(target.weightHistory || []);
-      setLoggedWorkouts(target.loggedWorkouts || []);
-      setLoggedMeals(target.loggedMeals || []);
-      setSnoozeUntil(target.snoozeUntil || null);
-      localStorage.setItem(ACTIVE_USER_ID_KEY, targetUserId);
+    const syncedVault = buildVaultWithActiveState();
+    const target = syncedVault[targetUserId];
+    if (target) {
+      loadVaultEntry(targetUserId, target, syncedVault);
       triggerConfetti();
     }
   };
@@ -476,35 +372,40 @@ export function AppProvider({ children }) {
     setIsAuthModalOpen(true);
   };
 
-  // Get list of all saved profiles
+  // Rich directory summary list of all athletes in the Vault
   const getAllSavedProfiles = () => {
-    let currentVault = { ...profilesVault };
-    try {
-      const stored = localStorage.getItem(VAULT_KEY);
-      if (stored) currentVault = JSON.parse(stored);
-    } catch (e) {}
-
-    return Object.values(currentVault).map((v) => ({
-      id: v.profile.id,
-      name: v.profile.name,
-      email: v.profile.email,
-      phone: v.profile.phone,
-      currentWeight: v.profile.currentWeight,
-      memberTier: v.profile.memberTier,
-      avatar: v.profile.avatar,
-    }));
+    const liveVault = buildVaultWithActiveState();
+    return Object.values(liveVault).map((v) => {
+      const p = v.profile || {};
+      const h = (p.height || 175) / 100;
+      const calcBmi = Math.round(((p.currentWeight || 75) / (h * h)) * 10) / 10;
+      return {
+        id: p.id,
+        name: p.name || 'Athlete',
+        email: p.email,
+        phone: p.phone,
+        currentWeight: p.currentWeight,
+        height: p.height,
+        bodyFat: p.bodyFat || 18,
+        bmi: calcBmi,
+        goal: p.goal || 'fat_loss',
+        specialty: p.specialty || 'Transformation Athlete',
+        memberTier: p.memberTier || 'Gold Elite Pro',
+        activePlan: p.activePlan,
+        workoutCount: (v.loggedWorkouts || []).length,
+        mealCount: (v.loggedMeals || []).length,
+        totalCaloriesBurnedAllTime: (v.loggedWorkouts || []).reduce((s, w) => s + (w.caloriesBurned || 0), 0),
+      };
+    });
   };
 
-  // Reset demo data to defaults
+  // Restore full seeded 8-athlete Vault database
   const resetDemoData = () => {
-    setUser(DEFAULT_PROFILE);
-    setWeightHistory(SEED_WEIGHT_HISTORY);
-    setLoggedWorkouts(SEED_WORKOUTS);
-    setLoggedMeals(SEED_MEALS);
-    setSnoozeUntil(null);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(VAULT_KEY);
-    localStorage.removeItem(ACTIVE_USER_ID_KEY);
+    const freshSeed = createSeededVault();
+    setProfilesVault(freshSeed);
+    localStorage.setItem(VAULT_KEY, JSON.stringify(freshSeed));
+    loadVaultEntry('user_alex', freshSeed['user_alex']);
+    triggerConfetti();
   };
 
   // Select active transformation plan (30, 60, 90 days)
@@ -515,7 +416,7 @@ export function AppProvider({ children }) {
         ...plan,
         startDate: getTodayDateString(),
         currentDay: 1,
-      }
+      },
     }));
     triggerConfetti();
   };
@@ -553,7 +454,7 @@ export function AppProvider({ children }) {
   const totalProtein = todaysMeals.reduce((sum, m) => sum + (m.protein || 0), 0);
   const totalCarbs = todaysMeals.reduce((sum, m) => sum + (m.carbs || 0), 0);
   const totalFats = todaysMeals.reduce((sum, m) => sum + (m.fats || 0), 0);
-  const totalSugar = todaysMeals.reduce((sum, m) => sum + (m.sugar || 0), 0);
+  const totalSugar = todaysMeals.reduce((sum, m) => sum + (m.sugar ?? 0), 0);
   const sugarLimitGrams = user.activePlan?.dailySugarLimitGrams || 25;
 
   const netCalories = totalCaloriesConsumed - totalCaloriesBurned;
@@ -606,6 +507,7 @@ export function AppProvider({ children }) {
     switchUserProfile,
     logoutUser,
     getAllSavedProfiles,
+    profilesVault,
     isMealScannerOpen,
     setIsMealScannerOpen,
     totalCaloriesBurned,

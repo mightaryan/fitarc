@@ -20,7 +20,6 @@ import { MEAL_CATEGORIES } from '../../data/foodData';
 import { GlassCard } from '../common/GlassCard';
 import { MacroPill } from '../common/MacroPill';
 import { RecipeDetailModal } from './RecipeDetailModal';
-import { MealPhotoScanner } from './MealPhotoScanner';
 import { useApp } from '../../context/AppContext';
 
 export function FoodSection() {
@@ -355,13 +354,6 @@ export function FoodSection() {
         <RecipeDetailModal
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
-        />
-      )}
-
-      {/* Photo Scanner Modal */}
-      {isMealScannerOpen && (
-        <MealPhotoScanner
-          onClose={() => setIsMealScannerOpen(false)}
         />
       )}
     </div>
