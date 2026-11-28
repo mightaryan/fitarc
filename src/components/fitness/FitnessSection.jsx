@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense, lazy } from 'react';
 import {
   Search,
-  Filter,
   Sparkles,
   Dumbbell,
   Flame,
@@ -12,33 +11,30 @@ import {
   Clock,
   Trash2,
   ChevronRight,
-  TrendingUp,
-  Award,
-  Layers,
-  CheckCircle2,
   SlidersHorizontal,
   X,
   Sun,
-  Smile,
+  Lock,
 } from 'lucide-react';
 import { MASTER_EXERCISE_CATALOG, DIFFICULTY_LEVELS } from '../../data/allExercisesMaster';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
 import { CALISTHENICS_EXERCISES } from '../../data/calisthenicsExercises';
-import { EXERCISE_CATEGORIES } from '../../data/fitnessData';
+import { HIIT_CARDIO_EXERCISES } from '../../data/hiitAndLeapWorkouts';
 import { GlassCard } from '../common/GlassCard';
-import { WorkoutDetailModal } from './WorkoutDetailModal';
-import { HomeWorkoutHub } from './HomeWorkoutHub';
-import { YogaSanctuaryHub } from './YogaSanctuaryHub';
-import { CalisthenicsHub } from './CalisthenicsHub';
-import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
 import { useApp } from '../../context/AppContext';
+
+const WorkoutDetailModal = lazy(() => import('./WorkoutDetailModal'));
+const HomeWorkoutHub = lazy(() => import('./HomeWorkoutHub').then((m) => ({ default: m.HomeWorkoutHub })));
+const YogaSanctuaryHub = lazy(() => import('./YogaSanctuaryHub').then((m) => ({ default: m.YogaSanctuaryHub })));
+const CalisthenicsHub = lazy(() => import('./CalisthenicsHub').then((m) => ({ default: m.CalisthenicsHub })));
+const HiitAndBodyPartStudio = lazy(() => import('./HiitAndBodyPartStudio'));
 
 const EQUIPMENT_FILTERS = [
   { id: 'all', label: 'All Equipment' },
   { id: 'yogamat', label: 'Yoga Mat (Non-Slip)' },
   { id: 'exercise_ball', label: 'Stability & Exercise Ball' },
-  { id: 'face_hands', label: 'Hands, Breath & Face' },
   { id: 'bodyweight', label: 'Bodyweight (Zero Equipment)' },
   { id: 'dumbbell', label: 'Free Weight Dumbbells' },
   { id: 'barbell', label: 'Olympic Barbells & EZ' },
@@ -69,8 +65,16 @@ export function FitnessSection() {
     deleteWorkout,
     setIsWeightModalOpen,
     setIsPlanModalOpen,
+    setIsCustomPlanModalOpen,
+    hasPaidPlan,
+    advancedUnlocked,
+    openPlanUpgradeModal,
+    t,
     fitnessSubTab: contextFitnessSubTab,
     setFitnessSubTab: contextSetFitnessSubTab,
+    customExercises,
+    disabledExerciseIds,
+    exerciseOverrides,
   } = useApp();
 
   const [localFitnessSubTab, setLocalFitnessSubTab] = useState('yoga'); // 'yoga' | 'home_hub' | 'archive'
@@ -85,15 +89,21 @@ export function FitnessSection() {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Combined catalog of 670+ Home Workouts, 166+ Yoga & Face routines, 129+ Calisthenics movements, and 1,323+ 3D Gym Lifts
+  // Combined Admin-managed catalog (HIIT, Home, Yoga, Calisthenics, Gym + Custom/Overrides/Disabled)
   const fullExerciseCatalog = useMemo(() => {
-    return [
+    const base = [
+      ...HIIT_CARDIO_EXERCISES,
       ...HOME_WORKOUTS_EXPANDED,
       ...YOGA_AND_HOME_WORKOUTS,
       ...CALISTHENICS_EXERCISES,
       ...MASTER_EXERCISE_CATALOG,
     ];
-  }, []);
+    return mergeManagedCatalog(base, {
+      customItems: customExercises,
+      disabledIds: disabledExerciseIds,
+      overrides: exerciseOverrides,
+    });
+  }, [customExercises, disabledExerciseIds, exerciseOverrides]);
 
   // Active filter count for badge
   const activeFilterCount =
@@ -120,8 +130,6 @@ export function FitnessSection() {
       if (!matchesCategory) {
         if (selectedCategory === 'yoga') {
           matchesCategory = item.category === 'yoga';
-        } else if (selectedCategory === 'face_yoga') {
-          matchesCategory = item.category === 'face_yoga' || item.muscleCategory === 'Face & Neck';
         } else if (selectedCategory === 'home_workout') {
           matchesCategory = item.category === 'home_workout' || item.equipment === 'bodyweight';
         } else if (selectedCategory === 'mobility') {
@@ -152,8 +160,6 @@ export function FitnessSection() {
           item.subCategory === 'exercise_ball' ||
           (item.name && item.name.toLowerCase().includes('ball')) ||
           (item.gifUrl && item.gifUrl.includes('ball'));
-      } else if (selectedEquipment === 'face_hands') {
-        matchesEquipment = item.equipment === 'face_hands' || item.category === 'face_yoga';
       } else if (selectedEquipment === 'bodyweight') {
         matchesEquipment =
           item.equipment === 'bodyweight' ||
@@ -200,19 +206,27 @@ export function FitnessSection() {
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              {fullExerciseCatalog.length.toLocaleString()}+ Exercises & 220+ Yogas
+              {fullExerciseCatalog.length.toLocaleString()}+ Exercises &amp; Yoga
             </span>
-            <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
-              3D Anatomical Biomechanics
+            <span className="text-[10px] text-slate-400 hidden sm:inline">
+              Step-by-step form guides
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-1 flex items-center gap-2">
-            Movement <span className="gold-gradient-text font-extrabold">Archive</span>
+            Workout <span className="gold-gradient-text font-extrabold">Studio</span>
           </h1>
         </div>
 
         {/* Compact Daily Status Badges */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setIsCustomPlanModalOpen?.(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/35 text-xs font-bold text-amber-300 hover:bg-amber-500/25 transition active:scale-95"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>AI &amp; Custom Plan</span>
+          </button>
+
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-300">
             <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             <span>{totalCaloriesBurned} <span className="text-[10px] text-slate-400 font-normal">kcal</span></span>
@@ -234,65 +248,88 @@ export function FitnessSection() {
         </div>
       </div>
 
-      {/* PRIMARY FITNESS NAVIGATION: YOGA vs HOME vs CALISTHENICS vs 3D GYM ARCHIVE */}
-      <div className="flex p-1 bg-black/60 rounded-2xl border border-white/10 max-w-3xl shadow-inner gap-1 overflow-x-auto scrollbar-none">
+      {/* PRIMARY FITNESS NAVIGATION: Full-width responsive grid prevents pill clipping */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 p-1.5 bg-black/60 rounded-2xl border border-white/10 w-full shadow-inner gap-1.5">
         <button
-          onClick={() => setFitnessSubTab('yoga')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
-            fitnessSubTab === 'yoga'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg font-extrabold'
-              : 'text-slate-400 hover:text-white'
+          onClick={() => setFitnessSubTab('hiit_leap')}
+          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-center ${
+            fitnessSubTab === 'hiit_leap'
+              ? 'bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 text-white shadow-lg font-extrabold'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Sun className={`w-4 h-4 ${fitnessSubTab === 'yoga' ? 'text-white' : 'text-emerald-400'}`} />
-          <span>🧘‍♀️ Yoga Studio</span>
+          <Zap className={`w-4 h-4 shrink-0 ${fitnessSubTab === 'hiit_leap' ? 'text-white' : 'text-rose-400'}`} />
+          <span className="truncate">30m HIIT &amp; Body Parts</span>
+        </button>
+
+        <button
+          onClick={() => setFitnessSubTab('yoga')}
+          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-center ${
+            fitnessSubTab === 'yoga'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg font-extrabold'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          <Sun className={`w-4 h-4 shrink-0 ${fitnessSubTab === 'yoga' ? 'text-white' : 'text-emerald-400'}`} />
+          <span className="truncate">Yoga Studio</span>
         </button>
 
         <button
           onClick={() => setFitnessSubTab('home_hub')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-center ${
             fitnessSubTab === 'home_hub'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Flame className={`w-4 h-4 ${fitnessSubTab === 'home_hub' ? 'text-black fill-current' : 'text-amber-400'}`} />
-          <span>🔥 Home (30 Days)</span>
+          <Flame className={`w-4 h-4 shrink-0 ${fitnessSubTab === 'home_hub' ? 'text-black fill-current' : 'text-amber-400'}`} />
+          <span className="truncate">Home (30 Days)</span>
         </button>
 
         <button
           onClick={() => setFitnessSubTab('calisthenics')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-center ${
             fitnessSubTab === 'calisthenics'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Zap className={`w-4 h-4 ${fitnessSubTab === 'calisthenics' ? 'text-black' : 'text-amber-400'}`} />
-          <span>🤸 Calisthenics Hub</span>
+          <Zap className={`w-4 h-4 shrink-0 ${fitnessSubTab === 'calisthenics' ? 'text-black' : 'text-amber-400'}`} />
+          <span className="truncate">Calisthenics</span>
         </button>
 
         <button
           onClick={() => setFitnessSubTab('archive')}
-          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+          className={`col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-center ${
             fitnessSubTab === 'archive'
               ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm font-extrabold'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-300 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Dumbbell className={`w-4 h-4 ${fitnessSubTab === 'archive' ? 'text-black' : 'text-amber-400'}`} />
-          <span>⚡ 3D Gym ({fullExerciseCatalog.length.toLocaleString()}+)</span>
+          <Dumbbell className={`w-4 h-4 shrink-0 ${fitnessSubTab === 'archive' ? 'text-black' : 'text-amber-400'}`} />
+          <span className="truncate">All Exercises ({fullExerciseCatalog.length.toLocaleString()})</span>
         </button>
       </div>
 
-      {/* VIEW 1: YOGA & FACE SANCTUARY (MAT, BALL & FACE ASANAS) */}
-      {fitnessSubTab === 'yoga' && <YogaSanctuaryHub />}
+      <Suspense
+        fallback={
+          <div className="p-10 rounded-3xl bg-obsidian-900 border border-white/10 text-center text-xs text-slate-400">
+            Loading workout studio...
+          </div>
+        }
+      >
+        {/* VIEW 0: 30-MIN HIIT CARDIO ARENA + BODY-PART & DURATION BUILDER */}
+        {fitnessSubTab === 'hiit_leap' && <HiitAndBodyPartStudio />}
 
-      {/* VIEW 2: LEAP FITNESS HOME WORKOUT HUB */}
-      {fitnessSubTab === 'home_hub' && <HomeWorkoutHub />}
+        {/* VIEW 1: YOGA SANCTUARY (MAT & STABILITY BALL ASANAS) */}
+        {fitnessSubTab === 'yoga' && <YogaSanctuaryHub />}
 
-      {/* VIEW 3: CALISTHENICS HUB & BODYWEIGHT MASTERY */}
-      {fitnessSubTab === 'calisthenics' && <CalisthenicsHub />}
+        {/* VIEW 2: HOME WORKOUT HUB */}
+        {fitnessSubTab === 'home_hub' && <HomeWorkoutHub />}
+
+        {/* VIEW 3: CALISTHENICS HUB */}
+        {fitnessSubTab === 'calisthenics' && <CalisthenicsHub />}
+      </Suspense>
 
       {/* VIEW 3: 3D MOVEMENT ARCHIVE & SEARCH */}
       {fitnessSubTab === 'archive' && (
@@ -337,7 +374,7 @@ export function FitnessSection() {
             <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder={`Search ${fullExerciseCatalog.length.toLocaleString()}+ movements (e.g., sun salutation, sofa squat, bench, jawline)...`}
+              placeholder={`Search ${fullExerciseCatalog.length.toLocaleString()}+ movements (e.g., sun salutation, sofa squat, bench, pull-up)...`}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -375,12 +412,11 @@ export function FitnessSection() {
           </button>
         </div>
 
-        {/* Horizontal Swipeable Category Chips (Single Clean Row with Yoga, Face Yoga & Home Workouts) */}
+        {/* Horizontal Swipeable Category Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x">
           {[
             { id: 'all', label: 'All Movements' },
-            { id: 'yoga', label: `🧘 Full Body Yoga (185+)` },
-            { id: 'face_yoga', label: `✨ Face Yoga (35)` },
+            { id: 'yoga', label: `🧘 Yoga Sanctuary (${YOGA_AND_HOME_WORKOUTS.length})` },
             { id: 'home_workout', label: '🏠 Home Workouts' },
             { id: 'machines', label: 'Gym Machines' },
             { id: 'freeweights', label: 'Free Weights & Dumbbells' },
@@ -437,6 +473,10 @@ export function FitnessSection() {
                 <select
                   value={selectedDifficulty}
                   onChange={(e) => {
+                    if (e.target.value === 'advanced' && !advancedUnlocked) {
+                      openPlanUpgradeModal('Switch from Free to a Paid Plan to unlock Advanced workouts.');
+                      return;
+                    }
                     setSelectedDifficulty(e.target.value);
                     setVisibleCount(24);
                   }}
@@ -444,7 +484,7 @@ export function FitnessSection() {
                 >
                   {DIFFICULTY_LEVELS.map((d) => (
                     <option key={d.id} value={d.id} className="bg-obsidian-900 text-white">
-                      {d.label}
+                      {d.id === 'advanced' && !advancedUnlocked ? `🔒 ${d.label} (Paid)` : d.label}
                     </option>
                   ))}
                 </select>
@@ -518,104 +558,117 @@ export function FitnessSection() {
         </div>
       </div>
 
-      {/* 3D Anatomical Exercise Grid */}
+      {/* Beginner-Minimalist Exercise Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedItems.map((item, idx) => {
           const burnPreview = Math.round((item.metScore * 3.5 * (user.currentWeight || 75) / 200) * 20);
+          const isLocked = item.level === 'Advanced' && !advancedUnlocked;
 
           return (
             <GlassCard
               key={item.uniqueKey || `${item.id}-${idx}`}
               className="flex flex-col justify-between border-amber-500/15 group cursor-pointer"
-              onClick={() => setSelectedExercise(item)}
+              onClick={() => {
+                if (isLocked) {
+                  openPlanUpgradeModal(`Switch from Free to a Paid Plan to unlock "${item.name}"`);
+                  return;
+                }
+                setSelectedExercise(item);
+              }}
             >
-              {/* Card Mini 3D Animated Thumbnail with Dark Gold Obsidian Frame */}
-              <div className="relative h-56 overflow-hidden bg-gradient-to-b from-[#141824] via-[#0a0c12] to-[#06070a] rounded-t-2xl flex items-center justify-center p-3">
-                {(item.category === 'face_yoga' || item.subCategory === 'face_yoga' || item.equipment === 'face_hands') ? (
-                  <YogaAnatomicalCanvas exercise={item} compact />
-                ) : (
-                  <img
-                    key={item.id || item.gifUrl}
-                    src={item.gifUrl}
-                    alt={item.name}
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.src =
-                        item.equipment === 'exercise_ball'
-                          ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
-                          : item.category === 'yoga' || item.equipment === 'yogamat'
-                          ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif'
-                          : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-bench-press.gif';
-                    }}
-                    className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
-                  />
-                )}
+              {/* Card Animated Thumbnail */}
+              <div className="relative h-52 overflow-hidden rounded-t-2xl flex items-center justify-center bg-gradient-to-b from-[#141824] via-[#0a0c12] to-[#06070a] p-3">
+                <img
+                  key={item.id || item.gifUrl}
+                  src={item.gifUrl}
+                  alt={item.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      item.fallbackGif ||
+                      (item.equipment === 'exercise_ball'
+                        ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
+                        : item.category === 'yoga' || item.equipment === 'yogamat'
+                        ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif'
+                        : item.category === 'cardio'
+                        ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/cardio/burpee.gif'
+                        : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/cross-body-crunch.gif');
+                  }}
+                  className="max-h-full w-auto object-contain transition duration-500 group-hover:scale-105 dark-3d-animation"
+                />
 
-                {/* Ambient glow highlight */}
                 <div className="absolute inset-0 bg-radial-gold opacity-15 pointer-events-none" />
 
-                {/* Difficulty level badge */}
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-3 left-3 flex items-center gap-1.5">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${item.level === 'Beginner'
-                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
-                      : item.level === 'Advanced'
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md border ${
+                      item.level === 'Beginner'
+                        ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                        : item.level === 'Advanced'
                         ? 'bg-rose-950/80 text-rose-300 border-rose-500/40'
                         : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
-                      }`}
+                    }`}
                   >
-                    {item.level === 'Beginner' ? '🟢 Simple' : item.level === 'Advanced' ? '🔴 Advanced' : '🟡 Intermediate'}
+                    {item.level === 'Beginner'
+                      ? (t?.('fitness.beginner') || 'Beginner')
+                      : item.level === 'Advanced'
+                      ? (isLocked ? `🔒 ${t?.('fitness.locked') || 'Paid Plan'}` : (t?.('fitness.advanced') || 'Advanced'))
+                      : (t?.('fitness.intermediate') || 'Intermediate')}
                   </span>
                 </div>
 
                 <div className="absolute top-3 right-3">
                   <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-black/80 border border-white/10 text-slate-300 backdrop-blur-md">
-                    {item.equipment}
+                    {item.equipmentLabel || item.equipment}
                   </span>
                 </div>
+
+                {isLocked && (
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex flex-col items-center justify-center gap-1.5">
+                    <div className="p-2.5 rounded-2xl bg-amber-500/20 border border-amber-400/50 text-amber-300">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] font-black text-amber-200 px-3 py-1 rounded-full bg-black/80 border border-amber-500/30">
+                      Paid Plan Required
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Card Content */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+              {/* Minimalistic Card Content */}
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5 overflow-hidden">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 truncate">
-                      ⚡ Active: {item.muscle || item.muscleCategory}
-                    </span>
-                    <span className="text-slate-600 shrink-0">·</span>
-                    <span className="text-[10px] text-slate-400 font-mono shrink-0">MET {item.metScore}</span>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 truncate mb-1">
+                    {item.muscleCategory || item.muscle}
                   </div>
-
-                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition tracking-tight line-clamp-1">
+                  <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition tracking-tight line-clamp-1">
                     {item.name}
                   </h3>
-
-                  <p className="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">
+                  <p className="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                     {item.tagline}
                   </p>
                 </div>
 
-                {/* Primary Muscle Pills */}
+                {/* Primary Muscle Tags (No clutter %) */}
                 <div className="flex items-center gap-1.5 flex-wrap overflow-hidden">
                   {item.primaryMuscles?.slice(0, 2).map((m, mIdx) => (
                     <span
                       key={mIdx}
                       className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-500/10 text-amber-200 border border-amber-500/20 truncate max-w-[150px]"
                     >
-                      {m.name} ({m.percentage}%)
+                      {m.name}
                     </span>
                   ))}
                 </div>
 
-                {/* Impact Preview Metrics */}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                <div className="pt-2.5 border-t border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-1 text-xs font-semibold text-slate-300">
                     <Flame className="w-3.5 h-3.5 text-amber-400" />
                     <span>~{burnPreview} kcal <span className="text-[10px] text-slate-400 font-normal">/ 20m</span></span>
                   </div>
 
                   <div className="flex items-center gap-1 text-xs font-semibold text-amber-400 group-hover:translate-x-1 transition">
-                    <span>Inspect 3D Form</span>
+                    <span>{isLocked ? 'Unlock Plan' : 'View Guide'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -701,13 +754,15 @@ export function FitnessSection() {
         </div>
       )}
 
-      {/* Exercise Detail & Calculator Modal */}
-      {selectedExercise && (
-        <WorkoutDetailModal
-          exercise={selectedExercise}
-          onClose={() => setSelectedExercise(null)}
-        />
-      )}
+      {/* Exercise Detail Guide Modal */}
+      <Suspense fallback={null}>
+        {selectedExercise && (
+          <WorkoutDetailModal
+            exercise={selectedExercise}
+            onClose={() => setSelectedExercise(null)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

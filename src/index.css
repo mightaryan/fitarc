@@ -7,6 +7,12 @@
     --gold-glow: rgba(245, 158, 11, 0.25);
   }
 
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     background-color: #08090C;
     background-image: 

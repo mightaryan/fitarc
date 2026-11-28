@@ -4,8 +4,8 @@ import {
   Dumbbell,
   Utensils,
   Camera,
-  Scale,
-  User,
+  ShoppingBag,
+  LayoutDashboard,
   Sparkles,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -14,145 +14,113 @@ export function MobileBottomNav() {
   const {
     activeTab,
     setActiveTab,
-    user,
-    setIsWeightModalOpen,
-    isAuthModalOpen,
-    setIsAuthModalOpen,
-    openAuthModal,
     setIsMealScannerOpen,
+    siteSettings,
+    t,
   } = useApp();
+
+  const shopEnabled = siteSettings?.shopEnabled !== false;
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-obsidian-950/95 backdrop-blur-2xl border-t border-amber-500/25 px-2 pt-1.5 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] shadow-[0_-12px_40px_rgba(0,0,0,0.95)]"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-obsidian-950/95 backdrop-blur-2xl border-t border-amber-500/30 px-2 pt-1.5 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] shadow-[0_-14px_45px_rgba(0,0,0,0.96)]"
       aria-label="Mobile Bottom Navigation"
     >
-      <div className="max-w-md mx-auto flex items-center justify-around relative">
-        {/* 1. HOME / TODAY (Apple Fitness & Google Fit Inspired) */}
+      {/* 5 equal symmetric columns so the center Scan FAB stays strictly dead center */}
+      <div className="max-w-lg mx-auto grid grid-cols-5 items-center relative">
+        {/* 1. HOME */}
         <button
           onClick={() => setActiveTab('home')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
-            activeTab === 'home'
-              ? 'text-amber-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200 font-medium'
+          className={`min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+            activeTab === 'home' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200 font-medium'
           }`}
           aria-label="Home Tab"
         >
-          <div className="relative">
-            <Home
-              className={`w-5 h-5 transition-transform duration-200 ${
-                activeTab === 'home' ? 'scale-110 text-amber-400' : 'text-slate-400'
-              }`}
-            />
-            {activeTab === 'home' && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
-            )}
-          </div>
-          <span className="text-[10px] mt-1 tracking-tight">Home</span>
+          <Home className={`w-5 h-5 ${activeTab === 'home' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+          <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">{t?.('nav.home') || 'Home'}</span>
           {activeTab === 'home' && (
-            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+            <span className="absolute -bottom-0.5 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.85)]" />
           )}
         </button>
 
-        {/* 2. FITNESS / MOVEMENTS */}
+        {/* 2. FITNESS */}
         <button
           onClick={() => setActiveTab('fitness')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
-            activeTab === 'fitness'
-              ? 'text-amber-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200 font-medium'
+          className={`min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+            activeTab === 'fitness' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200 font-medium'
           }`}
           aria-label="Fitness Movement Archive"
         >
-          <div className="relative">
-            <Dumbbell
-              className={`w-5 h-5 transition-transform duration-200 ${
-                activeTab === 'fitness' ? 'scale-110 text-amber-400' : 'text-slate-400'
-              }`}
-            />
-            {activeTab === 'fitness' && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
-            )}
-          </div>
-          <span className="text-[10px] mt-1 tracking-tight">Fitness</span>
+          <Dumbbell className={`w-5 h-5 ${activeTab === 'fitness' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+          <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">{t?.('nav.fitness') || 'Fitness'}</span>
           {activeTab === 'fitness' && (
-            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+            <span className="absolute -bottom-0.5 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.85)]" />
           )}
         </button>
 
-        {/* 3. CENTER ELEVATED FLOATING ACTION BUTTON: AI MEAL SCANNER */}
-        <div className="relative -mt-6 flex flex-col items-center">
+        {/* 3. DEAD-CENTER ELEVATED FLOATING ACTION BUTTON: AI MEAL SCANNER */}
+        <div className="relative -mt-6 flex flex-col items-center justify-center">
           <button
             onClick={() => setIsMealScannerOpen(true)}
-            className="w-13 h-13 p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-amber-600 shadow-[0_0_25px_rgba(245,158,11,0.65)] hover:shadow-[0_0_35px_rgba(245,158,11,0.9)] active:scale-90 transition-all duration-200 group flex items-center justify-center"
+            className="w-12 h-12 p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-orange-500 shadow-[0_0_24px_rgba(245,158,11,0.65)] active:scale-90 transition-all duration-200 group flex items-center justify-center"
             title="Instant AI Meal Photo Scanner"
             aria-label="Scan Meal with AI"
           >
-            <div className="w-12 h-12 rounded-full bg-obsidian-950 flex flex-col items-center justify-center border border-amber-300/40 group-hover:bg-amber-500/20 transition">
+            <div className="w-full h-full rounded-full bg-obsidian-950 flex items-center justify-center border border-amber-300/40 group-hover:bg-amber-500/20 transition">
               <Camera className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
             </div>
           </button>
           <span className="text-[9px] font-bold tracking-wider uppercase text-amber-400/90 mt-1 flex items-center gap-0.5">
             <Sparkles className="w-2.5 h-2.5 text-amber-300" />
-            AI Scan
+            {t?.('nav.scan') || 'Scan'}
           </span>
         </div>
 
-        {/* 4. FOOD & NUTRITION */}
+        {/* 4. FOOD */}
         <button
           onClick={() => setActiveTab('food')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
-            activeTab === 'food'
-              ? 'text-amber-400 font-bold'
-              : 'text-slate-400 hover:text-slate-200 font-medium'
+          className={`min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+            activeTab === 'food' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200 font-medium'
           }`}
           aria-label="Food & Nutrition Tab"
         >
-          <div className="relative">
-            <Utensils
-              className={`w-5 h-5 transition-transform duration-200 ${
-                activeTab === 'food' ? 'scale-110 text-amber-400' : 'text-slate-400'
-              }`}
-            />
-            {activeTab === 'food' && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
-            )}
-          </div>
-          <span className="text-[10px] mt-1 tracking-tight">Food</span>
+          <Utensils className={`w-5 h-5 ${activeTab === 'food' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+          <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">{t?.('nav.food') || 'Food'}</span>
           {activeTab === 'food' && (
-            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+            <span className="absolute -bottom-0.5 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.85)]" />
           )}
         </button>
 
-        {/* 5. ATHLETE VAULT & PROFILE (BMI, Body Fat, Active Plan, Tiers) */}
-        <button
-          onClick={() => openAuthModal('biometrics')}
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all duration-200 active:scale-90 relative ${
-            isAuthModalOpen
-              ? 'text-amber-400 font-bold'
-              : 'text-slate-400 hover:text-amber-300 font-medium'
-          }`}
-          aria-label="Athlete Vault, Body Fat & BMI"
-        >
-          <div className="relative">
-            <div
-              className={`w-5 h-5 rounded-md bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[9px] flex items-center justify-center transition ${
-                isAuthModalOpen ? 'shadow-gold-glow ring-2 ring-amber-400' : 'shadow-gold-glow-sm'
-              }`}
-            >
-              {user.name?.slice(0, 2).toUpperCase() || 'AV'}
-            </div>
-            {isAuthModalOpen && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
+        {/* 5. SHOP (or Overview fallback when Shop is hidden so Scan stays centered) */}
+        {shopEnabled ? (
+          <button
+            onClick={() => setActiveTab('shop')}
+            className={`min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+              activeTab === 'shop' ? 'text-emerald-400 font-bold' : 'text-slate-400 hover:text-emerald-300 font-medium'
+            }`}
+            aria-label="Trustified Supplement Shop"
+          >
+            <ShoppingBag className={`w-5 h-5 ${activeTab === 'shop' ? 'scale-110 text-emerald-400' : 'text-slate-400'}`} />
+            <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">{t?.('nav.shop') || 'Shop'}</span>
+            {activeTab === 'shop' && (
+              <span className="absolute -bottom-0.5 w-6 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.85)]" />
             )}
-          </div>
-          <span className="text-[10px] mt-1 font-semibold tracking-tight">
-            Vault
-          </span>
-          {isAuthModalOpen && (
-            <span className="absolute -bottom-1 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-          )}
-        </button>
+          </button>
+        ) : (
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-2xl transition-all duration-200 active:scale-90 relative ${
+              activeTab === 'dashboard' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200 font-medium'
+            }`}
+            aria-label="Overview Tab"
+          >
+            <LayoutDashboard className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110 text-amber-400' : 'text-slate-400'}`} />
+            <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">{t?.('nav.dashboard') || 'Overview'}</span>
+            {activeTab === 'dashboard' && (
+              <span className="absolute -bottom-0.5 w-6 h-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.85)]" />
+            )}
+          </button>
+        )}
       </div>
     </nav>
   );

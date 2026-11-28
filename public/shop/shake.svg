@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" fill="none">
+  <defs>
+    <radialGradient id="sBg" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22"/>
+      <stop offset="65%" stop-color="#0b0d13" stop-opacity="0.96"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#sBg)"/>
+  <ellipse cx="320" cy="358" rx="115" ry="16" fill="#000" fill-opacity="0.72"/>
+  <rect x="268" y="64" width="104" height="26" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-opacity="0.5"/>
+  <rect x="242" y="90" width="156" height="258" rx="26" fill="#111827" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="2"/>
+  <rect x="242" y="165" width="156" height="105" fill="#0ea5e9" fill-opacity="0.16"/>
+  <text x="320" y="210" text-anchor="middle" fill="#7dd3fc" font-family="system-ui,sans-serif" font-weight="900" font-size="17" letter-spacing="2">RTD PROTEIN</text>
+  <text x="320" y="234" text-anchor="middle" fill="#ffffff" font-family="monospace" font-weight="700" font-size="11">20G PROTEIN · LACTOSE FREE</text>
+</svg>

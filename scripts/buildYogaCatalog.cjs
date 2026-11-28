@@ -59,220 +59,119 @@ const BALL_POSE_GIFS = {
   ball_wall_squat: [g('glutes/exercise-ball-hip-flexor-stretch.gif'), g('calves/exercise-ball-on-the-wall-calf-raise.gif')],
 };
 
-const faceGifs = [
-  g('levator-scapulae/neck-side-stretch.gif'),
-  g('levator-scapulae/side-push-neck-stretch.gif'),
+const GYM_DISALLOWED_RE = /barbell|dumbbell|cable|smith|lever|sled|kettlebell|machine|ez-bar|plate|weighted|bench|pulldown|preacher|band|strap|rope|chair|tower|rack|cage|bar|rail|hanging|pull-up|pull up|chin-up|chin up|gironda|muscle-up|dip-cage|parallel-bar|captains-chair|suspended|trx|ring|inverted|balance-board|bosu|medicine|foam-roller|roller|wheel|partner|assisted|inverse|incline|decline|wall|step|box|stair|towel|stick|broom|jump|sprint|burpee|boxing|run|sit-up|crunch|planche|skin-the-cat|potty/i;
+const BALL_DISALLOWED_RE = /barbell|dumbbell|cable|smith|kettlebell|ez-bar|weighted|preacher|medicine|bosu|tennis/i;
+
+const matCandidates = MASTER_EXERCISE_CATALOG.filter((ex) => {
+  const s = `${ex.name} ${ex.slug} ${ex.gifUrl} ${ex.equipment}`.toLowerCase();
+  if (/ball|bosu|medicine/.test(s)) return false;
+  if (GYM_DISALLOWED_RE.test(s)) return false;
+  return (
+    ex.equipment === 'bodyweight' &&
+    /stretch|yoga|pose|bridge|twist|sphinx|cobra|butterfly|frog|piriformis|pelvic|runners|world-greatest|l-sit|v-sit|pike|curl|touch|reach|kneeling-lat|hug-keens|iron-cross|neck|side-bridge|side-plank|lying-side|all-fours/.test(s)
+  );
+});
+
+const CURATED_MAT_YOGA = [
+  { name: "Surya Namaskar A (Classic 12-Flow Sun Salutation)", sanskrit: "Surya Namaskar A", focus: "Full Body Mobility & Breath Synchrony", pool: "spine", gif: "glutes/pike-to-cobra-push-up.gif" },
+  { name: "Surya Namaskar B (Chair-to-Sky Reach Flow)", sanskrit: "Surya Namaskar B", focus: "Cardiovascular Heat & Thigh Strength", pool: "quads", gif: "quads/squat-to-overhead-reach.gif" },
+  { name: "Chandra Namaskar (Moon Salutation Cooling Sequence)", sanskrit: "Chandra Namaskar", focus: "Parasympathetic Reset & Hip Opening", pool: "glutes", gif: "hamstrings/world-greatest-stretch.gif" },
+  { name: "Bhujangasana (Classic Cobra & Heart Arch)", sanskrit: "Bhujangasana", focus: "Erector Spinae & Kidney Awakening", pool: "spine", gif: "spine/upward-facing-dog.gif" },
+  { name: "Salamba Bhujangasana (Sphinx Restorative Lumbar Ease)", sanskrit: "Sphinx Pose", focus: "Gentle Sacral Arch & Thoracic Glide", pool: "spine", gif: "spine/sphinx.gif" },
+  { name: "Baddha Konasana (Bound Angle Butterfly Pose)", sanskrit: "Baddha Konasana", focus: "Adductor Relaxation & Sacral Freedom", pool: "adductors", gif: "adductors/butterfly-yoga-pose.gif" },
+  { name: "Mandukasana (Deep Frog Pelvic Opener)", sanskrit: "Mandukasana", focus: "Groin, Adductor & Sacral Decompression", pool: "adductors", gif: "glutes/rocking-frog-stretch.gif" },
+  { name: "Balasana Reach (Extended Child's Pose Grounding)", sanskrit: "Balasana", focus: "Sacral Decompression & Latissimus Release", pool: "lats", gif: "lats/kneeling-lat-stretch.gif" },
+  { name: "Setu Bandhasana (Glute & Spine Bridge)", sanskrit: "Setu Bandhasana", focus: "Posterior Chain Drive & Heart Opening", pool: "glutes", gif: "glutes/pelvic-tilt-into-bridge.gif" },
+  { name: "Supta Setu Bandhasana (Restorative Floor Bridge)", sanskrit: "Supta Setu Bandha", focus: "Gentle Sacral Lift & Hip Release", pool: "glutes", gif: "glutes/low-glute-bridge-on-floor.gif" },
+  { name: "Eka Pada Setu Bandhasana (One-Legged Bridge)", sanskrit: "Eka Pada Setu", focus: "Unilateral Glute Activation & Spine Balance", pool: "glutes", gif: "glutes/single-leg-bridge-with-outstretched-leg.gif" },
+  { name: "Paschimottanasana (Classic Seated Forward Bend)", sanskrit: "Paschimottanasana", focus: "Total Posterior Chain Release", pool: "lats", gif: "lats/seated-lower-back-stretch.gif" },
+  { name: "Janu Sirsasana (Head-to-Knee Single Leg Fold)", sanskrit: "Janu Sirsasana", focus: "Asymmetric Hamstring & Lumbar Release", pool: "hamstrings", gif: "hamstrings/hamstring-stretch.gif" },
+  { name: "Upavistha Konasana (Seated Wide Straddle Fold)", sanskrit: "Upavistha Konasana", focus: "Inner Thigh & Pelvic Floor Freedom", pool: "hamstrings", gif: "hamstrings/seated-wide-angle-pose-sequence.gif" },
+  { name: "Uttanasana (Full Standing Forward Fold)", sanskrit: "Uttanasana", focus: "Spine Decompression & Posterior Elongation", pool: "spine", gif: "spine/two-toe-touch-male.gif" },
+  { name: "Supta Padangusthasana (Reclining Leg-Up Stretch)", sanskrit: "Supta Padangusthasana", focus: "Isolated Hamstring Release Without Back Strain", pool: "hamstrings", gif: "hamstrings/leg-up-hamstring-stretch.gif" },
+  { name: "Agnistambhasana (Double Pigeon Fire Log Pose)", sanskrit: "Agnistambhasana", focus: "Deep Outer Hip & Piriformis Release", pool: "glutes", gif: "glutes/seated-piriformis-stretch.gif" },
+  { name: "Ardha Matsyendrasana (Seated Spinal Detox Twist)", sanskrit: "Ardha Matsyendrasana", focus: "Digestive Stimulation & Thoracic Mobility", pool: "abs", gif: "abs/spine-twist.gif" },
+  { name: "Jathara Parivartanasana (Belly Twist Floor Flow)", sanskrit: "Jathara Parivartanasana", focus: "Visceral Drainage & Lumbar Rotation", pool: "glutes", gif: "glutes/bent-knee-lying-twist-male.gif" },
+  { name: "Supta Matsyendrasana (Iron Cross Supine Twist)", sanskrit: "Supta Matsyendrasana", focus: "Cross-Body Facet Joint Decompression", pool: "glutes", gif: "glutes/iron-cross-stretch.gif" },
+  { name: "Apanasana (Knees-to-Chest Wind-Relieving Hug)", sanskrit: "Apanasana", focus: "Lower Back Hug & Lumbar Decompression", pool: "glutes", gif: "glutes/hug-keens-to-chest.gif" },
+  { name: "Navasana (Boat Pose Core Transverse V-Sit)", sanskrit: "Navasana", focus: "Transverse Abdominis & Hip Flexor Balance", pool: "abs", gif: "abs/v-sit-on-floor.gif" },
+  { name: "Dandasana (Staff Pose Active L-Sit Grounding)", sanskrit: "Dandasana", focus: "Spinal Neutrality & Core Bracing", pool: "abs", gif: "abs/l-sit-on-floor.gif" },
+  { name: "Virabhadrasana I (Crescent Warrior Overhead Reach)", sanskrit: "Virabhadrasana I", focus: "Hip Flexor Extension & Leg Stamina", pool: "abs", gif: "abs/posterior-step-to-overhead-reach.gif" },
+  { name: "Parivrtta Virabhadrasana (Revolved Lunge Twist)", sanskrit: "Parivrtta Lunge", focus: "Thoracic Rotation & Adductor Endurance", pool: "abs", gif: "abs/lunge-with-twist.gif" },
+  { name: "Ashwa Sanchalanasana (Equestrian Low Lunge)", sanskrit: "Ashwa Sanchalanasana", focus: "Iliopsoas Release & Pelvic Sinking", pool: "hamstrings", gif: "hamstrings/runners-stretch.gif" },
+  { name: "Anjaneyasana (High Crescent Quad & Hip Opener)", sanskrit: "Anjaneyasana", focus: "Anterior Hip Capsule & Quad Elongation", pool: "quads", gif: "quads/intermediate-hip-flexor-and-quad-stretch.gif" },
+  { name: "Vasisthasana (Side Plank Core Stabilization)", sanskrit: "Vasisthasana", focus: "Lateral Core & Shoulder Integrity", pool: "abs", gif: "abs/side-bridge-v-2.gif" },
+  { name: "Ardha Chandrasana Flow (Side Bridge Hip Lift)", sanskrit: "Ardha Chandrasana", focus: "Glute Medius Balance & Lateral Chain", pool: "abductors", gif: "abductors/side-bridge-hip-abduction.gif" },
+  { name: "Skandasana Vasisthasana (Inner Adductor Side Plank)", sanskrit: "Skandasana Plank", focus: "Adductor Strength & Pelvic Alignment", pool: "adductors", gif: "adductors/side-plank-hip-adduction.gif" },
+  { name: "Parivrtta Utkatasana (Revolved Chair Flow)", sanskrit: "Parivrtta Utkatasana", focus: "Quadriceps Activation & Spinal Twist", pool: "quads", gif: "quads/squat-to-overhead-reach-with-twist.gif" },
+  { name: "Tadasana Alignment (Standing Pelvic Grounding)", sanskrit: "Tadasana", focus: "Neutral Pelvic Tilt & Upright Posture", pool: "spine", gif: "spine/standing-pelvic-tilt.gif" },
+  { name: "Indudalasana (Standing Crescent Side Bend)", sanskrit: "Indudalasana", focus: "Intercostal Ribs & Oblique Elongation", pool: "lats", gif: "lats/standing-lateral-stretch.gif" },
+  { name: "Side-Lying Crescent Rest (Rib & Lat Floor Flow)", sanskrit: "Chandra Shanti", focus: "Deep Fascial Lateral Decompression", pool: "lats", gif: "lats/side-lying-floor-stretch.gif" },
+  { name: "Ustrasana Heart Opener (Dynamic Chest Expansion)", sanskrit: "Ustrasana Prep", focus: "Thoracic Expansion & Lung Capacity", pool: "pectorals", gif: "pectorals/dynamic-chest-stretch-male.gif" },
+  { name: "Gomukhasana Upper Bind (Behind-Head Chest Opener)", sanskrit: "Gomukhasana", focus: "Rotator Cuff & Clavicular Freedom", pool: "pectorals", gif: "pectorals/behind-head-chest-stretch.gif" },
+  { name: "Anahata Heart Bloom (Chest & Deltoid Release)", sanskrit: "Anahata Asana", focus: "Anterior Shoulder & Pectoral Lengthening", pool: "pectorals", gif: "pectorals/chest-and-front-of-shoulder-stretch.gif" },
+  { name: "Garudasana Arms (Eagle Scapular Spread Stretch)", sanskrit: "Garudasana Arms", focus: "Posterior Deltoid & Rhomboid Release", pool: "delts", gif: "delts/rear-deltoid-stretch.gif" },
+  { name: "Kapotasana Overhead Bind (Triceps & Lat Reach)", sanskrit: "Kapotasana Arms", focus: "Shoulder Elevation & Triceps Release", pool: "triceps", gif: "triceps/overhead-triceps-stretch.gif" },
+  { name: "Seated Marjaryasana (Upper Back Cat Arch Stretch)", sanskrit: "Upavistha Marjari", focus: "Scapular Protraction & Neck Relief", pool: "upper-back", gif: "upper-back/upper-back-stretch.gif" },
+  { name: "Salabhasana Wave (Locust Spinal Extension Flow)", sanskrit: "Salabhasana", focus: "Spinal Erector Awakening & Mobility", pool: "spine", gif: "spine/lower-back-curl.gif" },
+  { name: "Merudanda Vinyasa (Seated Spine Roll Stretch)", sanskrit: "Merudanda Vinyasa", focus: "Intervertebral Space & Synovial Glide", pool: "spine", gif: "spine/spine-stretch.gif" },
+  { name: "Bhekasana Prep (Quadruped Quad & Hip Stretch)", sanskrit: "Bhekasana", focus: "Anterior Thigh & Hip Flexor Ease", pool: "quads", gif: "quads/all-fours-squad-stretch.gif" },
+  { name: "Supta Virasana Prep (Side-Lying Quad Elongation)", sanskrit: "Supta Virasana", focus: "Quad & Knee Capsule Gentle Opening", pool: "quads", gif: "quads/lying-side-quads-stretch.gif" },
+  { name: "Bharadvajasana (Gentle Sage Seated Hip Stretch)", sanskrit: "Bharadvajasana", focus: "Deep External Hip Rotator Relief", pool: "glutes", gif: "glutes/seated-glute-stretch.gif" },
+  { name: "Chaturanga Side Flow (Push-Up to Side Plank)", sanskrit: "Chaturanga Vinyasa", focus: "Core Integration & Shoulder Control", pool: "abs", gif: "abs/push-up-to-side-plank.gif" },
+  { name: "Kumbhakasana Twist (Plank Thoracic Mobility)", sanskrit: "Parivrtta Phalaka", focus: "Core Stabilization Under Twist", pool: "abs", gif: "abs/front-plank-with-twist.gif" },
+  { name: "Seated Ankle & Calf Ease (Vajrasana Lower Leg)", sanskrit: "Pada Shanti", focus: "Achilles & Calf Fascia Decompression", pool: "calves", gif: "calves/seated-calf-stretch-male.gif" },
+  { name: "Adho Mukha Heel Pedal (Calf & Ankle Elongation)", sanskrit: "Adho Mukha Pedal", focus: "Soleus & Gastrocnemius Lengthening", pool: "calves", gif: "calves/standing-calves-calf-stretch.gif" },
+  { name: "Tibialis & Shin Release (Restorative Lower Leg)", sanskrit: "Jangha Shanti", focus: "Shin Splint Ease & Ankle Flexibility", pool: "calves", gif: "calves/posterior-tibialis-stretch.gif" },
+  { name: "Sukhasana Knee Circle Warm-Up (Synovial Flow)", sanskrit: "Janu Chakra", focus: "Knee Joint Lubrication & Mobility", pool: "calves", gif: "calves/circles-knee-stretch.gif" },
+  { name: "Mudra Wrist & Carpal Stretch (Forearm Release)", sanskrit: "Manibandha Stretch", focus: "Wrist Decompression for Plank & Crow", pool: "forearms", gif: "forearms/side-wrist-pull-stretch.gif" },
+  { name: "Prasarita Windmill Flow (Circular Toe Reach)", sanskrit: "Prasarita Chakra", focus: "Hamstring Sweep & Spinal Twist", pool: "glutes", gif: "glutes/arms-apart-circular-toe-touch-male.gif" },
+  { name: "Pelvic Floor Bandha Tilt (Lumbar Reset on Mat)", sanskrit: "Mula Bandha Tilt", focus: "Neutral Pelvis & Lower Back Relief", pool: "abs", gif: "abs/pelvic-tilt.gif" },
+  { name: "Prasarita Padottanasana C (Clasped Arm Fold)", sanskrit: "Padottanasana C", focus: "Anterior Shoulder Bind & Spine Fold", pool: "glutes", gif: "glutes/hands-clasped-circular-toe-touch-male.gif" },
+  { name: "Seated Shoulder & Triceps Flow (Vajrasana Bind)", sanskrit: "Amsa Shanti", focus: "Upper Arm Flexibility & Posture", pool: "triceps", gif: "triceps/triceps-stretch.gif" },
+  { name: "Anahata Lat & Pec Floor Expansion", sanskrit: "Anahata Extension", focus: "Thoracic Cage & Breathing Volume", pool: "lats", gif: "lats/back-pec-stretch.gif" },
+  { name: "Standing Side Bend & Lateral Reach", sanskrit: "Parsva Tadasana", focus: "Oblique & Lateral Chain Flow", pool: "abs", gif: "abs/side-to-side-toe-touch-male.gif" },
 ];
 
-function getYogaGifForPose(poseType, index) {
-  const pool = YOGA_POSE_GIFS[poseType] || YOGA_POSE_GIFS.prana_vinyasa;
-  return pool[index % pool.length];
-}
-
-function getBallGifForPose(poseType, index) {
-  const pool = BALL_POSE_GIFS[poseType] || BALL_POSE_GIFS.ball_back_extension;
-  return pool[index % pool.length];
-}
-
-// 1. Classic Yoga Mat Asanas & Vinyasa Flows (155 entries)
-const MAT_YOGA_RAW = [
-  // Sun/Moon Flows
-  { name: "Surya Namaskar A (Classic 12-Flow Sun Salutation)", sanskrit: "Surya Namaskar A", focus: "Full Body Mobility & Breath Synchrony", pool: "spine" },
-  { name: "Surya Namaskar B (Ashtanga 17-Flow Chair & Warrior)", sanskrit: "Surya Namaskar B", focus: "Cardiovascular Heat & Thigh Strength", pool: "quads" },
-  { name: "Chandra Namaskar (Moon Salutation Cooling Sequence)", sanskrit: "Chandra Namaskar", focus: "Parasympathetic Reset & Hip Opening", pool: "glutes" },
-  { name: "Morning Prana Awakening Vinyasa Flow", sanskrit: "Prana Vinyasa", focus: "Spinal Waves & Diaphragm Activation", pool: "spine" },
-  { name: "Evening Restorative Yin Wind-Down Flow", sanskrit: "Chandra Yin Vinyasa", focus: "Deep Fascia Release & Cortisol Reduction", pool: "hamstrings" },
-  { name: "Agni Core Fire Power Yoga Flow", sanskrit: "Agni Vinyasa", focus: "Visceral Fat Burn & Core Transverse Lock", pool: "abs" },
-  { name: "Dynamic Warrior Vinyasa Dance Series", sanskrit: "Virabhadra Vinyasa", focus: "Pelvic Opening & Unilateral Leg Drive", pool: "quads" },
-  { name: "Spinal Fluid Wave & Kundalini Decompression", sanskrit: "Merudanda Vinyasa", focus: "Vertebral Fluidity & Synovial Glide", pool: "spine" },
-  { name: "Golden Hour Hip & Sacral Opening Vinyasa", sanskrit: "Svadhisthana Flow", focus: "Psoas Lengthening & Pelvic Mobility", pool: "glutes" },
-  { name: "Solar Plexus Fire & Digestion Flow", sanskrit: "Manipura Vinyasa", focus: "Metabolic Acceleration & Core Torque", pool: "abs" },
-  { name: "Anahata Heart & Thoracic Opening Wave", sanskrit: "Anahata Vinyasa", focus: "Pectoral Expansion & Shoulder Freedom", pool: "upper-back" },
-  { name: "Ashtanga Standing Primary Sequence", sanskrit: "Ashtanga Chikitsa", focus: "Foundation Alignment & Drishti Gaze", pool: "calves" },
-  { name: "Metabolic Detox Twisting Vinyasa", sanskrit: "Parivrtta Vinyasa", focus: "Spinal Detox & Internal Organ Compression", pool: "abs" },
-  { name: "Fascia Hydration & Joint Glide Wave", sanskrit: "Sandhi Vinyasa", focus: "Collagen Renewal & Synovial Pumping", pool: "spine" },
-
-  // Standing Asanas & Balance
-  { name: "Tadasana (Mountain Pose Midline Alignment)", sanskrit: "Tadasana", focus: "Grounding & Neutral Pelvic Tilt", pool: "calves" },
-  { name: "Vrikshasana (Tree Pose Single-Leg Balance)", sanskrit: "Vrikshasana", focus: "Unilateral Proprioception & Core", pool: "calves" },
-  { name: "Virabhadrasana I (Warrior I Heart Elevation)", sanskrit: "Virabhadrasana I", focus: "Hip Flexor Extension & Quad Power", pool: "quads" },
-  { name: "Virabhadrasana II (Warrior II Hip Opener)", sanskrit: "Virabhadrasana II", focus: "Adductor Endurance & External Rotation", pool: "quads" },
-  { name: "Virabhadrasana III (Warrior III Horizontal Fly)", sanskrit: "Virabhadrasana III", focus: "Posterior Chain Balance & Glute Medius", pool: "glutes" },
-  { name: "Utthita Trikonasana (Extended Triangle Pose)", sanskrit: "Trikonasana", focus: "Hamstring Elongation & Lateral Spine", pool: "hamstrings" },
-  { name: "Parivrtta Trikonasana (Revolved Triangle Pose)", sanskrit: "Parivrtta Trikonasana", focus: "Thoracic Rotation & IT Band Release", pool: "spine" },
-  { name: "Utthita Parsvakonasana (Extended Side Angle)", sanskrit: "Parsvakonasana", focus: "Intercostal Reach & Groin Opening", pool: "lats" },
-  { name: "Parivrtta Parsvakonasana (Revolved Side Angle)", sanskrit: "Parivrtta Parsvakonasana", focus: "Deep Visceral Detox & Quad Stability", pool: "abs" },
-  { name: "Utkatasana (Fierce Chair Pose Quadriceps Hold)", sanskrit: "Utkatasana", focus: "Quadriceps Hypertrophy & Ankle Mobility", pool: "quads" },
-  { name: "Garudasana (Eagle Pose Joint Decompression)", sanskrit: "Garudasana", focus: "Scapular Spread & Pelvic Equilibrium", pool: "upper-back" },
-  { name: "Natarajasana (Lord of the Dance Backbend Balance)", sanskrit: "Natarajasana", focus: "Chest Expansion & Unilateral Glute Lock", pool: "glutes" },
-  { name: "Ardha Chandrasana (Half Moon Lateral Balance)", sanskrit: "Ardha Chandrasana", focus: "Abductor Power & Spinal Extension", pool: "abductors" },
-  { name: "Parivrtta Ardha Chandrasana (Revolved Half Moon)", sanskrit: "Parivrtta Ardha Chandrasana", focus: "Balance Under Rotational Torque", pool: "spine" },
-  { name: "Prasarita Padottanasana A (Wide-Legged Fold)", sanskrit: "Prasarita Padottanasana A", focus: "Adductor Stretch & Inverted Calming", pool: "hamstrings" },
-  { name: "Prasarita Padottanasana C (Shoulder Clasp Fold)", sanskrit: "Prasarita Padottanasana C", focus: "Anterior Deltoid & Pectoral Release", pool: "upper-back" },
-  { name: "Utthita Hasta Padangusthasana (Hand-to-Big-Toe)", sanskrit: "Padangusthasana", focus: "Hamstring Flexibility & Hip Flexor Lock", pool: "hamstrings" },
-  { name: "Malasana (Yogic Deep Garland Squat)", sanskrit: "Malasana", focus: "Pelvic Floor Relaxation & Sacral Opening", pool: "glutes" },
-  { name: "Utkata Konasana (Goddess Pose Sacrum Open)", sanskrit: "Goddess Pose", focus: "Inner Thigh Fire & Pelvic Stability", pool: "quads" },
-  { name: "Skandasana (Side Lunge Half Squat Glide)", sanskrit: "Skandasana", focus: "Ankle Dorsiflexion & Adductor Freedom", pool: "adductors" },
-  { name: "Pada Hastasana (Gorilla Pose Hands Under Feet)", sanskrit: "Pada Hastasana", focus: "Deep Hamstring Release & Wrist Decompression", pool: "hamstrings" },
-  { name: "Uttanasana (Full Standing Forward Fold)", sanskrit: "Uttanasana", focus: "Spine Decompression & Posterior Elongation", pool: "spine" },
-  { name: "Ardha Uttanasana (Halfway Flat Back Lift)", sanskrit: "Ardha Uttanasana", focus: "Erector Spinae & Lat Engaging", pool: "spine" },
-  { name: "Ashwa Sanchalanasana (Equestrian Low Lunge)", sanskrit: "Ashwa Sanchalanasana", focus: "Iliopsoas Release & Pelvic Sinking", pool: "glutes" },
-  { name: "Anjaneyasana (Crescent High Lunge Heart Arch)", sanskrit: "Anjaneyasana", focus: "Front Body Opening & Thoracic Arch", pool: "quads" },
-  { name: "Parsvottanasana (Pyramid Intense Side Stretch)", sanskrit: "Parsvottanasana", focus: "Unilateral Hamstring & Scapular Bind", pool: "hamstrings" },
-  { name: "Urdhva Hastasana (Upward Salute Full Sky Reach)", sanskrit: "Urdhva Hastasana", focus: "Full Body Axial Extension", pool: "lats" },
-  { name: "Indudalasana (Standing Crescent Moon Side Bend)", sanskrit: "Indudalasana", focus: "Intercostals & Oblique Elongation", pool: "abs" },
-  { name: "Warrior Arch & Reverse Peaceful Warrior", sanskrit: "Viparita Virabhadrasana", focus: "Lateral Rib Expansion & Front Hip Open", pool: "lats" },
-  { name: "Bound Extended Side Angle (Baddha Parsvakonasana)", sanskrit: "Baddha Parsvakonasana", focus: "Internal Shoulder Rotation & Psoas Stretch", pool: "upper-back" },
-
-  // Seated & Forward Bends
-  { name: "Dandasana (Staff Pose Active L-Sit Grounding)", sanskrit: "Dandasana", focus: "Spinal Neutrality & Core Bracing", pool: "spine" },
-  { name: "Paschimottanasana (Classic Seated Forward Bend)", sanskrit: "Paschimottanasana", focus: "Total Posterior Chain Release", pool: "hamstrings" },
-  { name: "Janu Sirsasana (Head-to-Knee Single Leg Fold)", sanskrit: "Janu Sirsasana", focus: "Asymmetric Hamstring & Lumbar Release", pool: "hamstrings" },
-  { name: "Parivrtta Janu Sirsasana (Revolved Lateral Fold)", sanskrit: "Parivrtta Janu Sirsasana", focus: "Quadratus Lumborum & Lats Elongation", pool: "lats" },
-  { name: "Baddha Konasana (Bound Angle Butterfly Pose)", sanskrit: "Baddha Konasana", focus: "Adductor Relaxation & Sacral Freedom", pool: "adductors" },
-  { name: "Supta Baddha Konasana (Reclining Diamond Butterfly)", sanskrit: "Supta Baddha Konasana", focus: "Restorative Pelvic Drainage & Heart Open", pool: "glutes" },
-  { name: "Upavistha Konasana (Seated Wide Straddle Fold)", sanskrit: "Upavistha Konasana", focus: "Inner Thigh & Pelvic Floor Freedom", pool: "adductors" },
-  { name: "Gomukhasana (Cow Face Pose Hip & Shoulder Bind)", sanskrit: "Gomukhasana", focus: "Glute Rotators & Rotator Cuff Opening", pool: "upper-back" },
-  { name: "Agnistambhasana (Double Pigeon Fire Log Pose)", sanskrit: "Agnistambhasana", focus: "Deep Outer Hip & Piriformis Release", pool: "glutes" },
-  { name: "Ardha Matsyendrasana (Half Lord of Fishes Twist)", sanskrit: "Ardha Matsyendrasana", focus: "Digestive Stimulation & Spinal Health", pool: "spine" },
-  { name: "Bharadvajasana (Gentle Sage Seated Twist)", sanskrit: "Bharadvajasana", focus: "Thoracic Mobility & Sacroiliac Relief", pool: "spine" },
-  { name: "Marichyasana A (Sage Marichi Fold with Bind)", sanskrit: "Marichyasana A", focus: "Abdominal Compression & Hamstring Reach", pool: "abs" },
-  { name: "Marichyasana C (Sage Marichi Upright Detox Twist)", sanskrit: "Marichyasana C", focus: "Liver & Spleen Stimulation", pool: "spine" },
-  { name: "Krounchasana (Heron Pose Single-Leg Elevation)", sanskrit: "Krounchasana", focus: "Extreme Hamstring Stretch & Straight Spine", pool: "hamstrings" },
-  { name: "Tarasana (Star Pose Diamond Forward Fold)", sanskrit: "Tarasana", focus: "Sacrum & Sciatic Nerve Gentle Release", pool: "glutes" },
-  { name: "Siddhasana (Adept's Meditation Energy Lock)", sanskrit: "Siddhasana", focus: "Mula Bandha Activation & Grounding", pool: "glutes" },
-  { name: "Padmasana (Full Lotus Sacred Hip Rotation)", sanskrit: "Padmasana", focus: "Meditative Hip Equilibrium", pool: "glutes" },
-  { name: "Ardha Padmasana (Half Lotus Gentle Hip Opener)", sanskrit: "Ardha Padmasana", focus: "Gentle External Hip Rotation", pool: "glutes" },
-  { name: "Sukhasana (Easy Pose with Gyan Mudra Breath)", sanskrit: "Sukhasana", focus: "Diaphragmatic Breathwave & Grounding", pool: "spine" },
-  { name: "Virasana (Hero Pose Quadriceps & Knee Decompress)", sanskrit: "Virasana", focus: "Anterior Thigh & Ankle Mobility", pool: "quads" },
-  { name: "Supta Virasana (Reclining Hero Psoas Elongation)", sanskrit: "Supta Virasana", focus: "Intense Psoas & Quad Fascial Opening", pool: "quads" },
-  { name: "Vajrasana (Thunderbolt Pose Digestion Lock)", sanskrit: "Vajrasana", focus: "Post-Meal Bloodflow & Pelvic Drainage", pool: "quads" },
-  { name: "Navasana (Full Boat Pose Core Transverse V-Up)", sanskrit: "Navasana", focus: "Transverse Abdominis & Hip Flexor Fire", pool: "abs" },
-  { name: "Ardha Navasana (Low Boat Hollow Body Hold)", sanskrit: "Ardha Navasana", focus: "Deep Core Compression & Pelvic Lock", pool: "abs" },
-  { name: "Simhasana (Lion's Roar Tongue & Facial Release)", sanskrit: "Simhasana", focus: "Throat Chakra & Platysma Tension Drain", pool: "levator-scapulae" },
-  { name: "Kurmasana (Tortoise Pose Deep Inward Fold)", sanskrit: "Kurmasana", focus: "Pratyahara Sensory Withdrawal & Hamstrings", pool: "hamstrings" },
-  { name: "Bhekasana (Frog Pose Quad & Foot Arch Press)", sanskrit: "Bhekasana", focus: "Knee Flexibility & Chest Elevation", pool: "quads" },
-  { name: "Mandukasana (Frog Pose Deep Pelvic Opener)", sanskrit: "Mandukasana", focus: "Groin, Adductor & Sacral Decompression", pool: "adductors" },
-
-  // Backbends & Heart Openers
-  { name: "Bhujangasana (Classic Cobra Spinal Extension)", sanskrit: "Bhujangasana", focus: "Erector Spinae & Kidney Awakening", pool: "spine" },
-  { name: "Salamba Bhujangasana (Sphinx Pose Lumbar Ease)", sanskrit: "Sphinx Pose", focus: "Gentle Sacral Arch & Thoracic Glide", pool: "spine" },
-  { name: "Urdhva Mukha Svanasana (Upward-Facing Dog)", sanskrit: "Urdhva Mukha Svanasana", focus: "Anterior Body Opening & Wrist Lock", pool: "spine" },
-  { name: "Dhanurasana (Bow Pose Core-Balanced Backbend)", sanskrit: "Dhanurasana", focus: "Full Kinetic Arch & Visceral Massage", pool: "spine" },
-  { name: "Ustrasana (Camel Pose Deep Heart Throat Arch)", sanskrit: "Ustrasana", focus: "Psoas, Chest & Thyroid Activation", pool: "spine" },
-  { name: "Chakrasana / Urdhva Dhanurasana (Wheel Pose)", sanskrit: "Urdhva Dhanurasana", focus: "Peak Thoracic Arch & Tricep Power", pool: "spine" },
-  { name: "Setu Bandhasana (Bridge Pose Glute Squeeze)", sanskrit: "Setu Bandhasana", focus: "Posterior Chain Drive & Thyroid Pressure", pool: "glutes" },
-  { name: "Salabhasana (Locust Pose Pure Posterior Strength)", sanskrit: "Salabhasana", focus: "Lower Back, Glutes & Hamstrings Lift", pool: "spine" },
-  { name: "Matsyasana (Fish Pose Throat & Heart Crown Open)", sanskrit: "Matsyasana", focus: "Cervical Extension & Lung Expansion", pool: "spine" },
-  { name: "Eka Pada Rajakapotasana (King Pigeon Arch)", sanskrit: "Rajakapotasana", focus: "Supreme Hip Flexor & Lat Bind", pool: "glutes" },
-  { name: "Kapurthala Camel Heart Reaches", sanskrit: "Ustra Vinyasa", focus: "Dynamic Quad & Lumbar Wave", pool: "quads" },
-  { name: "Viparita Dandasana (Inverted Staff Heart Arch)", sanskrit: "Viparita Dandasana", focus: "Scapular Depression & Intercostals", pool: "spine" },
-
-  // Inversions & Restorative
-  { name: "Adho Mukha Svanasana (Downward-Facing Dog)", sanskrit: "Adho Mukha Svanasana", focus: "Axial Spine Traction & Calf Release", pool: "spine" },
-  { name: "Balasana (Child's Pose Restorative Grounding)", sanskrit: "Balasana", focus: "Sacral Decompression & Third Eye Ground", pool: "spine" },
-  { name: "Ananda Balasana (Happy Baby Hip & Sacrum Float)", sanskrit: "Ananda Balasana", focus: "Pelvic Floor Relaxation & Groin Ease", pool: "glutes" },
-  { name: "Supta Padangusthasana A (Reclining Big Toe)", sanskrit: "Supta Padangusthasana", focus: "Isolate Hamstring Without Back Strain", pool: "hamstrings" },
-  { name: "Jathara Parivartanasana (Belly Twist Flow)", sanskrit: "Jathara Parivartanasana", focus: "Visceral Drainage & Spinal Rotation", pool: "abs" },
-  { name: "Apanasana (Knees-to-Chest Wind-Relieving Pose)", sanskrit: "Apanasana", focus: "Lower Back Hug & Ascending Colon Ease", pool: "abs" },
-  { name: "Savasana (Corpse Pose Parasympathetic Surrender)", sanskrit: "Savasana", focus: "Full System Cellular Equilibrium & Rest", pool: "spine" },
-  { name: "Makarasana (Crocodile Prone Diaphragmatic Rest)", sanskrit: "Makarasana", focus: "Breathing Wave Into Sacrum & Low Back", pool: "spine" },
-  { name: "Viparita Karani (Legs-Up-The-Mat Circulation)", sanskrit: "Viparita Karani", focus: "Venous Return & Lymphatic Drainage", pool: "calves" },
-  { name: "Salamba Sarvangasana (Supported Shoulderstand)", sanskrit: "Sarvangasana", focus: "Thyroid Circulation & Inverted Flow", pool: "upper-back" },
-  { name: "Halasana (Plow Pose Deep Cervical & Back Stretch)", sanskrit: "Halasana", focus: "Total Posterior Chain & Autonomic Calm", pool: "spine" },
-  { name: "Karnapidasana (Ear Pressure Pose Deep Fold)", sanskrit: "Karnapidasana", focus: "Sensory Stillness & Deep Spinal Curl", pool: "spine" },
+const CURATED_BALL_YOGA = [
+  { name: "Stability Ball Balasana (Child's Pose Rollout Flow)", sanskrit: "Kanduka Balasana", focus: "Thoracic Opening & Latissimus Traction", pool: "lats", gif: "lats/exercise-ball-lat-stretch.gif" },
+  { name: "Exercise Ball Back Extension & Heart Opener", sanskrit: "Kanduka Bhujangasana", focus: "Spinal Decompression & Intercostal Reach", pool: "spine", gif: "spine/back-extension-on-exercise-ball.gif" },
+  { name: "Stability Ball Setu Bandhasana (Reverse Extension)", sanskrit: "Kanduka Setu Bandha", focus: "Gluteus Maximus & Hamstring Stabilization", pool: "glutes", gif: "glutes/reverse-hyper-extension-on-stability-ball.gif" },
+  { name: "Exercise Ball Thoracic Chest & Arch Glide", sanskrit: "Kanduka Matsyasana", focus: "Pectoral Opening & Kyphosis Reversal", pool: "pectorals", gif: "pectorals/chest-stretch-with-exercise-ball.gif" },
+  { name: "Stability Ball Arms-Extended Cobra Reach", sanskrit: "Kanduka Salabhasana", focus: "Long-Lever Spinal Extension & Balance", pool: "spine", gif: "spine/exercise-ball-back-extension-with-arms-extended.gif" },
+  { name: "Exercise Ball Supported Cobra Crown Lift", sanskrit: "Kanduka Hasta Arch", focus: "Upper Thoracic Erector Endurance", pool: "spine", gif: "spine/exercise-ball-back-extension-with-hands-behind-head.gif" },
+  { name: "Stability Ball Pyramid Back & Lat Release", sanskrit: "Kanduka Parvatasana", focus: "Full Posterior Fascia & Shoulder Ease", pool: "lats", gif: "lats/exercise-ball-lower-back-stretch-pyramid.gif" },
+  { name: "Exercise Ball Restorative Hug & Lumbar Melt", sanskrit: "Kanduka Apanasana", focus: "Parasympathetic Spine Surrender", pool: "spine", gif: "spine/exercise-ball-hug.gif" },
+  { name: "Stability Ball Seated Hamstring Forward Fold", sanskrit: "Kanduka Paschimo", focus: "Seated Posterior Chain Elongation", pool: "hamstrings", gif: "hamstrings/exercise-ball-seated-hamstring-stretch.gif" },
+  { name: "Exercise Ball Lateral Side-Lying Lat Arc", sanskrit: "Kanduka Parsva", focus: "Quadratus Lumborum & Lateral Rib Glide", pool: "lats", gif: "lats/exercise-ball-lying-side-lat-stretch.gif" },
+  { name: "Stability Ball Deep Hip Flexor & Psoas Melt", sanskrit: "Kanduka Anjaneya", focus: "Anterior Hip Capsule Release", pool: "glutes", gif: "glutes/exercise-ball-hip-flexor-stretch.gif" },
+  { name: "Exercise Ball Knees-Off Prone Spine Extension", sanskrit: "Kanduka Urdhva", focus: "Full Kinetic Extension & Core Lock", pool: "spine", gif: "spine/exercise-ball-back-extension-with-knees-off-ground.gif" },
+  { name: "Stability Ball Prone Rotational Spine Twist", sanskrit: "Kanduka Parivrtta", focus: "Thoracic Mobility & Oblique Control", pool: "spine", gif: "spine/exercise-ball-back-extension-with-rotation.gif" },
+  { name: "Exercise Ball Assisted Pectoral & Heart Opener", sanskrit: "Kanduka Anahata", focus: "Deep Anterior Chest Relaxation", pool: "pectorals", gif: "pectorals/assisted-seated-pectoralis-major-stretch-with-stability-ball.gif" },
+  { name: "Stability Ball Seated Triceps & Shoulder Stretch", sanskrit: "Kanduka Amsa", focus: "Cervical Posture & Upper Arm Flexibility", pool: "triceps", gif: "triceps/exercise-ball-seated-triceps-stretch.gif" },
+  { name: "Exercise Ball Alternating Bird-Dog Arm Reaches", sanskrit: "Kanduka Dandayamana", focus: "Contralateral Neuromuscular Balance", pool: "lats", gif: "lats/exercise-ball-alternating-arm-ups.gif" },
+  { name: "Stability Ball Prone Leg Elevation & Sacrum Lift", sanskrit: "Kanduka Leg Float", focus: "Gluteal Firing & Sacroiliac Alignment", pool: "spine", gif: "spine/exercise-ball-prone-leg-raise.gif" },
+  { name: "Exercise Ball Diagonal Hip & Hamstring Glide", sanskrit: "Kanduka Eka Pada", focus: "Posterior Chain Balance on Ball", pool: "glutes", gif: "glutes/exercise-ball-one-legged-diagonal-kick-hamstring-curl.gif" },
+  { name: "Stability Ball Supine Single-Leg Hip Rotation", sanskrit: "Kanduka Yoni Flow", focus: "Deep Hip Capsule Mobility", pool: "glutes", gif: "glutes/exercise-ball-one-leg-prone-lower-body-rotation.gif" },
+  { name: "Exercise Ball Gentle Plank Rollout Pull-In", sanskrit: "Kanduka Kumbhaka", focus: "Transverse Core & Pelvic Stabilization", pool: "abs", gif: "abs/pull-in-on-stability-ball.gif" },
+  { name: "Stability Ball Prone Torso Twist Integration", sanskrit: "Kanduka Prone Twist", focus: "Oblique Balance & Spine Control", pool: "abs", gif: "abs/prone-twist-on-stability-ball.gif" },
+  { name: "Exercise Ball Pike Inversion & Shoulder Lock", sanskrit: "Kanduka Adho Mukha", focus: "Inverted Core Elevation & Scapular Drive", pool: "pectorals", gif: "pectorals/exercise-ball-pike-push-up.gif" },
+  { name: "Stability Ball Seated Core Crunch & Rib Tuck", sanskrit: "Kanduka Navasana Prep", focus: "Abdominal Endurance on Spherical Surface", pool: "abs", gif: "abs/crunch-on-stability-ball.gif" },
+  { name: "Exercise Ball Arms-Straight Boat Balance Flow", sanskrit: "Kanduka Navasana", focus: "Long-Lever Core Stability & Breath", pool: "abs", gif: "abs/crunch-on-stability-ball-arms-straight.gif" },
+  { name: "Stability Ball Hands-Behind-Head Arch Crunch", sanskrit: "Kanduka Ardha Crunch", focus: "Thoracic Flexion-Extension Wave", pool: "abs", gif: "abs/stability-ball-crunch-full-range-hands-behind-head.gif" },
+  { name: "Exercise Ball Wall Support Calf & Ankle Rise", sanskrit: "Kanduka Tadasana", focus: "Achilles Mobility & Lower-Leg Venous Return", pool: "calves", gif: "calves/exercise-ball-on-the-wall-calf-raise.gif" },
+  { name: "Stability Ball Elevated Chaturanga Push-Up", sanskrit: "Kanduka Chaturanga", focus: "Proprioceptive Shoulder & Core Lock", pool: "pectorals", gif: "pectorals/push-up-on-stability-ball.gif" },
+  { name: "Exercise Ball Narrow-Grip Chaturanga Balance", sanskrit: "Kanduka Tricep Flow", focus: "Midline Stability & Tricep Tone", pool: "triceps", gif: "triceps/narrow-push-up-on-exercise-ball.gif" },
+  { name: "Stability Ball Seated Reverse Table Dip Flow", sanskrit: "Kanduka Purvottana", focus: "Anterior Shoulder & Core Integration", pool: "triceps", gif: "triceps/exercise-ball-dip.gif" },
+  { name: "Exercise Ball Supine Triceps & Chest Float", sanskrit: "Kanduka Supine Flow", focus: "Upper-Body Stabilization on Ball", pool: "triceps", gif: "triceps/exercise-ball-supine-triceps-extension.gif" },
+  { name: "Stability Ball Dynamic Flow Chaturanga Sequence", sanskrit: "Kanduka Vinyasa", focus: "Full Kinetic Core Harmony", pool: "pectorals", gif: "pectorals/push-up-on-stability-ball-0656.gif" },
 ];
 
-// 2. Stability & Exercise Ball Yoga Flows (35 entries)
-const BALL_YOGA_RAW = [
-  { name: "Stability Ball Balasana (Child's Pose Rollout Flow)", sanskrit: "Kanduka Balasana", focus: "Thoracic Opening & Latissimus Traction", pool: "spine" },
-  { name: "Exercise Ball Back Extension & Heart Opener", sanskrit: "Kanduka Bhujangasana", focus: "Spinal Decompression & Intercostal Reach", pool: "spine" },
-  { name: "Stability Ball Setu Bandhasana (Pelvic Bridge Flow)", sanskrit: "Kanduka Setu Bandha", focus: "Gluteus Maximus & Hamstring Stabilization", pool: "glutes" },
-  { name: "Exercise Ball Thoracic Foam & Arch Glide", sanskrit: "Kanduka Matsyasana", focus: "Postural Kyphosis Reversal on Ball", pool: "upper-back" },
-  { name: "Stability Ball Seated Parivrtta (Spinal Twist)", sanskrit: "Kanduka Parivrtta", focus: "Gentle Rotational Torque & Core Alignment", pool: "abs" },
-  { name: "Exercise Ball Marjaryasana (Cat-Cow Ball Float)", sanskrit: "Kanduka Marjaryasana", focus: "Pelvic Rhythms & Lumbar Wave", pool: "spine" },
-  { name: "Stability Ball Supported Adho Mukha (Downward Dog)", sanskrit: "Kanduka Svanasana", focus: "Zero-Wrist Shoulder Traction & Calf Float", pool: "spine" },
-  { name: "Exercise Ball Supta Baddha Konasana (Reclined Diamond)", sanskrit: "Kanduka Baddha Konasana", focus: "Sacral Freedom & Deep Pelvic Drainage", pool: "glutes" },
-  { name: "Stability Ball Lateral Side Arc & Oblique Lengthener", sanskrit: "Kanduka Parsva", focus: "Quadratus Lumborum & Ribcage Glide", pool: "abs" },
-  { name: "Exercise Ball Prone Spine Hyper-Extension with Arms Wings", sanskrit: "Kanduka Salabhasana", focus: "Rhomboids, Middle Traps & Low Back", pool: "spine" },
-  { name: "Stability Ball Pelvic Neutral Clock & Circular Rocks", sanskrit: "Kanduka Chakra Pelvis", focus: "Sacroiliac Joint Fluidity & Core Sync", pool: "glutes" },
-  { name: "Exercise Ball Savasana (Legs-Elevated Circulatory Float)", sanskrit: "Kanduka Savasana", focus: "Deep Venous Drainage & Psoas Relaxation", pool: "calves" },
-  { name: "Stability Ball Single-Leg Bridge Stabilization", sanskrit: "Kanduka Eka Pada Setu", focus: "Glute Medius & Pelvic Leveling", pool: "glutes" },
-  { name: "Exercise Ball Chest Hug & Upper Back Traction", sanskrit: "Kanduka Garudasana", focus: "Scapular Separation & Trapezius Relief", pool: "upper-back" },
-  { name: "Stability Ball Prone Leg Elevation & Hip Extension", sanskrit: "Kanduka Prone Leg Lift", focus: "Gluteal Firing & Sacroiliac Alignment", pool: "glutes" },
-  { name: "Exercise Ball Kneeling Thoracic Melt", sanskrit: "Kanduka Anahatasana", focus: "Shoulder Impingement Relief on Ball", pool: "upper-back" },
-  { name: "Stability Ball Seated Core Tilt & Transverse Brace", sanskrit: "Kanduka Navasana Prep", focus: "Deep Transverse Abdominis Firing", pool: "abs" },
-  { name: "Exercise Ball Reclined Butterfly Arch", sanskrit: "Kanduka Supta Butterfly", focus: "Groin Release & Deep Diaphragmatic Breath", pool: "adductors" },
-  { name: "Stability Ball Rollout to Plank Alignment", sanskrit: "Kanduka Kumbhakasana", focus: "Shoulder Centration & Serratus Drive", pool: "abs" },
-  { name: "Exercise Ball Hamstring Curl & Spinal Bridge", sanskrit: "Kanduka Dvipada", focus: "Biceps Femoris & Posterior Kinetic Chain", pool: "hamstrings" },
-  { name: "Stability Ball Supported Fish Pose Crown Glide", sanskrit: "Kanduka Matsya Open", focus: "Thyroid Stimulation & Cervical Traction", pool: "spine" },
-  { name: "Exercise Ball Lateral Hip Glide & IT Band Ease", sanskrit: "Kanduka IT Release", focus: "Tensor Fasciae Latae & Lateral Hip", pool: "abductors" },
-  { name: "Stability Ball Wall Squat Isometric Flow", sanskrit: "Kanduka Utkatasana", focus: "Quad Hypertrophy with Perfect Spine Support", pool: "quads" },
-  { name: "Exercise Ball Prone Torso Twist Mobility", sanskrit: "Kanduka Prone Twist", focus: "Thoracolumbar Fascia & Oblique Stretch", pool: "abs" },
-  { name: "Stability Ball Restorative Hip Cradle", sanskrit: "Kanduka Yoni Resting", focus: "Parasympathetic Down-Regulation", pool: "glutes" },
-  { name: "Exercise Ball Quad Stretch & Psoas Melt", sanskrit: "Kanduka Anjaneya", focus: "Anterior Hip Capsule Release on Ball", pool: "quads" },
-  { name: "Stability Ball Gentle Calf & Ankle Dorsiflexion", sanskrit: "Kanduka Pada Glide", focus: "Achilles Tendon Mobility & Venous Return", pool: "calves" },
-  { name: "Exercise Ball Cobra Slide & Pectoral Spread", sanskrit: "Kanduka Bhujanga Slide", focus: "Thoracic Mobility & Kidney Awakening", pool: "spine" },
-  { name: "Stability Ball Overhead Arm Sweep on Ball", sanskrit: "Kanduka Urdhva Reach", focus: "Full Kinetic Axial Decompression", pool: "lats" },
-  { name: "Exercise Ball Forward Fold Traction on Mat", sanskrit: "Kanduka Paschimo", focus: "Gentle Posterior Chain Glide", pool: "hamstrings" },
-  { name: "Stability Ball Inner Thigh Adductor Hug", sanskrit: "Kanduka Adductor Squeeze", focus: "Pelvic Floor Tone & VMO Activation", pool: "adductors" },
-  { name: "Exercise Ball Supine Arm Flutters & Heart Breath", sanskrit: "Kanduka Prana Sweep", focus: "Chest Expansion & Nervous System Reset", pool: "upper-back" },
-  { name: "Stability Ball Cross-Body Glute & Hip Stretch", sanskrit: "Kanduka Piriformis", focus: "Sciatic Nerve Flossing on Ball", pool: "glutes" },
-  { name: "Exercise Ball Quadruped Balance & Bird Dog Wave", sanskrit: "Kanduka Dandayamana", focus: "Contralateral Neuromuscular Balance", pool: "spine" },
-  { name: "Stability Ball Final Guided Savasana Wave", sanskrit: "Kanduka Maha Shanti", focus: "Deep Zen Stillness & Somatic Integration", pool: "spine" },
-];
-
-// 3. Face Yoga & Anti-Aging Facial Sculpting (35 entries)
-const FACE_YOGA_RAW = [
-  { name: "Mandibular Jawline Sculpt & Platysma Tightener", sanskrit: "Platysma Sculpt", focus: "Double Chin Elimination & Jaw Definition" },
-  { name: "Cheekbone Elevation & Zygomaticus Major Lift", sanskrit: "Kapi Asana (Cheek Sculpt)", focus: "Mid-Face Volume & Nasolabial Smoothing" },
-  { name: "Forehead Smoothing & Frontalis Fascia Glide", sanskrit: "Bhrumadhya Shanti", focus: "Expression Line Softening & Brow Balance" },
-  { name: "Orbicularis Oculi Eye Ring Tone & Brow Smoother", sanskrit: "Netra Asana", focus: "Crow's Feet Prevention & Under-Eye Drain" },
-  { name: "Buccinator Sculpt & Nasolabial Fold Flusher", sanskrit: "Mukha Shuddhi", focus: "Cheek Definition & Deep Facial Drainage" },
-  { name: "Swan Neck Lengthener & Cervical Decompression", sanskrit: "Hamsasana Mukha", focus: "Neck Firming & Platysma Fascial Pull" },
-  { name: "Fish Lips Pout & Oral Fascia Plumping", sanskrit: "Matsya Mukha", focus: "Lip Definition & Perioral Tone" },
-  { name: "Simhasana (Lion's Roar Facial Detox Flush)", sanskrit: "Simhasana Mukha", focus: "Full Facial Bloodflow & Tension Relief" },
-  { name: "Double Chin Eraser & Tongue-to-Palate Mewing Lock", sanskrit: "Jihva Bandha", focus: "Submental Muscle & Hyoid Bone Lift" },
-  { name: "Gua Sha Lymphatic Collarbone & Jawline Sweep", sanskrit: "Prana Drainage", focus: "Puffiness Removal & Lymph Drainage" },
-  { name: "Under-Eye Tap & Lymphatic Drainage Pulse", sanskrit: "Netra Bindu", focus: "Microcirculation & Dark Circle Relief" },
-  { name: "Temple & Sphenoid Bone Tension Release", sanskrit: "Shankha Shanti", focus: "TMJ Clenching Relief & Head Ease" },
-  { name: "Masseter Jaw Muscle Acupressure Release", sanskrit: "Hanu Mardana", focus: "Clenching & Bruxism Relief" },
-  { name: "Eyebrow Arch Acupressure & Brow Tension Lift", sanskrit: "Bhru Namaskar", focus: "Upper Eyelid Lift & Frontal Ease" },
-  { name: "Nose Sculpting & Nasalis Acupressure Glide", sanskrit: "Nasa Shodhana Asana", focus: "Sinus Drainage & Nasal Symmetry" },
-  { name: "Tongue Roof Glide & Hyoid Bone Elevation", sanskrit: "Khechari Mudra Light", focus: "Deep Submental Toning" },
-  { name: "Corrugator Brow Furrow Smoothing Stroke", sanskrit: "Ajna Smoothing", focus: "11 Line Softening & Forehead Calm" },
-  { name: "Zygomatic Minor Cheek Pinch & Plump Technique", sanskrit: "Kapola Vardhana", focus: "Collagen Stimulation in Cheeks" },
-  { name: "Neck Bandha & Thyroid Compression Wave", sanskrit: "Jalandhara Bandha", focus: "Thyroid Vitality & Neck Tightening" },
-  { name: "Lip Boundary Plumping & Breath Kiss Hold", sanskrit: "Oshtha Vardhana", focus: "Circumoral Muscle Elasticity" },
-  { name: "Cranial Fascia Scalp Glide & Crown Release", sanskrit: "Sahasrara Mardana", focus: "Facial Toning via Scalp Fascia" },
-  { name: "Ear Lobe & Vagus Nerve Reflexology Stroke", sanskrit: "Karna Mardana", focus: "Parasympathetic Facial Glow Reset" },
-  { name: "Clavicular Lymphatic Pump & Chest Sweep", sanskrit: "Uras Shanti", focus: "Thoracic Lymphatic Flush" },
-  { name: "Chin Pinch & Jawline Tapering Sweep", sanskrit: "Chibuka Mardana", focus: "Mandibular Contour Sharpening" },
-  { name: "Smile Muscle Counter-Resistance Hold", sanskrit: "Hasya Asana", focus: "Lip Corner Elevation & Saccular Tone" },
-  { name: "Sitali Cooling Tongue Breath & Skin Hydration", sanskrit: "Sitali Prana", focus: "Cellular Hydration & Inflammation Cool" },
-  { name: "Jaw Drop & Occipital Neck Release", sanskrit: "Mukhaprasadana", focus: "TMJ Alignment & Facial Equilibrium" },
-  { name: "Upper Eyelid Resistance Flutters", sanskrit: "Netra Spandana", focus: "Ptosis Prevention & Eye Brightening" },
-  { name: "Lower Lid Squint & Tear-Trough Strengthener", sanskrit: "Netra Tarpana Flow", focus: "Tear-Trough Plumping & Tone" },
-  { name: "Cheek Vacuum & Oral Wall Compression", sanskrit: "Kapola Shoshana", focus: "Hollow Cheekbone Definition" },
-  { name: "Platysma Kiss-the-Ceiling Neck Sculpt", sanskrit: "Urdhva Mukha Platysma", focus: "Deep Neck Line Eradication" },
-  { name: "Suboccipital Base Release & Posture Reset", sanskrit: "Griva Shanti", focus: "Forward Head Posture & Double Chin Fix" },
-  { name: "Facial Tapotement (Micro-Vibration Glow Tap)", sanskrit: "Mukha Taranga", focus: "Skin Elasticity & Microcapillary Flow" },
-  { name: "Pranayama Bhramari (Bee Breath Facial Resonance)", sanskrit: "Bhramari Mukha", focus: "Nitric Oxide Release & Cellular Radiance" },
-  { name: "Final Zen Shanti Facial Savasana Stillness", sanskrit: "Mukha Savasana", focus: "Complete Facial Muscle Reset & Radiance" },
-];
+const MAT_YOGA_RAW = CURATED_MAT_YOGA;
+const BALL_YOGA_RAW = CURATED_BALL_YOGA;
 
 function resolvePoseType(category, name) {
   const n = name.toLowerCase();
-  if (category === 'face_yoga') {
-    if (n.includes('double chin') || n.includes('mewing') || n.includes('hyoid') || n.includes('tongue')) return 'face_mewing_chin';
-    if (n.includes('cheek') || n.includes('zygomatic') || n.includes('buccinator') || n.includes('smile')) return 'face_cheek';
-    if (n.includes('forehead') || n.includes('brow') || n.includes('corrugator') || n.includes('scalp')) return 'face_forehead';
-    if (n.includes('eye') || n.includes('oculi') || n.includes('eyelid') || n.includes('tear')) return 'face_eyes';
-    if (n.includes('lip') || n.includes('fish') || n.includes('oral')) return 'face_lips';
-    if (n.includes('lion') || n.includes('simhasana') || n.includes('bhramari') || n.includes('sitali')) return 'face_lion_breath';
-    if (n.includes('gua sha') || n.includes('lymph') || n.includes('neck') || n.includes('collarbone') || n.includes('ear') || n.includes('clavicular') || n.includes('masseter') || n.includes('temple') || n.includes('nose')) return 'face_lymphatic';
-    return 'face_jawline';
-  }
   if (category === 'exercise_ball') {
     if (n.includes('child') || n.includes('rollout') || n.includes('melt') || n.includes('sweep') || n.includes('downward')) return 'ball_child_rollout';
     if (n.includes('bridge') || n.includes('hamstring') || n.includes('setu')) return 'ball_bridge';
@@ -316,7 +215,7 @@ function resolvePoseType(category, name) {
   return 'warrior_2';
 }
 
-console.log('Generating organized Yoga catalog with Mat, Stability Ball, and Face categories...');
+console.log('Generating organized Yoga catalog with Mat and Stability Ball categories...');
 
 const finalCatalog = [];
 
@@ -343,7 +242,7 @@ MAT_YOGA_RAW.forEach((item, idx) => {
     metScore: Math.round((3.0 + (idx % 5) * 0.3) * 10) / 10,
     hypertrophyRate: 0.25,
     poseType,
-    gifUrl: getYogaGifForPose(poseType, idx),
+    gifUrl: g(item.gif),
     primaryMuscles: [
       { name: 'Spinal Erectors & Axial Core', percentage: 90, color: '#f59e0b' },
       { name: 'Fascial Kinetic Chain', percentage: 75, color: '#fbbf24' },
@@ -391,7 +290,7 @@ BALL_YOGA_RAW.forEach((item, idx) => {
     metScore: Math.round((3.2 + (idx % 4) * 0.3) * 10) / 10,
     hypertrophyRate: 0.35,
     poseType,
-    gifUrl: getBallGifForPose(poseType, idx),
+    gifUrl: g(item.gif),
     primaryMuscles: [
       { name: 'Core Stabilizer Ring', percentage: 92, color: '#f59e0b' },
       { name: 'Thoracic & Lumbar Erectors', percentage: 80, color: '#fbbf24' },
@@ -416,62 +315,14 @@ BALL_YOGA_RAW.forEach((item, idx) => {
   });
 });
 
-// 3. Process Face Yoga & Anti-Aging
-FACE_YOGA_RAW.forEach((item, idx) => {
-  const id = `yoga-face-${String(idx + 1).padStart(3, '0')}`;
-  finalCatalog.push({
-    id,
-    name: item.name,
-    sanskritName: item.sanskrit,
-    slug: item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    category: 'face_yoga',
-    subCategory: 'face_yoga',
-    level: idx % 3 === 0 ? 'Beginner' : idx % 3 === 1 ? 'Intermediate' : 'Advanced',
-    muscleCategory: 'Face & Neck',
-    muscle: 'face-neck',
-    equipment: 'face_hands',
-    equipmentLabel: 'Hands, Breath & Mirror',
-    environment: 'Seated Zen Space / Mirror',
-    isHomeFriendly: true,
-    isGymFree: true,
-    tagline: `Non-invasive facial toning & lymphatic drainage asana for ${item.focus.toLowerCase()}.`,
-    metScore: 2.2,
-    hypertrophyRate: 0.2,
-    poseType: resolvePoseType('face_yoga', item.name),
-    gifUrl: faceGifs[idx % faceGifs.length],
-    primaryMuscles: [
-      { name: 'Platysma & Zygomaticus Major', percentage: 92, color: '#f59e0b' },
-      { name: 'Orbicularis & Facial Fascia', percentage: 80, color: '#fbbf24' },
-      { name: 'Cervical & Hyoid Stabilizers', percentage: 65, color: '#d97706' },
-    ],
-    setupSteps: [
-      'Sit comfortably on your yoga mat or chair with spine erect and chest open.',
-      'Ensure hands are clean and apply a drop of light facial oil or moisturizer to prevent friction.',
-      'Position a mirror at eye level to monitor facial symmetry and avoid squinting.',
-    ],
-    formSteps: [
-      `Inhale through nose, relaxing jaw hinge and unclenching back molars.`,
-      `Apply gentle finger pads or facial muscle resistance to initiate ${item.sanskrit}.`,
-      `Hold the isometric facial contraction or lymphatic glide for 10 to 15 seconds with steady breathing.`,
-      `Release with a deep, cleansing exhale; feel warm circulation returning to facial skin.`,
-    ],
-    commonMistakes: [
-      'Pulling or stretching delicate facial skin aggressively without oil or slip.',
-      'Holding tension in the forehead or jaw during targeted lower-face movements.',
-    ],
-    proTip: `Treat facial muscles with the same progressive overload principles as your body. Consistent 8-minute daily practice stimulates fibroblast collagen synthesis naturally.`,
-  });
-});
-
-console.log(`Successfully generated ${finalCatalog.length} Total Yoga & Face Yoga entries:`);
+console.log(`Successfully generated ${finalCatalog.length} Total Yoga Sanctuary entries:`);
 console.log(`- Mat Yoga Asanas: ${finalCatalog.filter(e => e.subCategory === 'yoga_mat').length}`);
 console.log(`- Stability Ball Yoga: ${finalCatalog.filter(e => e.subCategory === 'exercise_ball').length}`);
-console.log(`- Face Yoga Routines: ${finalCatalog.filter(e => e.subCategory === 'face_yoga').length}`);
 
 const fileContent = `/**
- * FITARC YOGA & FACE YOGA SANCTUARY ARCHIVE
- * Authentic Non-Gym Yoga Asanas on Non-Slip Yoga Mat, Stability Ball Decompression & Face Yoga
- * Dedicated 225+ routines free from gym machines, barbells, or weights.
+ * FITARC YOGA SANCTUARY ARCHIVE
+ * Authentic Non-Gym Yoga Asanas on Non-Slip Yoga Mat & Stability Ball Decompression
+ * Dedicated routines free from gym machines, barbells, or weights.
  */
 
 export const YOGA_AND_HOME_WORKOUTS = ${JSON.stringify(finalCatalog, null, 2)};

@@ -1,43 +1,47 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Sparkles,
   Zap,
-  Activity,
-  Award,
   Play,
-  RotateCcw,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Layers,
-  CircleDot,
-  Dumbbell,
+  Lock,
 } from 'lucide-react';
 import { CALISTHENICS_EXERCISES } from '../../data/calisthenicsExercises';
-import { GuidedWorkoutPlayerModal } from './GuidedWorkoutPlayerModal';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
+import { useApp } from '../../context/AppContext';
 
 export function CalisthenicsHub() {
+  const { customExercises, disabledExerciseIds, exerciseOverrides, hasPaidPlan, openPlanUpgradeModal, setActiveGuidedSession } = useApp();
   const [selectedTier, setSelectedTier] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
-  const [guidedPlan, setGuidedPlan] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
 
+  const managedCalisthenics = useMemo(
+    () =>
+      mergeManagedCatalog(CALISTHENICS_EXERCISES, {
+        customItems: customExercises,
+        disabledIds: disabledExerciseIds,
+        overrides: exerciseOverrides,
+        customFilter: (ex) => ex.category === 'calisthenics' || ex.subCategory === 'calisthenics',
+      }),
+    [customExercises, disabledExerciseIds, exerciseOverrides]
+  );
+
   const filteredExercises = useMemo(() => {
-    return CALISTHENICS_EXERCISES.filter((item) => {
+    return managedCalisthenics.filter((item) => {
+      const tierStr = item.tier || 'Tier 1';
       const matchTier =
         selectedTier === 'all' ||
-        (selectedTier === 'tier1' && item.tier.includes('Tier 1')) ||
-        (selectedTier === 'tier2' && item.tier.includes('Tier 2')) ||
-        (selectedTier === 'tier3' && item.tier.includes('Tier 3'));
+        (selectedTier === 'tier1' && tierStr.includes('Tier 1')) ||
+        (selectedTier === 'tier2' && tierStr.includes('Tier 2')) ||
+        (selectedTier === 'tier3' && tierStr.includes('Tier 3'));
       const matchLevel = selectedLevel === 'all' || item.level === selectedLevel;
       return matchTier && matchLevel;
     });
-  }, [selectedTier, selectedLevel]);
+  }, [managedCalisthenics, selectedTier, selectedLevel]);
 
-  const tier1Count = useMemo(() => CALISTHENICS_EXERCISES.filter((e) => e.tier.includes('Tier 1')).length, []);
-  const tier2Count = useMemo(() => CALISTHENICS_EXERCISES.filter((e) => e.tier.includes('Tier 2')).length, []);
-  const tier3Count = useMemo(() => CALISTHENICS_EXERCISES.filter((e) => e.tier.includes('Tier 3')).length, []);
+  const tier1Count = useMemo(() => managedCalisthenics.filter((e) => (e.tier || 'Tier 1').includes('Tier 1')).length, [managedCalisthenics]);
+  const tier2Count = useMemo(() => managedCalisthenics.filter((e) => (e.tier || '').includes('Tier 2')).length, [managedCalisthenics]);
+  const tier3Count = useMemo(() => managedCalisthenics.filter((e) => (e.tier || '').includes('Tier 3')).length, [managedCalisthenics]);
 
   const handleStartCalisthenicsSession = () => {
     const routineTitle =
@@ -49,8 +53,8 @@ export function CalisthenicsHub() {
 
     const exercises = filteredExercises.slice(0, 8);
 
-    setGuidedPlan({
-      title: routineTitle,
+    setActiveGuidedSession?.({
+      routineTitle,
       badge: 'Calisthenics Street Workout',
       exercises,
     });
@@ -73,7 +77,7 @@ export function CalisthenicsHub() {
                 Bodyweight · Bars · Rings · Levers
               </span>
               <span className="text-[11px] text-slate-400 font-semibold hidden sm:inline">
-                {CALISTHENICS_EXERCISES.length} Certified Movements
+                {managedCalisthenics.length} Certified Movements
               </span>
             </div>
 
@@ -106,7 +110,7 @@ export function CalisthenicsHub() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-white/5">
         <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 scrollbar-none">
           {[
-            { id: 'all', label: `All Moves (${CALISTHENICS_EXERCISES.length})`, icon: '🤸' },
+            { id: 'all', label: `All Moves (${managedCalisthenics.length})`, icon: '🤸' },
             { id: 'tier1', label: `Foundations (${tier1Count})`, icon: '⚡' },
             { id: 'tier2', label: `Bar & Dips (${tier2Count})`, icon: '💪' },
             { id: 'tier3', label: `Elite Static Holds (${tier3Count})`, icon: '👑' },
@@ -128,32 +132,52 @@ export function CalisthenicsHub() {
 
         {/* Level Filter */}
         <div className="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/10 shrink-0">
-          {['all', 'Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
-            <button
-              key={lvl}
-              onClick={() => setSelectedLevel(lvl)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${
-                selectedLevel === lvl
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {lvl === 'all' ? 'All Tiers' : lvl}
-            </button>
-          ))}
+          {['all', 'Beginner', 'Intermediate', 'Advanced'].map((lvl) => {
+            const locked = lvl === 'Advanced' && !hasPaidPlan;
+            return (
+              <button
+                key={lvl}
+                onClick={() => {
+                  if (locked) {
+                    openPlanUpgradeModal('Switch from Free to a Paid Plan to unlock Advanced Calisthenics skills.');
+                    return;
+                  }
+                  setSelectedLevel(lvl);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1 ${
+                  selectedLevel === lvl
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : locked
+                    ? 'text-amber-300/80 hover:text-amber-200'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {locked && <Lock className="w-2.5 h-2.5" />}
+                <span>{lvl === 'all' ? 'All' : lvl}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* 3. CALISTHENICS MOVEMENTS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredExercises.map((exercise) => (
+        {filteredExercises.map((exercise) => {
+          const isLocked = exercise.level === 'Advanced' && !hasPaidPlan;
+          return (
           <div
             key={exercise.id}
-            onClick={() => setSelectedExercise(exercise)}
+            onClick={() => {
+              if (isLocked) {
+                openPlanUpgradeModal(`Switch from Free to a Paid Plan to unlock "${exercise.name}"`);
+                return;
+              }
+              setSelectedExercise(exercise);
+            }}
             className="p-4 rounded-3xl bg-obsidian-850/90 border border-white/10 hover:border-amber-400/50 hover:bg-obsidian-800 transition-all duration-300 cursor-pointer group flex flex-col justify-between space-y-3 shadow-lg active:scale-[0.98]"
           >
             <div className="space-y-3">
-              {/* 3D Motion Stage */}
+              {/* Motion Preview Stage */}
               <div className="relative w-full h-44 rounded-2xl bg-black/70 overflow-hidden border border-white/5 flex items-center justify-center p-2 group-hover:border-amber-500/30 transition">
                 <img
                   src={exercise.gifUrl}
@@ -171,18 +195,18 @@ export function CalisthenicsHub() {
 
                 <div className="absolute top-2 left-2">
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-black/80 border border-amber-500/40 text-amber-300 backdrop-blur-md">
-                    {exercise.badge}
+                    {isLocked ? '🔒 Paid' : exercise.badge}
                   </span>
                 </div>
 
                 <div className="absolute bottom-2 right-2 p-2 rounded-xl bg-black/80 text-amber-400 border border-white/10 group-hover:bg-amber-500 group-hover:text-black transition shadow-lg">
-                  <Play className="w-3.5 h-3.5 fill-current" />
+                  {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                 </div>
               </div>
 
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 font-mono">
-                  {exercise.tier}
+                  {exercise.level || 'Intermediate'}
                 </span>
                 <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition line-clamp-1 mt-0.5">
                   {exercise.name}
@@ -193,26 +217,15 @@ export function CalisthenicsHub() {
               </div>
             </div>
 
-            {/* Footer metrics */}
             <div className="pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="truncate">⚡ {exercise.primaryMuscles[0]?.name || 'Relative Power'}</span>
+              <span className="truncate">{exercise.primaryMuscles[0]?.name || 'Bodyweight Strength'}</span>
               <span className="font-mono text-amber-300 font-bold shrink-0">
-                MET {exercise.metScore} · {exercise.defaultReps}
+                {exercise.defaultReps}
               </span>
             </div>
           </div>
-        ))}
+        );})}
       </div>
-
-      {/* Guided Workout Runner Modal */}
-      {guidedPlan && (
-        <GuidedWorkoutPlayerModal
-          planTitle={guidedPlan.title}
-          planBadge={guidedPlan.badge}
-          exercises={guidedPlan.exercises}
-          onClose={() => setGuidedPlan(null)}
-        />
-      )}
 
       {/* Exercise Detail Modal */}
       {selectedExercise && (

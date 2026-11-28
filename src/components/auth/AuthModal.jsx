@@ -8,12 +8,10 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  Users,
   Smartphone,
   ChevronDown,
   Activity,
   Target,
-  Flame,
   Scale,
   Camera,
   Upload,
@@ -25,13 +23,20 @@ import {
   Dumbbell,
   Trash2,
   Search,
-  Database,
   Calendar,
   Plus,
+  Trophy,
+  LogOut,
+  LifeBuoy,
+  Globe,
+  Send,
+  Clock,
+  MessageSquare,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { buildDailyHistoryRecords, formatHistoryDateLabel } from '../../utils/vaultHistoryHelpers';
 import { getRelativeDateString } from '../../data/athleteVaultDatabase';
+import { SUPPORTED_LANGUAGES } from '../../utils/i18n';
 
 export const ATHLETE_TIERS = [
   {
@@ -130,8 +135,9 @@ export function AuthModal({ isOpen, onClose }) {
     setIsPlanModalOpen,
     loginWithPhone,
     loginWithEmail,
-    switchUserProfile,
-    getAllSavedProfiles,
+    logoutUser,
+    currentUserHealthPoints,
+    getTopHealthLeaderboard,
     loggedWorkouts,
     loggedMeals,
     weightHistory,
@@ -139,14 +145,31 @@ export function AuthModal({ isOpen, onClose }) {
     logMeal,
     deleteWorkout,
     deleteMeal,
-    resetDemoData,
     authModalTab,
     updateMemberTier,
     triggerConfetti,
+    siteSettings,
+    hasPaidPlan,
+    openPlanUpgradeModal,
+    downgradeToFreePlan,
+    language,
+    setLanguage,
+    t,
+    supportTickets,
+    submitSupportTicket,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState(authModalTab || 'biometrics'); // 'biometrics' | 'directory' | 'history' | 'tier' | 'auth'
-  const [authMethod, setAuthMethod] = useState('phone');
+  const isLeaderboardEnabled = siteSettings?.leaderboardEnabled !== false;
+  const [activeTab, setActiveTab] = useState(
+    authModalTab === 'leaderboard' && siteSettings?.leaderboardEnabled === false
+      ? 'biometrics'
+      : authModalTab || 'biometrics'
+  ); // 'biometrics' | 'leaderboard' | 'history' | 'tier' | 'support' | 'auth'
+  const [supportCategory, setSupportCategory] = useState('Plans & Billing');
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportSubmittedToast, setSupportSubmittedToast] = useState('');
+  const [authMethod, setAuthMethod] = useState('both'); // 'both' (SMS + Email) | 'phone' | 'email'
   const [countryCode, setCountryCode] = useState('+91');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [emailAddress, setEmailAddress] = useState('');
@@ -156,11 +179,11 @@ export function AuthModal({ isOpen, onClose }) {
   const [manualFatInput, setManualFatInput] = useState(user.bodyFat || 16.5);
   const [otpStep, setOtpStep] = useState(false);
   const [otpValue, setOtpValue] = useState('');
+  const [sentOtpCode, setSentOtpCode] = useState('8888');
   const [statusMessage, setStatusMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Vault DB & History sub-states
-  const [directorySearch, setDirectorySearch] = useState('');
+  // Vault History sub-states
   const [historySubTab, setHistorySubTab] = useState('daily'); // 'daily' | 'workouts' | 'meals' | 'weight'
   const [historySearch, setHistorySearch] = useState('');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState('all'); // 'all' | 'YYYY-MM-DD'
@@ -222,12 +245,15 @@ export function AuthModal({ isOpen, onClose }) {
   const [isScanningPhoto, setIsScanningPhoto] = useState(false);
   const [scanResult, setScanResult] = useState(null);
 
-  // Sync requested tab when modal opens
+  // Sync requested tab when modal opens (enforce Sign In when logged out, except public Leaderboard)
   useEffect(() => {
-    if (authModalTab) {
-      setActiveTab(authModalTab);
+    if (!user?.isLoggedIn) {
+      setActiveTab(authModalTab === 'leaderboard' && isLeaderboardEnabled ? 'leaderboard' : 'auth');
+    } else if (authModalTab) {
+      const normalized = authModalTab === 'directory' ? 'leaderboard' : authModalTab;
+      setActiveTab(normalized === 'leaderboard' && !isLeaderboardEnabled ? 'biometrics' : normalized);
     }
-  }, [authModalTab, isOpen]);
+  }, [authModalTab, isOpen, user?.isLoggedIn, isLeaderboardEnabled]);
 
   // Sync local biometric inputs whenever user switches or telemetry changes
   useEffect(() => {
@@ -243,21 +269,11 @@ export function AuthModal({ isOpen, onClose }) {
     return Math.round((w / (h * h)) * 10) / 10;
   }, [heightInput, currentWeightInput]);
 
-  const savedProfiles = useMemo(() => {
-    return getAllSavedProfiles ? getAllSavedProfiles() : [];
-  }, [getAllSavedProfiles]);
-
-  const filteredDirectory = useMemo(() => {
-    const q = directorySearch.toLowerCase().trim();
-    if (!q) return savedProfiles;
-    return savedProfiles.filter(
-      (p) =>
-        p.name?.toLowerCase().includes(q) ||
-        p.specialty?.toLowerCase().includes(q) ||
-        p.memberTier?.toLowerCase().includes(q) ||
-        p.email?.toLowerCase().includes(q)
-    );
-  }, [savedProfiles, directorySearch]);
+  const leaderboardData = useMemo(() => {
+    return getTopHealthLeaderboard
+      ? getTopHealthLeaderboard(10)
+      : { top10: [], currentUserRank: null, currentUserStats: null, totalParticipants: 0, pointsToTop10: 0 };
+  }, [getTopHealthLeaderboard, user, loggedWorkouts, loggedMeals, isOpen]);
 
   const dailyHistory = useMemo(() => {
     return buildDailyHistoryRecords({
@@ -374,127 +390,288 @@ export function AuthModal({ isOpen, onClose }) {
 
   const handleRequestOtp = (e) => {
     e.preventDefault();
-    if (!phoneNumber || phoneNumber.replace(/\D/g, '').length < 7) {
-      setStatusMessage({ type: 'error', text: 'Please enter a valid phone number.' });
+    const digitsOnly = (phoneNumber || '').replace(/\D/g, '');
+    const cleanEmail = (emailAddress || '').trim().toLowerCase();
+
+    if (digitsOnly.length < 7) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Please enter a valid Phone Number so we can send your OTP.',
+      });
       return;
     }
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Please enter a valid Email Address along with your phone number for OTP delivery.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setTimeout(() => {
+      const generatedOtp = String(Math.floor(1000 + Math.random() * 9000));
+      setSentOtpCode(generatedOtp);
       setIsSubmitting(false);
       setOtpStep(true);
-      setOtpValue('8888');
-      setStatusMessage({ type: 'success', text: `SMS code sent to ${countryCode} ${phoneNumber} (Use 8888)` });
+      setOtpValue(generatedOtp);
+      setStatusMessage({
+        type: 'success',
+        text: `OTP sent to ${countryCode} ${phoneNumber.trim()} & ${cleanEmail} (Code: ${generatedOtp})`,
+      });
     }, 450);
   };
 
   const handleVerifyPhone = (e) => {
     e.preventDefault();
+    const cleanOtp = (otpValue || '').trim();
+    if (!cleanOtp || (sentOtpCode && cleanOtp !== sentOtpCode && cleanOtp !== '8888')) {
+      setStatusMessage({
+        type: 'error',
+        text: `Invalid OTP code. Enter the 4-digit OTP sent to ${countryCode} ${phoneNumber.trim()} & ${emailAddress.trim()}.`,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setTimeout(() => {
       const fullPhone = `${countryCode} ${phoneNumber.trim()}`;
-      loginWithPhone(fullPhone, otpValue, fullName || `Athlete ${phoneNumber.slice(-4)}`, parseFloat(currentWeightInput) || 75.0);
+      const cleanEmail = emailAddress.trim().toLowerCase();
+      const resolvedName = fullName.trim() || cleanEmail.split('@')[0] || `Athlete ${phoneNumber.slice(-4)}`;
+      const startingWeight = parseFloat(currentWeightInput) || 75.0;
+
+      if (authMethod === 'email') {
+        loginWithEmail(cleanEmail, cleanOtp, resolvedName, startingWeight, fullPhone);
+      } else {
+        loginWithPhone(fullPhone, cleanOtp, resolvedName, startingWeight, cleanEmail);
+      }
+
       setIsSubmitting(false);
       setOtpStep(false);
+      setOtpValue('');
       setPhoneNumber('');
-      setFullName('');
-      setStatusMessage({ type: 'success', text: 'New athlete saved & loaded into Vault!' });
-      setTimeout(() => setStatusMessage(null), 1800);
-    }, 450);
-  };
-
-  const handleEmailAuth = (e) => {
-    e.preventDefault();
-    if (!emailAddress || !emailAddress.includes('@')) {
-      setStatusMessage({ type: 'error', text: 'Please enter a valid email address.' });
-      return;
-    }
-    setIsSubmitting(true);
-    setTimeout(() => {
-      loginWithEmail(emailAddress.trim(), 'pass', fullName || emailAddress.split('@')[0], parseFloat(currentWeightInput) || 75.0);
-      setIsSubmitting(false);
       setEmailAddress('');
       setFullName('');
-      setStatusMessage({ type: 'success', text: 'Account signed in & synced to Vault!' });
-      setTimeout(() => setStatusMessage(null), 1800);
+      setActiveTab('biometrics');
+      setStatusMessage({
+        type: 'success',
+        text: `Verified & Vault synced (${fullPhone} · ${cleanEmail})!`,
+      });
+      setTimeout(() => setStatusMessage(null), 2200);
     }, 450);
   };
 
-  const handleSelectProfile = (profileId) => {
-    switchUserProfile(profileId);
-    setStatusMessage({ type: 'success', text: 'Loaded athlete profile & full history from Vault!' });
+  const handleLogout = () => {
+    logoutUser?.();
+    setOtpStep(false);
+    setActiveTab('auth');
+    setStatusMessage({ type: 'success', text: 'Signed out of your personal Vault account.' });
+  };
+
+  const handleSubmitSupportTicket = (e) => {
+    e.preventDefault();
+    if (!supportSubject.trim() || !supportMessage.trim()) return;
+    const created = submitSupportTicket?.({
+      category: supportCategory,
+      subject: supportSubject.trim(),
+      message: supportMessage.trim(),
+      userName: user?.name || 'Athlete Guest',
+      userEmail: user?.email || user?.phone || 'guest@fitarc.app',
+    });
+    setSupportSubject('');
+    setSupportMessage('');
+    setSupportSubmittedToast(
+      `Ticket ${created?.id || 'sent'} received! Our team replies under "Your Support Tickets".`
+    );
+    setTimeout(() => setSupportSubmittedToast(''), 4000);
+  };
+
+  // Profile Picture Upload -> Square 192x192 JPEG compressed for localStorage safety
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result;
+      if (typeof dataUrl !== 'string') return;
+      const img = new window.Image();
+      img.onload = () => {
+        try {
+          const size = 192;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          setUser((prev) => ({ ...prev, avatarUrl: compressed }));
+          setStatusMessage({ type: 'success', text: 'Profile picture updated in your Vault!' });
+          setTimeout(() => setStatusMessage(null), 2000);
+        } catch (err) {
+          setUser((prev) => ({ ...prev, avatarUrl: dataUrl }));
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    setUser((prev) => ({ ...prev, avatarUrl: '' }));
+    setStatusMessage({ type: 'success', text: 'Profile picture reset to Vault initials.' });
     setTimeout(() => setStatusMessage(null), 1800);
   };
+
+  const isSignedIn = user?.isLoggedIn !== false;
+  const visibleTab =
+    (!isSignedIn && activeTab !== 'leaderboard' && activeTab !== 'support') ||
+      (activeTab === 'leaderboard' && !isLeaderboardEnabled)
+      ? (isSignedIn ? 'biometrics' : 'auth')
+      : activeTab;
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl max-h-[92vh] glass-panel-glow rounded-t-3xl sm:rounded-3xl border border-amber-500/30 text-slate-100 shadow-2xl flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-4 sm:p-5 bg-obsidian-900/95 backdrop-blur-md border-b border-amber-500/15">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-black shadow-gold-glow-sm">
-              <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
-            </div>
-            <div>
+          <div className="flex items-center gap-3 min-w-0">
+            <label
+              className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-black shadow-gold-glow-sm shrink-0 flex items-center justify-center cursor-pointer group"
+              title={isSignedIn ? 'Upload or change profile picture' : 'Athlete Vault'}
+            >
+              <div className="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
+                {isSignedIn && user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name || 'Profile'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+                )}
+              </div>
+              {isSignedIn && (
+                <>
+                  <span
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-obsidian-950 border border-amber-400 text-amber-300 flex items-center justify-center shadow"
+                    aria-hidden="true"
+                  >
+                    <Camera className="w-3 h-3" />
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    aria-label="Upload Vault Profile Picture"
+                  />
+                </>
+              )}
+            </label>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                  Athlete Vault · {savedProfiles.length} Profiles
+                  {isSignedIn ? 'My Private Vault' : 'Vault Signed Out'}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/35 flex items-center gap-1">
-                  <Crown className="w-2.5 h-2.5" />
-                  {user.memberTier || 'Gold Elite Pro'}
-                </span>
+                {isSignedIn && (
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/35 flex items-center gap-1">
+                    <Crown className="w-2.5 h-2.5" />
+                    {user.memberTier || 'Gold Elite Pro'}
+                  </span>
+                )}
               </div>
-              <h2 className="text-base sm:text-xl font-black text-white tracking-tight">
-                {user.name || 'Athlete Profile'}
+              <h2 className="text-base sm:text-xl font-black text-white tracking-tight truncate">
+                {isSignedIn ? user.name || 'My Profile' : 'Sign In Required'}
               </h2>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
-            aria-label="Close Vault"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {isSignedIn && (
+              <button
+                onClick={handleLogout}
+                className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-[11px] font-bold flex items-center gap-1 transition active:scale-95"
+                aria-label="Logout of Vault"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+              aria-label="Close Vault"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* TOP LEVEL VAULT NAVIGATION TABS */}
-        <div className="flex p-1.5 bg-black/60 border-b border-white/5 gap-1 shrink-0 px-2 sm:px-4 overflow-x-auto scrollbar-none">
-          {[
-            { id: 'biometrics', label: 'Vault & BMI', icon: Activity },
-            { id: 'directory', label: `Athletes (${savedProfiles.length})`, icon: Users },
-            { id: 'history', label: `History (${(loggedWorkouts?.length || 0) + (loggedMeals?.length || 0)})`, icon: History },
-            { id: 'tier', label: 'Tiers', icon: Crown },
-            { id: 'auth', label: 'Plan & Login', icon: Lock },
-          ].map((tab) => {
+        {/* TOP LEVEL VAULT NAVIGATION TABS (Non-overlapping 3-col grid on mobile, single flex row on tablet+) */}
+        <div className="grid grid-cols-3 sm:flex sm:flex-wrap p-2 bg-black/60 border-b border-white/5 gap-1.5 shrink-0 sm:px-4">
+          {(isSignedIn
+            ? [
+              { id: 'biometrics', label: t?.('vault.biometrics') || 'My Body', icon: Activity },
+              { id: 'history', label: `${t?.('vault.history') || 'History'} (${(loggedWorkouts?.length || 0) + (loggedMeals?.length || 0)})`, icon: History },
+              ...(isLeaderboardEnabled ? [{ id: 'leaderboard', label: t?.('vault.leaderboard') || 'Top 10', icon: Trophy }] : []),
+              ...(!hasPaidPlan ? [{ id: 'tier', label: t?.('vault.tier') || 'Upgrade', icon: Crown }] : []),
+              { id: 'support', label: t?.('vault.support') || 'Support', icon: LifeBuoy },
+              { id: 'auth', label: t?.('vault.auth') || 'Account', icon: Lock },
+            ]
+            : [
+              { id: 'auth', label: t?.('vault.auth') || 'Sign Up / In', icon: Lock },
+              { id: 'support', label: t?.('vault.support') || 'Support', icon: LifeBuoy },
+              ...(isLeaderboardEnabled ? [{ id: 'leaderboard', label: t?.('vault.leaderboard') || 'Top 10', icon: Trophy }] : []),
+            ]
+          ).map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-[92px] py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`w-full sm:w-auto sm:flex-1 py-2 px-2 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 min-w-0 ${visibleTab === tab.id
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-gold-glow-sm'
+                  : 'bg-white/[0.03] sm:bg-transparent text-slate-300 hover:text-white'
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span>{tab.label}</span>
+                <span className="truncate">{tab.label}</span>
               </button>
             );
           })}
+        </div>
+
+        {/* MOBILE LANGUAGE QUICK BAR (Vault Settings on Mobile Devices) */}
+        <div className="md:hidden px-4 py-2 bg-black/75 border-b border-white/10 flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 shrink-0">
+            <Globe className="w-3.5 h-3.5 text-amber-400" />
+            <span>{t?.('vault.languageTitle') || 'App Language'}</span>
+          </div>
+          <select
+            value={language}
+            onChange={(e) => setLanguage?.(e.target.value)}
+            aria-label="Mobile Vault Language Selector"
+            className="px-2.5 py-1 rounded-xl glass-input text-xs font-bold text-white cursor-pointer"
+          >
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code} className="bg-obsidian-950 text-white">
+                {lang.native}{lang.native !== lang.label ? ` (${lang.label})` : ''}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 space-y-5 overflow-y-auto">
           {statusMessage && (
             <div
-              className={`p-3 rounded-2xl text-xs flex items-center gap-2 border animate-in fade-in duration-200 ${
-                statusMessage.type === 'error'
-                  ? 'bg-rose-950/60 border-rose-500/40 text-rose-200'
-                  : 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
-              }`}
+              className={`p-3 rounded-2xl text-xs flex items-center gap-2 border animate-in fade-in duration-200 ${statusMessage.type === 'error'
+                ? 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+                : 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
+                }`}
             >
               {statusMessage.type === 'error' ? (
                 <Lock className="w-4 h-4 text-rose-400 shrink-0" />
@@ -508,7 +685,7 @@ export function AuthModal({ isOpen, onClose }) {
           {/* ======================================================== */}
           {/* TAB 1: BIOMETRICS, BMI & PHOTO BODY FAT ESTIMATOR */}
           {/* ======================================================== */}
-          {activeTab === 'biometrics' && (
+          {visibleTab === 'biometrics' && (
             <div className="space-y-5">
               {/* SECTION A: LIVE BMI CALCULATOR & GAUGE */}
               <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/25 space-y-4 shadow-xl">
@@ -726,96 +903,130 @@ export function AuthModal({ isOpen, onClose }) {
           )}
 
           {/* ======================================================== */}
-          {/* TAB 2: MULTI-USER ATHLETE DATABASE DIRECTORY */}
+          {/* TAB 2: TOP 10 HEALTH POINTS LEADERBOARD (PRIVACY-SAFE) */}
           {/* ======================================================== */}
-          {activeTab === 'directory' && (
+          {visibleTab === 'leaderboard' && (
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                    <Database className="w-3 h-3" /> FitArc Cloud Athlete Vault
-                  </span>
-                  <h3 className="text-base font-extrabold text-white">
-                    {savedProfiles.length} Stored Athletes with Full Histories
-                  </h3>
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                      <Trophy className="w-3.5 h-3.5" /> Health Points Top 10 Leaderboard
+                    </span>
+                    <h3 className="text-base sm:text-lg font-black text-white mt-0.5">
+                      Top Healthy Food & Exercise Leaders
+                    </h3>
+                    <p className="text-[11px] text-slate-300 mt-0.5">
+                      Points are earned by logging wholesome, low-sugar nutrition and consistent daily workout minutes. Private profiles are hidden.
+                    </p>
+                  </div>
+                  {isSignedIn && leaderboardData.currentUserRank && (
+                    <div className="px-3.5 py-2 rounded-2xl bg-black/50 border border-amber-400/40 text-right shrink-0">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-bold">
+                        Your Standing
+                      </span>
+                      <span className="text-base font-black text-amber-300">
+                        Rank #{leaderboardData.currentUserRank}
+                      </span>
+                      <span className="text-[10px] text-slate-300 block font-mono">
+                        {currentUserHealthPoints?.healthPoints || 0} pts
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => {
-                    resetDemoData();
-                    setStatusMessage({ type: 'success', text: 'Full 8-Athlete Vault Database restored!' });
-                    setTimeout(() => setStatusMessage(null), 2000);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 text-[11px] font-bold text-amber-300 flex items-center gap-1.5 self-start transition"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  <span>Restore Full DB</span>
-                </button>
+
+                {isSignedIn && (
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
+                    <div className="p-2 rounded-xl bg-black/40 border border-white/5">
+                      <span className="text-[9px] uppercase text-slate-400 block">Healthy Food</span>
+                      <span className="text-sm font-black text-emerald-300">
+                        {currentUserHealthPoints?.nutritionPoints || 0} pts
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-black/40 border border-white/5">
+                      <span className="text-[9px] uppercase text-slate-400 block">Exercise Time</span>
+                      <span className="text-sm font-black text-amber-300">
+                        {currentUserHealthPoints?.totalExerciseMinutes || 0} min
+                      </span>
+                    </div>
+                    <div className="p-2 rounded-xl bg-black/40 border border-white/5">
+                      <span className="text-[9px] uppercase text-slate-400 block">Top 10 Gap</span>
+                      <span className="text-sm font-black text-white">
+                        {leaderboardData.pointsToTop10 > 0
+                          ? `+${leaderboardData.pointsToTop10} pts`
+                          : 'In Top 10'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Search Bar */}
-              <div className="relative">
-                <Search className="w-4 h-4 text-amber-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search athletes by name, specialty, tier or goal..."
-                  value={directorySearch}
-                  onChange={(e) => setDirectorySearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
-                />
-              </div>
+              {/* Privacy-Safe Top 10 Ranked List */}
+              <div className="space-y-2">
+                {leaderboardData.top10.map((entry) => {
+                  const isTopThree = entry.rank <= 3;
+                  const rankBadgeClass =
+                    entry.rank === 1
+                      ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-black shadow-gold-glow-sm'
+                      : entry.rank === 2
+                        ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-black'
+                        : entry.rank === 3
+                          ? 'bg-gradient-to-br from-orange-400 to-amber-700 text-black'
+                          : 'bg-black/60 border border-white/10 text-slate-300';
 
-              {/* Athlete Profiles Cards */}
-              <div className="space-y-2.5">
-                {filteredDirectory.map((p) => {
-                  const isActive = user?.id === p.id;
                   return (
                     <div
-                      key={p.id}
-                      onClick={() => handleSelectProfile(p.id)}
-                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 flex items-center justify-between gap-3 ${
-                        isActive
-                          ? 'bg-gradient-to-r from-amber-500/15 to-obsidian-900 border-amber-400 shadow-gold-glow-sm'
-                          : 'bg-obsidian-850/90 border-white/10 hover:border-amber-500/40'
-                      }`}
+                      key={`${entry.rank}-${entry.initials}-${entry.displayName}`}
+                      className={`p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 ${entry.isCurrentUser
+                        ? 'bg-gradient-to-r from-amber-500/20 to-obsidian-900 border-amber-400 shadow-gold-glow-sm'
+                        : isTopThree
+                          ? 'bg-obsidian-850/95 border-amber-500/25'
+                          : 'bg-obsidian-900/75 border-white/10'
+                        }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-                          isActive
-                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-black'
-                            : 'bg-black/60 border border-amber-500/30 text-amber-300'
-                        }`}>
-                          {p.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 overflow-hidden ${rankBadgeClass}`}
+                        >
+                          {entry.avatarUrl ? (
+                            <img src={entry.avatarUrl} alt={entry.displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            `#${entry.rank}`
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className="text-sm font-bold text-white truncate">{p.name}</h4>
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-white/10 text-amber-300 border border-white/10">
-                              {p.memberTier}
+                            <h4 className="text-sm font-bold text-white truncate">
+                              {entry.displayName}
+                            </h4>
+                            {entry.isCurrentUser && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-400 text-black uppercase">
+                                You
+                              </span>
+                            )}
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-white/5 text-amber-300 border border-white/10">
+                              {entry.memberTier}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                            {p.specialty} · <strong className="text-slate-200">{p.currentWeight}kg</strong> · BMI {p.bmi} · {p.bodyFat}% BF
-                          </p>
-                          <div className="flex items-center gap-3 mt-1 text-[10px] font-mono text-slate-400">
-                            <span className="text-amber-300 font-semibold">{p.workoutCount} workouts</span>
+                          <div className="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-slate-400 font-mono">
+                            <span className="text-emerald-300 font-semibold">
+                              Clean Food: {entry.cleanMealsCount} meals ({entry.avgMealScore}/10)
+                            </span>
                             <span>·</span>
-                            <span className="text-emerald-300 font-semibold">{p.mealCount} meals</span>
-                            <span>·</span>
-                            <span>{p.totalCaloriesBurnedAllTime} kcal logged</span>
+                            <span className="text-amber-300 font-semibold">
+                              Exercise: {entry.totalExerciseMinutes} min ({entry.activeDays}d)
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="shrink-0">
-                        {isActive ? (
-                          <span className="px-2.5 py-1 rounded-xl bg-amber-400 text-black text-[10px] font-extrabold uppercase flex items-center gap-1">
-                            <Check className="w-3 h-3 stroke-[3]" /> Active
-                          </span>
-                        ) : (
-                          <span className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-500 text-slate-200 hover:text-black text-[11px] font-bold transition">
-                            Load Vault
-                          </span>
-                        )}
+                      <div className="text-right shrink-0">
+                        <div className="text-base sm:text-lg font-black text-amber-300 leading-none">
+                          {entry.healthPoints}
+                        </div>
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">
+                          Health Pts
+                        </span>
                       </div>
                     </div>
                   );
@@ -827,50 +1038,46 @@ export function AuthModal({ isOpen, onClose }) {
           {/* ======================================================== */}
           {/* TAB 3: COMPLETE EXERCISE, MEAL & WEIGHT HISTORY LOGS */}
           {/* ======================================================== */}
-          {activeTab === 'history' && (
+          {visibleTab === 'history' && (
             <div className="space-y-4">
               {/* History Sub-navigation */}
               <div className="flex flex-wrap sm:flex-nowrap p-1 rounded-2xl bg-black/60 border border-white/10 gap-1">
                 <button
                   onClick={() => setHistorySubTab('daily')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    historySubTab === 'daily'
-                      ? 'bg-amber-500 text-black'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${historySubTab === 'daily'
+                    ? 'bg-amber-500 text-black'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Daily Records ({dailyHistory.availableDates.length})</span>
                 </button>
                 <button
                   onClick={() => setHistorySubTab('workouts')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    historySubTab === 'workouts'
-                      ? 'bg-amber-500 text-black font-extrabold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${historySubTab === 'workouts'
+                    ? 'bg-amber-500 text-black font-extrabold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <Dumbbell className="w-3.5 h-3.5" />
                   <span>Exercises ({loggedWorkouts?.length || 0})</span>
                 </button>
                 <button
                   onClick={() => setHistorySubTab('meals')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    historySubTab === 'meals'
-                      ? 'bg-amber-500 text-black font-extrabold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${historySubTab === 'meals'
+                    ? 'bg-amber-500 text-black font-extrabold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <Utensils className="w-3.5 h-3.5" />
                   <span>Meals ({loggedMeals?.length || 0})</span>
                 </button>
                 <button
                   onClick={() => setHistorySubTab('weight')}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                    historySubTab === 'weight'
-                      ? 'bg-amber-500 text-black font-extrabold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${historySubTab === 'weight'
+                    ? 'bg-amber-500 text-black font-extrabold'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <Scale className="w-3.5 h-3.5" />
                   <span>Weight ({weightHistory?.length || 0})</span>
@@ -897,11 +1104,10 @@ export function AuthModal({ isOpen, onClose }) {
                   <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
                     <button
                       onClick={() => setSelectedHistoryDate('all')}
-                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
-                        selectedHistoryDate === 'all'
-                          ? 'bg-amber-500 text-black border-amber-400'
-                          : 'bg-black/40 text-slate-300 border-white/10 hover:border-amber-500/40'
-                      }`}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${selectedHistoryDate === 'all'
+                        ? 'bg-amber-500 text-black border-amber-400'
+                        : 'bg-black/40 text-slate-300 border-white/10 hover:border-amber-500/40'
+                        }`}
                     >
                       All Days ({dailyHistory.availableDates.length})
                     </button>
@@ -909,11 +1115,10 @@ export function AuthModal({ isOpen, onClose }) {
                       <button
                         key={d.date}
                         onClick={() => setSelectedHistoryDate(d.date)}
-                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${
-                          selectedHistoryDate === d.date
-                            ? 'bg-amber-500/25 text-amber-300 border-amber-400'
-                            : 'bg-black/40 text-slate-400 border-white/10 hover:text-white'
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition border ${selectedHistoryDate === d.date
+                          ? 'bg-amber-500/25 text-amber-300 border-amber-400'
+                          : 'bg-black/40 text-slate-400 border-white/10 hover:text-white'
+                          }`}
                       >
                         {d.label} ({d.workoutCount}W · {d.mealCount}M)
                       </button>
@@ -941,18 +1146,16 @@ export function AuthModal({ isOpen, onClose }) {
                           <button
                             type="button"
                             onClick={() => setPastEntryKind('workout')}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${
-                              pastEntryKind === 'workout' ? 'bg-amber-500 text-black' : 'text-slate-400'
-                            }`}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${pastEntryKind === 'workout' ? 'bg-amber-500 text-black' : 'text-slate-400'
+                              }`}
                           >
                             Exercise
                           </button>
                           <button
                             type="button"
                             onClick={() => setPastEntryKind('meal')}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${
-                              pastEntryKind === 'meal' ? 'bg-amber-500 text-black' : 'text-slate-400'
-                            }`}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold ${pastEntryKind === 'meal' ? 'bg-amber-500 text-black' : 'text-slate-400'
+                              }`}
                           >
                             Meal
                           </button>
@@ -989,7 +1192,6 @@ export function AuthModal({ isOpen, onClose }) {
                             <option value="freeweights">Freeweights</option>
                             <option value="home_workout">Home Workout</option>
                             <option value="yoga">Yoga Flow</option>
-                            <option value="face_yoga">Face Yoga</option>
                             <option value="calisthenics">Calisthenics</option>
                           </select>
                           <input
@@ -1307,7 +1509,7 @@ export function AuthModal({ isOpen, onClose }) {
           {/* ======================================================== */}
           {/* TAB 4: ATHLETE MEMBERSHIP TIER & PERKS */}
           {/* ======================================================== */}
-          {activeTab === 'tier' && (
+          {visibleTab === 'tier' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-600/10 to-obsidian-850 border border-amber-500/30 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -1315,14 +1517,24 @@ export function AuthModal({ isOpen, onClose }) {
                     <Crown className="w-5 h-5 fill-current" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Current Active Membership</span>
-                    <h3 className="text-base font-extrabold text-white">{user.memberTier || 'Gold Elite Pro'}</h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                      {hasPaidPlan ? 'Active Paid Plan' : 'Free Plan — Switch to Paid (From ₹99/mo)'}
+                    </span>
+                    <h3 className="text-base font-extrabold text-white">{user.memberTier || 'Free Starter'}</h3>
                   </div>
                 </div>
-                <div className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
-                  <span>Active</span>
-                </div>
+                {!hasPaidPlan && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      openPlanUpgradeModal?.('Choose Monthly or Yearly Paid Plan');
+                    }}
+                    className="gold-btn px-3.5 py-2 rounded-xl text-xs font-black"
+                  >
+                    Switch to Paid →
+                  </button>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-3">
@@ -1331,11 +1543,10 @@ export function AuthModal({ isOpen, onClose }) {
                   return (
                     <div
                       key={tier.id}
-                      className={`p-4 rounded-2xl border transition-all duration-200 ${
-                        isSelected
-                          ? `${tier.bgGlow} ${tier.borderColor} shadow-gold-glow-sm`
-                          : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
-                      }`}
+                      className={`p-4 rounded-2xl border transition-all duration-200 ${isSelected
+                        ? `${tier.bgGlow} ${tier.borderColor} shadow-gold-glow-sm`
+                        : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
+                        }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -1355,11 +1566,10 @@ export function AuthModal({ isOpen, onClose }) {
                             if (triggerConfetti) triggerConfetti();
                             setTimeout(() => setStatusMessage(null), 2000);
                           }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 active:scale-95 flex items-center gap-1 ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-gold-glow-sm'
-                              : 'bg-white/10 text-slate-200 hover:bg-white/20'
-                          }`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 active:scale-95 flex items-center gap-1 ${isSelected
+                            ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold shadow-gold-glow-sm'
+                            : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                            }`}
                         >
                           {isSelected ? (
                             <>
@@ -1388,87 +1598,260 @@ export function AuthModal({ isOpen, onClose }) {
           )}
 
           {/* ======================================================== */}
-          {/* TAB 5: ACTIVE TRANSFORMATION PLAN & CREATE / SIGN IN ACCOUNT */}
+          {/* TAB 5: MY ACCOUNT DETAILS, LOGOUT & SIGN IN */}
           {/* ======================================================== */}
-          {activeTab === 'auth' && (
+          {visibleTab === 'auth' && (
             <div className="space-y-5">
-              {/* Active Plan Card */}
-              {user.activePlan && (
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/30 space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                        Active Transformation Protocol ({user.activePlan.workoutLocation || 'home'})
-                      </span>
-                      <h3 className="text-sm sm:text-base font-bold text-white mt-0.5">{user.activePlan.title}</h3>
+              {isSignedIn ? (
+                <>
+                  {/* My Private Account Details Card */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-obsidian-850 via-obsidian-900 to-black border border-amber-500/35 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-black font-black text-base flex items-center justify-center shadow-gold-glow-sm shrink-0 overflow-hidden">
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.name || 'Profile Picture'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            (user.name || 'AV').split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-base sm:text-lg font-black text-white truncate">
+                              {user.name || 'FitArc Athlete'}
+                            </h3>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase">
+                              Signed In
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-300 truncate mt-0.5">
+                            {user.email || user.phone || 'Personal Vault Account'}
+                          </p>
+                          <p className="text-[11px] text-amber-300/90 mt-0.5">
+                            {user.memberTier || 'Gold Elite Pro'} · Focus:{' '}
+                            <span className="capitalize">{(user.goal || 'fat_loss').replace('_', ' ')}</span>
+                          </p>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <label className="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/40 text-amber-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition">
+                              <Camera className="w-3 h-3" />
+                              <span>{user.avatarUrl ? 'Change Photo' : 'Set Profile Picture'}</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            {user.avatarUrl && (
+                              <button
+                                type="button"
+                                onClick={handleRemoveAvatar}
+                                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-rose-500/15 border border-white/10 text-slate-400 hover:text-rose-300 text-[10px] font-semibold transition"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!hasPaidPlan ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onClose();
+                              openPlanUpgradeModal?.('Switch from Free to a Paid Monthly or Yearly Plan');
+                            }}
+                            className="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition"
+                          >
+                            Switch to Paid
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              downgradeToFreePlan?.();
+                              setStatusMessage({ type: 'success', text: 'Switched back to Free Starter plan.' });
+                            }}
+                            className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-semibold transition"
+                          >
+                            Switch to Free
+                          </button>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/35 text-rose-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Log Out</span>
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        onClose();
-                        setIsPlanModalOpen(true);
-                      }}
-                      className="px-3 py-1.5 rounded-xl gold-btn text-xs font-bold shrink-0"
-                    >
-                      Change Plan
-                    </button>
+
+                    {/* Personal Biometrics & Live Health Points Summary */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div className="p-2.5 rounded-xl bg-black/50 border border-white/10">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 block">Weight / BMI</span>
+                        <span className="text-sm font-black text-white">
+                          {user.currentWeight}kg · {liveBmi}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-black/50 border border-white/10">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 block">Body Fat %</span>
+                        <span className="text-sm font-black text-amber-300">
+                          {user.bodyFat || 16.5}%
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-black/50 border border-amber-500/20">
+                        <span className="text-[9px] uppercase tracking-wider text-amber-400 block">Health Points</span>
+                        <span className="text-sm font-black text-amber-300">
+                          {currentUserHealthPoints?.healthPoints || 0} pts
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-black/50 border border-white/10">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 block">Leaderboard</span>
+                        <span className="text-sm font-black text-emerald-300">
+                          Rank #{leaderboardData.currentUserRank || '-'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Active Plan Card */}
+                  {user.activePlan && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-obsidian-850 to-obsidian-900 border border-amber-500/25 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                            Active Transformation Protocol ({user.activePlan.workoutLocation || 'home'})
+                          </span>
+                          <h3 className="text-sm sm:text-base font-bold text-white mt-0.5">{user.activePlan.title}</h3>
+                        </div>
+                        <button
+                          onClick={() => {
+                            onClose();
+                            setIsPlanModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 rounded-xl gold-btn text-xs font-bold shrink-0"
+                        >
+                          Change Plan
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 rounded-2xl bg-black/50 border border-amber-500/30 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+                    Vault Signed Out
+                  </span>
+                  <h3 className="text-base font-extrabold text-white">
+                    Sign In or Create Your Own Vault Account
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Your workouts, meals, weight history, and biometric profile stay strictly private to your own credentials.
+                  </p>
                 </div>
               )}
 
-              {/* Create / Login Profile Form */}
+              {/* Full Multilingual Vault Setting (always accessible in My Account tab) */}
+              <div className="p-4 rounded-2xl bg-black/50 border border-amber-500/25 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-amber-400 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-bold text-white">
+                      {t?.('vault.languageTitle') || 'App Language'}
+                    </h4>
+                    <p className="text-[10px] text-slate-400">
+                      {t?.('vault.languageHint') || 'Choose your preferred language across workouts, nutrition & support'}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => setLanguage?.(lang.code)}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex items-center gap-2 ${language === lang.code
+                        ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-bold'
+                        : 'bg-obsidian-950/70 border-white/10 text-slate-300 hover:border-white/25'
+                        }`}
+                    >
+                      <span className="text-base">{lang.flag}</span>
+                      <div className="min-w-0 leading-tight">
+                        <div className="text-xs font-bold truncate">{lang.native}</div>
+                        <div className="text-[9px] text-slate-400">{lang.label}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sign Up / Sign In With Required Phone & Email + OTP Delivery */}
               <div className="space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
-                  Create New Vault Athlete or Sign In:
-                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                    {isSignedIn ? 'Register New Account or Switch Credentials:' : 'Sign Up / Verify With Phone Number & Email:'}
+                  </span>
+                  <span className="text-[10px] text-emerald-300 font-semibold">
+                    OTP sent to Phone &amp; Email
+                  </span>
+                </div>
 
+                {/* OTP Delivery Channel Indicator */}
                 <div className="flex p-1 rounded-2xl bg-black/60 border border-white/10">
-                  <button
-                    onClick={() => {
-                      setAuthMethod('phone');
-                      setOtpStep(false);
-                      setStatusMessage(null);
-                    }}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
-                      authMethod === 'phone'
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Smartphone className="w-4 h-4" />
-                    <span>Phone (SMS)</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAuthMethod('email');
-                      setStatusMessage(null);
-                    }}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
-                      authMethod === 'email'
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>Email Address</span>
-                  </button>
+                  {[
+                    { id: 'both', label: 'Phone + Email OTP', icon: ShieldCheck },
+                    { id: 'phone', label: 'SMS Primary', icon: Smartphone },
+                    { id: 'email', label: 'Email Primary', icon: Mail },
+                  ].map((mode) => {
+                    const ModeIcon = mode.icon;
+                    return (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => {
+                          setAuthMethod(mode.id);
+                          setStatusMessage(null);
+                        }}
+                        className={`flex-1 py-2 px-1.5 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1 ${authMethod === mode.id
+                          ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold'
+                          : 'text-slate-400 hover:text-white'
+                          }`}
+                      >
+                        <ModeIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{mode.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                    Athlete Full Name (for new account)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Jordan Mercer"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
-                  />
-                </div>
+                {!otpStep ? (
+                  <form onSubmit={handleRequestOtp} className="space-y-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                        Athlete Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Jordan Mercer"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                        required
+                      />
+                    </div>
 
-                {authMethod === 'phone' ? (
-                  !otpStep ? (
-                    <form onSubmit={handleRequestOtp} className="space-y-3">
+                    <div>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                        Phone Number (Required for SMS OTP) *
+                      </label>
                       <div className="flex gap-2">
                         <div className="relative">
                           <select
@@ -1478,14 +1861,14 @@ export function AuthModal({ isOpen, onClose }) {
                           >
                             {COUNTRY_CODES.map((c) => (
                               <option key={c.code} value={c.code} className="bg-obsidian-900 text-white">
-                                {c.flag} {c.code}
+                                {c.code} ({c.country})
                               </option>
                             ))}
                           </select>
                           <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
 
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 min-w-0">
                           <Phone className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
                           <input
                             type="tel"
@@ -1497,57 +1880,225 @@ export function AuthModal({ isOpen, onClose }) {
                           />
                         </div>
                       </div>
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
-                      >
-                        <span>Send 4-Digit SMS Code</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
-                  ) : (
-                    <form onSubmit={handleVerifyPhone} className="space-y-3">
-                      <input
-                        type="text"
-                        maxLength={4}
-                        value={otpValue}
-                        onChange={(e) => setOtpValue(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl glass-input text-center text-base font-mono font-bold tracking-widest text-amber-300"
-                        required
-                      />
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Verify & Save to Vault</span>
-                      </button>
-                    </form>
-                  )
-                ) : (
-                  <form onSubmit={handleEmailAuth} className="space-y-3">
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="email"
-                        placeholder="athlete@fitarc.elite"
-                        value={emailAddress}
-                        onChange={(e) => setEmailAddress(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
-                        required
-                      />
                     </div>
+
+                    <div>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                        Email Address (Required for Email OTP) *
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="email"
+                          placeholder="athlete@example.com"
+                          value={emailAddress}
+                          onChange={(e) => setEmailAddress(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className="w-full gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
                     >
-                      <span>Create / Sign In to Vault</span>
+                      <span>Send 4-Digit OTP to Phone &amp; Email</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </form>
+                ) : (
+                  <form onSubmit={handleVerifyPhone} className="space-y-3 p-4 rounded-2xl bg-black/55 border border-amber-500/30">
+                    <div className="space-y-1 text-center">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+                        Verify 4-Digit OTP
+                      </span>
+                      <p className="text-[11px] text-slate-300">
+                        Code sent to <strong className="text-white">{countryCode} {phoneNumber}</strong> &amp; <strong className="text-amber-300">{emailAddress}</strong>
+                      </p>
+                    </div>
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder="Enter 4-digit OTP"
+                      value={otpValue}
+                      onChange={(e) => setOtpValue(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl glass-input text-center text-base font-mono font-bold tracking-widest text-amber-300"
+                      required
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOtpStep(false);
+                          setStatusMessage(null);
+                        }}
+                        className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-300"
+                      >
+                        Edit Contact
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 gold-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Verify OTP &amp; Save Vault</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ======================================================== */}
+          {/* TAB 6: HELP & SUPPORT CENTER INSIDE VAULT                */}
+          {/* ======================================================== */}
+          {visibleTab === 'support' && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 to-obsidian-900 border border-amber-500/30 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+                      {siteSettings?.brandName || 'FITARC'} Concierge
+                    </span>
+                    <h3 className="text-base sm:text-lg font-black text-white mt-0.5">
+                      {t?.('support.title') || 'FitArc Help & Support Center'}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      {t?.('support.subtitle') || 'Message our coaching & billing team directly from your Vault'}
+                    </p>
+                  </div>
+                  <LifeBuoy className="w-7 h-7 text-amber-400 shrink-0" />
+                </div>
+
+                {/* Live Admin-Managed Support Contact Channels */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px]">
+                  <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-2">
+                    <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="text-slate-200 truncate">{siteSettings?.supportEmail || 'support@fitarc.app'}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="text-slate-200 truncate">{siteSettings?.supportWhatsapp || '+91 98765 43210'}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                    <span className="text-slate-200 truncate">{siteSettings?.supportHours || 'Mon–Sat · 9AM–8PM'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Support Team Form */}
+              <form onSubmit={handleSubmitSupportTicket} className="p-4 rounded-2xl bg-obsidian-900 border border-white/10 space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Contact Support Team</span>
+                </h4>
+
+                {supportSubmittedToast && (
+                  <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{supportSubmittedToast}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase block mb-1">
+                      {t?.('support.category') || 'Issue Category'}
+                    </label>
+                    <select
+                      value={supportCategory}
+                      onChange={(e) => setSupportCategory(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl glass-input text-xs text-white cursor-pointer"
+                    >
+                      <option className="bg-obsidian-950" value="Plans & Billing">Plans &amp; Billing (₹99 / Yearly)</option>
+                      <option className="bg-obsidian-950" value="Workouts & HIIT">Workouts, Voice Coach &amp; 30m HIIT</option>
+                      <option className="bg-obsidian-950" value="Food & Macro Scan">Food &amp; Meal Photo Scanner</option>
+                      <option className="bg-obsidian-950" value="Trustified Shop">Trustified™ Shop &amp; Orders</option>
+                      <option className="bg-obsidian-950" value="Technical / Language">App Language / Bug Report</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase block mb-1">
+                      {t?.('support.subject') || 'Subject'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Brief summary..."
+                      value={supportSubject}
+                      onChange={(e) => setSupportSubject(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase block mb-1">
+                    {t?.('support.message') || 'How can our support team help?'}
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Describe your question or issue..."
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl glass-input text-xs text-white placeholder-slate-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full gold-btn py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 active:scale-95"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{t?.('support.submit') || 'Send Support Request'}</span>
+                </button>
+              </form>
+
+              {/* Submitted Tickets & Admin Responses */}
+              <div className="space-y-2.5">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  {t?.('support.yourTickets') || 'Your Support Tickets & Replies'} ({(supportTickets || []).filter((tk) => !user?.id || tk.userId === user.id || tk.userId === 'guest').length})
+                </h4>
+                {((supportTickets || []).filter((tk) => !user?.id || tk.userId === user.id || tk.userId === 'guest')).length === 0 ? (
+                  <p className="text-xs text-slate-400 p-3 rounded-xl bg-black/40 border border-white/5">
+                    {t?.('support.noTickets') || 'No support tickets yet. Message our team anytime!'}
+                  </p>
+                ) : (
+                  (supportTickets || [])
+                    .filter((tk) => !user?.id || tk.userId === user.id || tk.userId === 'guest')
+                    .map((tk) => (
+                      <div key={tk.id} className="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] font-bold text-amber-400">{tk.id}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-slate-300">{tk.category}</span>
+                          </div>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tk.status === 'Resolved'
+                              ? 'bg-emerald-500/20 text-emerald-300'
+                              : tk.status === 'In Progress'
+                                ? 'bg-amber-500/20 text-amber-300'
+                                : 'bg-rose-500/20 text-rose-300'
+                              }`}
+                          >
+                            {tk.status}
+                          </span>
+                        </div>
+                        <div className="text-xs font-bold text-white">{tk.subject}</div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">{tk.message}</p>
+                        {tk.adminReply && (
+                          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-200">
+                            <strong className="text-emerald-300">Support Team Reply:</strong> {tk.adminReply}
+                          </div>
+                        )}
+                      </div>
+                    ))
                 )}
               </div>
             </div>

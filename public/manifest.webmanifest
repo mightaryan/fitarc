@@ -1,0 +1,53 @@
+{
+  "id": "/",
+  "name": "FITARC — AI Fitness, 30-Min HIIT & Verified Nutrition",
+  "short_name": "FITARC",
+  "description": "Biomechanics 3D workouts, 30-minute HIIT cardio with voice coach, Leap-style body-part sessions, AI meal tracking, and Trustified™ high-protein shop.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08090C",
+  "theme_color": "#08090C",
+  "categories": ["health", "fitness", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "30-Min HIIT & Body Parts",
+      "short_name": "Workouts",
+      "url": "/fitness",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Nutrition & Meal Log",
+      "short_name": "Food",
+      "url": "/food",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Trustified Protein Shop",
+      "short_name": "Shop",
+      "url": "/shop",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

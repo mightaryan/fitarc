@@ -4,26 +4,25 @@ import {
   X,
   BellOff,
   Clock,
-  TrendingDown,
   CheckCircle2,
-  Calendar,
-  Sparkles,
-  ArrowRight,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export function DailyWeightModal({ isOpen, onClose }) {
   const { user, weightHistory, logDailyWeight, snoozeWeightReminder, snoozeUntil } = useApp();
-  const [weight, setWeight] = useState(user.currentWeight || 78.5);
+  const safeCurrentWeight = Number(user?.currentWeight) || 75;
+  const safeTargetWeight = Number(user?.targetWeight) || safeCurrentWeight;
+  const [weight, setWeight] = useState(safeCurrentWeight);
   const [note, setNote] = useState('Morning fasted weigh-in');
   const [showSnoozeOptions, setShowSnoozeOptions] = useState(false);
 
   if (!isOpen) return null;
 
   const lastEntry = weightHistory[weightHistory.length - 1];
-  const previousWeight = lastEntry?.weight || user.currentWeight;
-  const delta = Math.round((weight - previousWeight) * 10) / 10;
-  const targetDelta = Math.round((weight - user.targetWeight) * 10) / 10;
+  const previousWeight = Number(lastEntry?.weight) || safeCurrentWeight;
+  const numericWeight = Number(weight) || previousWeight;
+  const delta = Math.round((numericWeight - previousWeight) * 10) / 10;
+  const targetDelta = Math.round((numericWeight - safeTargetWeight) * 10) / 10;
 
   const handleSubmit = (e) => {
     e.preventDefault();

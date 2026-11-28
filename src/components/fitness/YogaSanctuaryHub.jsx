@@ -2,31 +2,25 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   Sparkles,
   Sun,
-  Smile,
-  Activity,
-  Heart,
   Play,
-  RotateCcw,
-  CheckCircle2,
   Wind,
   ShieldCheck,
   ChevronRight,
-  Clock,
-  Layers,
   CircleDot,
+  Lock,
 } from 'lucide-react';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
-import { GuidedWorkoutPlayerModal } from './GuidedWorkoutPlayerModal';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
-import { YogaAnatomicalCanvas } from './YogaAnatomicalCanvas';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
+import { useApp } from '../../context/AppContext';
 
 export function YogaSanctuaryHub() {
-  // Sanctuary section: 'yoga_mat' | 'exercise_ball' | 'face_yoga'
+  const { customExercises, disabledExerciseIds, exerciseOverrides, hasPaidPlan, openPlanUpgradeModal, setActiveGuidedSession } = useApp();
+
+  // Sanctuary section: 'yoga_mat' | 'exercise_ball'
   const [selectedStudio, setSelectedStudio] = useState('yoga_mat');
   // Level filter: 'all' | 'Beginner' | 'Intermediate' | 'Advanced'
   const [selectedLevel, setSelectedLevel] = useState('all');
-  // Guided session runner state
-  const [guidedPlan, setGuidedPlan] = useState(null);
   // Detail modal state
   const [selectedPose, setSelectedPose] = useState(null);
 
@@ -53,39 +47,45 @@ export function YogaSanctuaryHub() {
     return () => clearInterval(interval);
   }, []);
 
+  const managedYogaList = useMemo(
+    () =>
+      mergeManagedCatalog(YOGA_AND_HOME_WORKOUTS, {
+        customItems: customExercises,
+        disabledIds: disabledExerciseIds,
+        overrides: exerciseOverrides,
+        customFilter: (ex) => ex.category === 'yoga' || ex.subCategory === 'yoga_mat' || ex.subCategory === 'exercise_ball',
+      }),
+    [customExercises, disabledExerciseIds, exerciseOverrides]
+  );
+
   // Filtered routines based on studio and level
   const studioRoutines = useMemo(() => {
-    return YOGA_AND_HOME_WORKOUTS.filter((item) => {
-      const matchStudio = item.subCategory === selectedStudio;
+    return managedYogaList.filter((item) => {
+      const matchStudio = item.subCategory === selectedStudio || item.category === selectedStudio;
       const matchLevel = selectedLevel === 'all' || item.level === selectedLevel;
       return matchStudio && matchLevel;
     });
-  }, [selectedStudio, selectedLevel]);
+  }, [managedYogaList, selectedStudio, selectedLevel]);
 
   // Counts for tabs
-  const matCount = useMemo(() => YOGA_AND_HOME_WORKOUTS.filter((e) => e.subCategory === 'yoga_mat').length, []);
-  const ballCount = useMemo(() => YOGA_AND_HOME_WORKOUTS.filter((e) => e.subCategory === 'exercise_ball').length, []);
-  const faceCount = useMemo(() => YOGA_AND_HOME_WORKOUTS.filter((e) => e.subCategory === 'face_yoga').length, []);
+  const matCount = useMemo(() => managedYogaList.filter((e) => e.subCategory === 'yoga_mat').length, [managedYogaList]);
+  const ballCount = useMemo(() => managedYogaList.filter((e) => e.subCategory === 'exercise_ball').length, [managedYogaList]);
 
   const handleStartStudioSession = () => {
     const routineTitle =
       selectedStudio === 'yoga_mat'
         ? 'Yoga Mat Flow: Full Body Vinyasa'
-        : selectedStudio === 'exercise_ball'
-        ? 'Stability Ball: Spinal Decompression & Core'
-        : 'Face Yoga: 8-Min Jawline & Anti-Aging Sculpt';
+        : 'Stability Ball: Spinal Decompression & Core';
 
     const routineBadge =
       selectedStudio === 'yoga_mat'
         ? 'Yoga Mat Sanctuary'
-        : selectedStudio === 'exercise_ball'
-        ? 'Stability Ball Studio'
-        : 'Face Yoga Facial Sculpt';
+        : 'Stability Ball Studio';
 
     const exercises = studioRoutines.slice(0, 8);
 
-    setGuidedPlan({
-      title: routineTitle,
+    setActiveGuidedSession?.({
+      routineTitle,
       badge: routineBadge,
       exercises,
     });
@@ -105,7 +105,7 @@ export function YogaSanctuaryHub() {
                 No Gym Machinery
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                Yoga Mat · Stability Ball · Face Yoga
+                Yoga Mat · Stability Ball
               </span>
               <span className="text-[11px] text-slate-400 font-semibold hidden sm:inline">
                 {YOGA_AND_HOME_WORKOUTS.length} Certified Routines
@@ -113,11 +113,11 @@ export function YogaSanctuaryHub() {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              Holistic Yoga & Face Sanctuary
+              Holistic Yoga Sanctuary
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              True yoga is never practiced on gym machines. Unroll your non-slip mat, sit upon your stability ball, or practice facial fascia sculpt with mindful Ujjayi breathing.
+              True yoga is never practiced on gym machines. Unroll your non-slip mat or sit upon your stability ball for spinal decompression with mindful Ujjayi breathing.
             </p>
           </div>
 
@@ -162,14 +162,14 @@ export function YogaSanctuaryHub() {
         </div>
       </div>
 
-      {/* 3. THREE DEDICATED STUDIO ROOMS (MAT, BALL & FACE) */}
+      {/* 3. TWO DEDICATED STUDIO ROOMS (MAT & STABILITY BALL) */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           Choose Sanctuary Studio Room:
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Room 1: Yoga Mat */}
           <button
             onClick={() => setSelectedStudio('yoga_mat')}
@@ -225,53 +225,37 @@ export function YogaSanctuaryHub() {
               </span>
             </div>
           </button>
-
-          {/* Room 3: Face Yoga */}
-          <button
-            onClick={() => setSelectedStudio('face_yoga')}
-            className={`p-4 rounded-2xl border text-left transition-all duration-200 active:scale-[0.99] flex items-start gap-3.5 ${
-              selectedStudio === 'face_yoga'
-                ? 'bg-gradient-to-br from-purple-500/20 to-obsidian-900 border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.3)] ring-2 ring-purple-400'
-                : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
-            }`}
-          >
-            <div className="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 flex items-center justify-center shrink-0 font-extrabold text-xl shadow-inner">
-              ✨
-            </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-extrabold text-white">Face Yoga & Sculpt</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-purple-300 font-bold">
-                  {faceCount}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-300 leading-snug">
-                Mandibular jawline sculpt, cheek volume, double chin erase & lymphatic drainage.
-              </p>
-              <span className="text-[10px] text-purple-400 font-bold block pt-1">
-                Equipment: Hands, Breath & Mirror
-              </span>
-            </div>
-          </button>
         </div>
       </div>
 
       {/* 4. LEVEL FILTER PILLS */}
       <div className="flex items-center justify-between gap-3 pt-1">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {['all', 'Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
-            <button
-              key={lvl}
-              onClick={() => setSelectedLevel(lvl)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
-                selectedLevel === lvl
-                  ? 'bg-amber-500 text-black border-amber-400 shadow-gold-glow-sm'
-                  : 'bg-black/50 border-white/10 text-slate-400 hover:text-white'
-              }`}
-            >
-              {lvl === 'all' ? 'All Difficulty Levels' : lvl}
-            </button>
-          ))}
+          {['all', 'Beginner', 'Intermediate', 'Advanced'].map((lvl) => {
+            const locked = lvl === 'Advanced' && !hasPaidPlan;
+            return (
+              <button
+                key={lvl}
+                onClick={() => {
+                  if (locked) {
+                    openPlanUpgradeModal('Switch from Free to a Paid Plan to unlock Advanced Yoga flows.');
+                    return;
+                  }
+                  setSelectedLevel(lvl);
+                }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 border inline-flex items-center gap-1 ${
+                  selectedLevel === lvl
+                    ? 'bg-amber-500 text-black border-amber-400 shadow-gold-glow-sm'
+                    : locked
+                    ? 'bg-black/40 border-amber-500/25 text-amber-300/80 hover:border-amber-400'
+                    : 'bg-black/50 border-white/10 text-slate-400 hover:text-white'
+                }`}
+              >
+                {locked && <Lock className="w-3 h-3" />}
+                <span>{lvl === 'all' ? 'All Levels' : lvl}</span>
+              </button>
+            );
+          })}
         </div>
 
         <span className="text-xs text-slate-400 font-mono shrink-0">
@@ -282,45 +266,51 @@ export function YogaSanctuaryHub() {
       {/* 5. ROUTINE LISTING CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {studioRoutines.map((pose) => {
-          const isFaceYoga =
-            pose.category === 'face_yoga' ||
-            pose.subCategory === 'face_yoga' ||
-            pose.equipment === 'face_hands';
           const fallbackYogaGif =
             pose.subCategory === 'exercise_ball'
               ? 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif'
               : 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/pike-to-cobra-push-up.gif';
 
+          const isLocked = pose.level === 'Advanced' && !hasPaidPlan;
           return (
             <div
               key={pose.id}
-              onClick={() => setSelectedPose(pose)}
+              onClick={() => {
+                if (isLocked) {
+                  openPlanUpgradeModal(`Switch from Free to a Paid Plan to unlock "${pose.name}"`);
+                  return;
+                }
+                setSelectedPose(pose);
+              }}
               className="rounded-2xl bg-obsidian-850 border border-white/10 hover:border-amber-400/50 transition duration-200 cursor-pointer group flex flex-col justify-between overflow-hidden shadow-lg active:scale-[0.99]"
             >
-              {/* Prominent 3D Obsidian Spotlight Stage (GymVisual 3D GIFs for Mat & Ball Yoga; Expressive Canvas for Face Yoga) */}
-              <div className="relative h-44 w-full bg-[#050608] overflow-hidden border-b border-white/5 flex items-center justify-center p-2">
-                {isFaceYoga ? (
-                  <YogaAnatomicalCanvas exercise={pose} compact />
-                ) : (
-                  <img
-                    src={pose.gifUrl}
-                    alt={pose.name}
-                    loading="lazy"
-                    onError={(e) => {
-                      if (!e.currentTarget.dataset.err) {
-                        e.currentTarget.dataset.err = 'true';
-                        e.currentTarget.src = fallbackYogaGif;
-                      }
-                    }}
-                    className="max-h-full w-auto object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
+              {/* Clean Obsidian Spotlight Stage */}
+              <div className="relative h-44 w-full overflow-hidden border-b border-white/5 flex items-center justify-center bg-[#050608] p-2">
+                <img
+                  src={pose.gifUrl}
+                  alt={pose.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    if (!e.currentTarget.dataset.err) {
+                      e.currentTarget.dataset.err = 'true';
+                      e.currentTarget.src = fallbackYogaGif;
+                    }
+                  }}
+                  className="max-h-full w-auto object-contain dark-3d-animation group-hover:scale-105 transition-transform duration-300"
+                />
                 <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-amber-500/30 text-[10px] font-bold text-amber-300 backdrop-blur-sm">
                   {pose.equipmentLabel}
                 </div>
                 <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-white/10 text-[10px] font-mono text-slate-300 backdrop-blur-sm">
-                  {pose.level}
+                  {isLocked ? '🔒 Paid' : pose.level}
                 </div>
+                {isLocked && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="px-3 py-1 rounded-full bg-black/85 border border-amber-400/40 text-amber-300 text-[11px] font-bold flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" /> Upgrade to Unlock
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
@@ -353,17 +343,6 @@ export function YogaSanctuaryHub() {
           );
         })}
       </div>
-
-      {/* 6. GUIDED SESSION RUNNER MODAL */}
-      {guidedPlan && (
-        <GuidedWorkoutPlayerModal
-          isOpen={!!guidedPlan}
-          onClose={() => setGuidedPlan(null)}
-          routineTitle={guidedPlan.title}
-          planBadge={guidedPlan.badge}
-          exercises={guidedPlan.exercises}
-        />
-      )}
 
       {/* 7. ASANA DETAIL & BIOMECHANICAL INSPECTION MODAL */}
       {selectedPose && (

@@ -1,50 +1,32 @@
 import React, { useState, useMemo } from 'react';
 import {
   Flame,
-  Clock,
   Zap,
-  TrendingUp,
-  Award,
   Sparkles,
   ChevronRight,
   Camera,
   Scale,
-  Dumbbell,
   Utensils,
   Play,
   CheckCircle2,
   Calendar,
-  Layers,
-  ArrowUpRight,
-  Heart,
-  Droplet,
   Smile,
   ShieldCheck,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { WorkoutDetailModal } from '../fitness/WorkoutDetailModal';
-import { GuidedWorkoutPlayerModal } from '../fitness/GuidedWorkoutPlayerModal';
 import { YOGA_AND_HOME_WORKOUTS } from '../../data/yogaAndHomeWorkouts';
 import { MASTER_EXERCISE_CATALOG } from '../../data/allExercisesMaster';
 import { TROUBLE_ZONE_PLANS, HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
-import { YogaAnatomicalCanvas } from '../fitness/YogaAnatomicalCanvas';
+import { CALISTHENICS_EXERCISES } from '../../data/calisthenicsExercises';
+import { BODY_PART_SETS, DURATION_OPTIONS, buildBodyPartSession } from '../../data/hiitAndLeapWorkouts';
+import { HealthifySuite } from '../wellness/HealthifySuite';
+import { PwaInstallPrompt } from '../common/PwaInstallPrompt';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
 
-function FeaturedPreviewImage({ exercise, src, fallbackSrc, alt }) {
+function FeaturedPreviewImage({ src, fallbackSrc, alt }) {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-
-  const isFaceYoga =
-    exercise?.category === 'face_yoga' ||
-    exercise?.subCategory === 'face_yoga' ||
-    exercise?.equipment === 'face_hands';
-
-  if (isFaceYoga) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-[#050608]">
-        <YogaAnatomicalCanvas exercise={exercise} compact animate />
-      </div>
-    );
-  }
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
@@ -84,13 +66,38 @@ export function HomeSection() {
     setIsWeightModalOpen,
     setIsMealScannerOpen,
     setIsPlanModalOpen,
+    setIsCustomPlanModalOpen,
     isAuthModalOpen,
     setIsAuthModalOpen,
     openAuthModal,
+    openPlanUpgradeModal,
+    hasPaidPlan,
+    siteSettings,
+    customExercises,
+    setActiveGuidedSession,
+    t,
+    disabledExerciseIds,
+    exerciseOverrides,
   } = useApp();
 
   const [selectedExercise, setSelectedExercise] = useState(null);
-  const [guidedWorkoutPlan, setGuidedWorkoutPlan] = useState(null);
+  const [homeBodyPart, setHomeBodyPart] = useState('hiit_cardio');
+  const [homeDuration, setHomeDuration] = useState(30);
+
+  const launchHomeBodyPartSession = (bodyPartId = homeBodyPart, durationMinutes = homeDuration) => {
+    const built = buildBodyPartSession({
+      bodyPartId,
+      durationMinutes,
+      level: 'Intermediate',
+      catalogExercises: [...HOME_WORKOUTS_EXPANDED, ...CALISTHENICS_EXERCISES, ...YOGA_AND_HOME_WORKOUTS],
+      userWeightKg: user?.currentWeight || 75,
+    });
+    setActiveGuidedSession?.({
+      routineTitle: built.title,
+      badge: built.badge,
+      exercises: built.exercises,
+    });
+  };
 
   const launchTroubleZoneSession = (zoneId = 'belly_fat') => {
     const plan = TROUBLE_ZONE_PLANS.find((p) => p.id === zoneId) || TROUBLE_ZONE_PLANS[0];
@@ -100,8 +107,8 @@ export function HomeSection() {
       .map((id) => HOME_WORKOUTS_EXPANDED.find((e) => e.id === id))
       .filter(Boolean);
 
-    setGuidedWorkoutPlan({
-      title: `${plan.title} (Day 5)`,
+    setActiveGuidedSession?.({
+      routineTitle: `${plan.title} (Day 5)`,
       badge: plan.badge,
       exercises,
     });
@@ -110,10 +117,10 @@ export function HomeSection() {
   // Dynamic Time-based Greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  }, []);
+    if (hour < 12) return t?.('hero.greetingMorning') || 'Good morning';
+    if (hour < 17) return t?.('hero.greetingAfternoon') || 'Good afternoon';
+    return t?.('hero.greetingEvening') || 'Good evening';
+  }, [t]);
 
   const todayFormatted = useMemo(() => {
     const options = { weekday: 'long', month: 'short', day: 'numeric' };
@@ -130,18 +137,28 @@ export function HomeSection() {
   const exercisePercent = Math.min(100, Math.round((totalWorkoutMinutes / exerciseMinGoal) * 100));
   const sugarPercent = Math.min(100, Math.round((totalSugar / sugarLimit) * 100));
 
-  // Curated Featured Workouts for Today (Apple Fitness+ style)
+  const effectiveYoga = useMemo(
+    () =>
+      mergeManagedCatalog(YOGA_AND_HOME_WORKOUTS, {
+        customItems: customExercises,
+        disabledIds: disabledExerciseIds,
+        overrides: exerciseOverrides,
+        customFilter: (ex) => ex.category === 'yoga',
+      }),
+    [customExercises, disabledExerciseIds, exerciseOverrides]
+  );
+
+  // Curated Featured Workouts for Today (synced with Admin overrides/hides)
   const featuredWorkouts = useMemo(() => {
     const sunSalutation =
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.name && e.name.includes('Surya Namaskar')) ||
-      YOGA_AND_HOME_WORKOUTS[0];
+      effectiveYoga.find((e) => e.name && e.name.includes('Surya Namaskar')) ||
+      effectiveYoga[0];
     const crossCrunch =
       MASTER_EXERCISE_CATALOG.find((e) => e.name && e.name.toLowerCase().includes('cross body crunch')) ||
       MASTER_EXERCISE_CATALOG.find((e) => e.muscleCategory === 'Core' || e.muscle === 'abs');
-    const faceYoga =
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga' && e.name.includes('Jawline')) ||
-      YOGA_AND_HOME_WORKOUTS.find((e) => e.category === 'face_yoga') ||
-      YOGA_AND_HOME_WORKOUTS[1];
+    const ballYoga =
+      effectiveYoga.find((e) => e.subCategory === 'exercise_ball') ||
+      CALISTHENICS_EXERCISES[0];
     const homeSquat =
       HOME_WORKOUTS_EXPANDED.find((e) => e.name && e.name.toLowerCase().includes('split squat')) ||
       HOME_WORKOUTS_EXPANDED.find((e) => e.name && e.name.toLowerCase().includes('squat')) ||
@@ -169,11 +186,11 @@ export function HomeSection() {
         badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
       },
       {
-        exercise: faceYoga,
-        title: 'Jawline Sculpt & Fascia Glide',
-        subtitle: '8 min · Targeted Face Yoga',
-        tag: 'Face Definition',
-        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/levator-scapulae/neck-side-stretch.gif',
+        exercise: ballYoga,
+        title: ballYoga?.name || 'Stability Ball Spine Release',
+        subtitle: '14 min · Decompression & Posture',
+        tag: 'Stability Ball',
+        fallbackGif: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/spine/back-extension-on-exercise-ball.gif',
         color: 'from-purple-500/20 to-pink-500/10',
         borderColor: 'border-purple-500/30',
         badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
@@ -189,10 +206,87 @@ export function HomeSection() {
         badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
       },
     ].filter((item) => item.exercise);
-  }, []);
+  }, [effectiveYoga]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-7xl mx-auto">
+      {/* 0. PRODUCTION LANDING HERO SECTION (100% Admin-Customizable) */}
+      {siteSettings?.heroSectionEnabled !== false && (
+        <section className="p-5 sm:p-8 rounded-3xl bg-gradient-to-br from-[#12161f] via-[#0c0e14] to-amber-950/20 border border-amber-500/25 shadow-2xl relative overflow-hidden space-y-5">
+          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                  {siteSettings?.heroBadge || 'Production PWA · iOS & Android Ready'}
+                </span>
+                <PwaInstallPrompt compact />
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-white tracking-tight leading-[1.14]">
+                {siteSettings?.heroTitle || 'Start Stronger with Easy Home Workouts, 30m HIIT & '}{' '}
+                <span className="gold-gradient-text">
+                  {hasPaidPlan ? 'All Features Unlocked' : (siteSettings?.heroHighlight || 'Plans from ₹99')}
+                </span>
+              </h2>
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                {siteSettings?.heroSubtitle ||
+                  'Choose a body part and duration, follow clear animation guides with voice coaching, track daily meals & water, and shop verified supplements.'}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                {!hasPaidPlan && (
+                  <button
+                    type="button"
+                    onClick={() => openPlanUpgradeModal?.('Switch from Free to Monthly or Yearly Paid Plan')}
+                    className="gold-btn px-5 py-3 rounded-2xl text-xs sm:text-sm font-black shadow-gold-glow-sm active:scale-95 transition"
+                  >
+                    {siteSettings?.heroPrimaryCta || 'View Plans · From ₹99/mo'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFitnessSubTab?.('hiit_leap');
+                    setActiveTab('fitness');
+                  }}
+                  className={`${hasPaidPlan ? 'gold-btn shadow-gold-glow-sm font-black' : 'gold-btn-outline font-bold'} px-4 py-3 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 active:scale-95 transition`}
+                >
+                  <Zap className="w-4 h-4" />
+                  <span>{siteSettings?.heroSecondaryCta || 'Launch 30m HIIT Studio'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomPlanModalOpen?.(true)}
+                  className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-200 transition"
+                >
+                  ✨ Create Custom Plan
+                </button>
+              </div>
+            </div>
+
+            {/* Hero Proofs Grid */}
+            <div className="grid grid-cols-2 gap-2.5 lg:w-80 shrink-0">
+              {[
+                !hasPaidPlan
+                  ? { val: '₹99/mo', label: 'Monthly & Yearly', sub: 'Unlock Advanced Plans' }
+                  : { val: 'Active', label: 'Plan Unlocked', sub: 'All Levels Ready' },
+                { val: '30 Min', label: 'HIIT & Body Parts', sub: 'HD Guides + Voice' },
+                { val: '2,000+', label: 'Beginner Exercises', sub: 'Step-by-Step Guides' },
+                { val: 'Shop', label: 'Verified Store', sub: 'Amazon & Flipkart' },
+              ].map((s) => (
+                <div key={s.label} className="p-3.5 rounded-2xl bg-black/55 border border-white/10">
+                  <div className="text-lg sm:text-xl font-black text-amber-300">{s.val}</div>
+                  <div className="text-[11px] font-bold text-white mt-0.5">{s.label}</div>
+                  <div className="text-[10px] text-slate-400">{s.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 1. HERO GREETING & STREAK BANNER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
@@ -237,6 +331,7 @@ export function HomeSection() {
       </div>
 
       {/* 2. APPLE FITNESS ICONIC 3-RING ACTIVITY & METRIC HUB */}
+      {siteSettings?.activityRingsEnabled !== false && (
       <div className="p-5 sm:p-7 rounded-3xl bg-gradient-to-br from-obsidian-850 via-obsidian-900 to-black border border-amber-500/25 shadow-2xl relative overflow-hidden">
         {/* Glow ambient background */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -388,6 +483,83 @@ export function HomeSection() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* 2B. INSTANT BODY PART & DURATION WORKOUT LAUNCHER + AI ARCHITECT */}
+      {siteSettings?.bodyPartLauncherEnabled !== false && (
+        <section className="p-5 sm:p-6 rounded-3xl bg-obsidian-850/90 border border-amber-500/25 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-rose-400 flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" /> Body-Part &amp; Duration Selector (HD Video + Voice Coach)
+              </span>
+              <h2 className="text-base sm:text-lg font-black text-white">
+                {t?.('hero.bodyPartLauncherTitle') || 'Choose a Body Part & Duration — Train Instantly'}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setFitnessSubTab?.('hiit_leap');
+                setActiveTab('fitness');
+              }}
+              className="text-xs font-bold text-amber-300 hover:underline self-start sm:self-auto"
+            >
+              Open Full 30m HIIT &amp; Calendar Studio →
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {BODY_PART_SETS.map((part) => (
+              <button
+                key={part.id}
+                type="button"
+                onClick={() => setHomeBodyPart(part.id)}
+                className={`px-3 py-2 rounded-xl border text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition shrink-0 ${
+                  homeBodyPart === part.id
+                    ? 'bg-amber-500 text-black border-amber-300 shadow-gold-glow-sm'
+                    : 'bg-black/50 text-slate-300 border-white/10 hover:border-amber-400/50'
+                }`}
+              >
+                <span>{part.icon}</span>
+                <span>{part.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-bold text-slate-400">Duration:</span>
+              {DURATION_OPTIONS.map((d) => (
+                <button
+                  key={d.minutes}
+                  type="button"
+                  onClick={() => setHomeDuration(d.minutes)}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition ${
+                    homeDuration === d.minutes
+                      ? 'bg-rose-500/25 border-rose-400 text-rose-200'
+                      : 'bg-black/45 border-white/10 text-slate-300'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => launchHomeBodyPartSession(homeBodyPart, homeDuration)}
+              className="gold-btn px-5 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-gold-glow-sm"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>Start {homeDuration}-Min Voice-Coached Set</span>
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* 2C. HEALTHIFY DAILY TELEMETRY BAR (Water, Steps, Sleep, Fasting, AI Coach) */}
+      {siteSettings?.healthifySuiteEnabled !== false && <HealthifySuite compact />}
 
       {/* 3. ACTIVE TRANSFORMATION SPRINT CARD (30 / 60 / 90 DAYS) */}
       {user.activePlan && (
@@ -466,20 +638,21 @@ export function HomeSection() {
       )}
 
       {/* 4. LEAP FITNESS TROUBLE ZONE 30-DAY CHALLENGES */}
+      {siteSettings?.troubleZoneEnabled !== false && (
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            30 Days Challenge: Focus on Trouble Zone
+            <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>{t?.('hero.troubleZoneTitle') || '30 Days Challenge: Focus on Trouble Zone'}</span>
           </h2>
           <button
             onClick={() => {
               setFitnessSubTab?.('home_hub');
               setActiveTab('fitness');
             }}
-            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1"
+            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1 self-start sm:self-auto shrink-0"
           >
-            <span>Open Home Workout Hub</span>
+            <span>{t?.('hero.openWorkoutHub') || 'Open Home Workout Hub'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -515,11 +688,13 @@ export function HomeSection() {
           ))}
         </div>
       </div>
+      )}
 
       {/* 5. QUICK ACTION 1-TAP LAUNCHPAD */}
+      {siteSettings?.quickLaunchpadEnabled !== false && (
       <div className="space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Quick Launchpad
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t?.('hero.quickLaunchpad') || 'Quick Launchpad'}
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -538,7 +713,7 @@ export function HomeSection() {
               <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
                 Home Workouts
               </h4>
-              <p className="text-[11px] text-slate-400">670+ Zero-Equipment</p>
+              <p className="text-[11px] text-slate-400">Zero-Equipment Moves</p>
             </div>
           </button>
 
@@ -561,7 +736,7 @@ export function HomeSection() {
             </div>
           </button>
 
-          {/* Action 3: Daily Yoga & Face Yoga */}
+          {/* Action 3: Holistic Yoga Sanctuary */}
           <button
             onClick={() => {
               setFitnessSubTab?.('yoga');
@@ -574,9 +749,9 @@ export function HomeSection() {
             </div>
             <div>
               <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                Yoga & Face Flow
+                Yoga Sanctuary
               </h4>
-              <p className="text-[11px] text-slate-400">Full Body & Jawline</p>
+              <p className="text-[11px] text-slate-400">Mat &amp; Stability Ball</p>
             </div>
           </button>
 
@@ -604,25 +779,55 @@ export function HomeSection() {
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition">
               <Scale className="w-5 h-5" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                Body Fat & BMI
-              </h4>
-              <p className="text-[11px] text-slate-400">Photo Vision Scan</p>
-            </div>
-          </button>
+              <div>
+                <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
+                  Body Fat &amp; BMI
+                </h4>
+                <p className="text-[11px] text-slate-400">Photo Vision Scan</p>
+              </div>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* 5. APPLE FITNESS+ CURATED SESSIONS FOR TODAY */}
+      {/* AI EXERCISE & CUSTOM PLAN PROMO + PWA MOBILE INSTALL */}
+      {siteSettings?.aiPlannerEnabled !== false && (
+        <section className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-obsidian-850 to-emerald-950/20 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+              Personalized Goal + Multi-Discipline Architect
+            </span>
+            <h3 className="text-base sm:text-lg font-black text-white">
+              Create Your Own Custom Plan or Synthesize AI Exercises
+            </h3>
+            <p className="text-xs text-slate-300">
+              Blend HIIT Cardio, Abs, Chest, Legs &amp; Yoga into a weekly schedule matched to your calorie &amp; protein goals.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsCustomPlanModalOpen?.(true)}
+              className="gold-btn px-4 py-2.5 rounded-xl text-xs font-black"
+            >
+              ✨ Open Custom Plan Builder
+            </button>
+          </div>
+        </section>
+      )}
+
+      <PwaInstallPrompt />
+
+      {/* 5. CURATED SESSIONS FOR TODAY */}
+      {siteSettings?.homeFeaturedEnabled !== false && (
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              Curated For You Today
+              {t?.('hero.curatedToday') || 'Curated For You Today'}
             </h2>
             <p className="text-xs text-slate-400">
-              Personalized routines with dark 3D anatomical animations & form guidance
+              {t?.('hero.curatedSub') || 'Beginner-friendly routines with clear motion demonstrations and voice guidance'}
             </p>
           </div>
 
@@ -633,7 +838,7 @@ export function HomeSection() {
             }}
             className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1 self-start sm:self-auto"
           >
-            <span>See All ({YOGA_AND_HOME_WORKOUTS.length}+ Movements)</span>
+            <span>See All ({effectiveYoga.length}+ Yoga &amp; Movements)</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -649,7 +854,6 @@ export function HomeSection() {
                 {/* 3D Preview Stage */}
                 <div className="relative w-full h-36 rounded-2xl bg-[#050608] overflow-hidden border border-white/5 flex items-center justify-center p-1">
                   <FeaturedPreviewImage
-                    exercise={item.exercise}
                     src={item.exercise.gifUrl}
                     fallbackSrc={item.fallbackGif}
                     alt={item.title}
@@ -682,6 +886,7 @@ export function HomeSection() {
           ))}
         </div>
       </div>
+      )}
 
       {/* 6. TODAY'S RECENT ACTIVITY & LOGGED SESSIONS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -789,17 +994,6 @@ export function HomeSection() {
         <WorkoutDetailModal
           exercise={selectedExercise}
           onClose={() => setSelectedExercise(null)}
-        />
-      )}
-
-      {/* Guided Workout Live Session Runner Modal */}
-      {guidedWorkoutPlan && (
-        <GuidedWorkoutPlayerModal
-          isOpen={!!guidedWorkoutPlan}
-          onClose={() => setGuidedWorkoutPlan(null)}
-          routineTitle={guidedWorkoutPlan.title}
-          planBadge={guidedWorkoutPlan.badge}
-          exercises={guidedWorkoutPlan.exercises}
         />
       )}
     </div>

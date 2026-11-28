@@ -3,7 +3,6 @@ import {
   Camera,
   Search,
   Sparkles,
-  Utensils,
   Clock,
   ArrowRight,
   Trash2,
@@ -12,14 +11,14 @@ import {
   Egg,
   Sprout,
   Flame,
-  Award,
-  X,
 } from 'lucide-react';
 import { MASSIVE_FOOD_CATALOG, DIET_FILTERS } from '../../data/massiveFoodDatabase';
 import { MEAL_CATEGORIES } from '../../data/foodData';
 import { GlassCard } from '../common/GlassCard';
 import { MacroPill } from '../common/MacroPill';
 import { RecipeDetailModal } from './RecipeDetailModal';
+import { HealthifySuite } from '../wellness/HealthifySuite';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
 import { useApp } from '../../context/AppContext';
 
 export function FoodSection() {
@@ -32,20 +31,35 @@ export function FoodSection() {
     totalFats,
     totalSugar,
     sugarLimitGrams,
+    logMeal,
     deleteMeal,
     isMealScannerOpen,
     setIsMealScannerOpen,
+    customFoods,
+    disabledFoodIds,
+    foodOverrides,
   } = useApp();
 
   const [selectedDiet, setSelectedDiet] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [activeMealSlot, setActiveMealSlot] = useState('all'); // 'all' | 'breakfast' | 'morning_snack' | 'lunch' | 'evening_snack' | 'dinner'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [visibleCount, setVisibleCount] = useState(24);
 
-  // Filter 500+ recipes and food items
+  const managedFoods = useMemo(
+    () =>
+      mergeManagedCatalog(MASSIVE_FOOD_CATALOG, {
+        customItems: customFoods,
+        disabledIds: disabledFoodIds,
+        overrides: foodOverrides,
+      }),
+    [customFoods, disabledFoodIds, foodOverrides]
+  );
+
+  // Filter Admin-managed foods & recipes
   const filteredRecipes = useMemo(() => {
-    return MASSIVE_FOOD_CATALOG.filter((recipe) => {
+    return managedFoods.filter((recipe) => {
       // Diet filter
       let matchesDiet = true;
       if (selectedDiet === 'veg') {
@@ -75,7 +89,7 @@ export function FoodSection() {
 
       return matchesDiet && matchesCat && matchesSearch;
     });
-  }, [selectedDiet, selectedCategory, searchQuery]);
+  }, [managedFoods, selectedDiet, selectedCategory, searchQuery]);
 
   const displayedItems = filteredRecipes.slice(0, visibleCount);
 
@@ -95,7 +109,7 @@ export function FoodSection() {
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              {MASSIVE_FOOD_CATALOG.length.toLocaleString()}+ Whole Foods & Recipes
+              {managedFoods.length.toLocaleString()}+ Whole Foods & Recipes
             </span>
             <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">
               Exact Gram Macros
@@ -169,6 +183,82 @@ export function FoodSection() {
           </div>
           <span className="text-xs font-mono font-bold text-emerald-400">{fatPercent}%</span>
         </div>
+      </div>
+
+      {/* HEALTHIFY WELLNESS TRACKER + MEAL SLOT LOGGER */}
+      <HealthifySuite compact />
+
+      <div className="p-4 rounded-2xl bg-obsidian-850/90 border border-white/10 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[11px] font-black uppercase tracking-wider text-amber-400">
+            Daily Meal Slots ({todaysMeals.length} Logged)
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { id: 'all', label: 'All Slots' },
+              { id: 'breakfast', label: 'Breakfast' },
+              { id: 'morning_snack', label: 'Morning Snack' },
+              { id: 'lunch', label: 'Lunch' },
+              { id: 'evening_snack', label: 'Evening Snack' },
+              { id: 'dinner', label: 'Dinner' },
+            ].map((slot) => (
+              <button
+                key={slot.id}
+                type="button"
+                onClick={() => setActiveMealSlot(slot.id)}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition ${
+                  activeMealSlot === slot.id
+                    ? 'bg-amber-500 text-black border-amber-400'
+                    : 'bg-black/40 text-slate-300 border-white/10'
+                }`}
+              >
+                {slot.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          <span className="text-slate-400">1-Tap Quick Slot Add:</span>
+          {[
+            { title: 'Masala Oats + Chia', calories: 260, protein: 11, carbs: 38, fats: 6, sugar: 2, mealSlot: 'breakfast' },
+            { title: '150g Paneer / Tofu Bhurji', calories: 320, protein: 26, carbs: 10, fats: 18, sugar: 2, mealSlot: 'lunch' },
+            { title: '1 Scoop Whey Isolate Shake', calories: 120, protein: 27, carbs: 2, fats: 1, sugar: 0, mealSlot: 'evening_snack' },
+          ].map((quick) => (
+            <button
+              key={quick.title}
+              type="button"
+              onClick={() => logMeal(quick)}
+              className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold hover:bg-emerald-500/25 transition"
+            >
+              + {quick.title} ({quick.protein}g P)
+            </button>
+          ))}
+        </div>
+
+        {todaysMeals.filter((m) => activeMealSlot === 'all' || (m.mealSlot || 'lunch') === activeMealSlot).length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {todaysMeals
+              .filter((m) => activeMealSlot === 'all' || (m.mealSlot || 'lunch') === activeMealSlot)
+              .map((meal) => (
+                <div key={meal.id} className="p-2.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between gap-2 text-xs">
+                  <div className="min-w-0">
+                    <span className="text-[9px] uppercase text-amber-400 font-bold block">{meal.mealSlot || 'meal'}</span>
+                    <div className="font-bold text-white truncate">{meal.title}</div>
+                    <div className="text-[10px] text-slate-400">{meal.calories} kcal · {meal.protein}g P</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => deleteMeal(meal.id)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+                    title="Delete meal"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
 
       {/* FILTER BAR: VEG / NON-VEG / VEGAN / EGGETARIAN DIETARY FILTERS */}

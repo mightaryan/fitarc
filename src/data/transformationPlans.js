@@ -1,5 +1,5 @@
 // Targeted Transformation Plans (30, 60, and 90 Days)
-// Covers Belly Fat, Thigh Fat, Back Fat, Overall Body Fat, and Yoga/Face Sculpting.
+// Covers Belly Fat, Thigh Fat, Back Fat, Overall Body Fat, and Holistic Yoga & Mobility.
 
 export const TARGET_AREAS = [
   { id: 'belly_fat', label: 'Belly Fat & Core Shred', icon: 'Flame', desc: 'Target stubborn lower belly & visceral abdominal fat' },
@@ -8,14 +8,14 @@ export const TARGET_AREAS = [
   { id: 'thigh_fat', label: 'Thigh & Glute Sculpt', icon: 'Target', desc: 'Tone inner/outer thighs and lift glutes' },
   { id: 'back_fat', label: 'Back Fat & Posture Toning', icon: 'Shield', desc: 'Eliminate bra-line rolls and sculpt V-taper posture' },
   { id: 'overall_fat', label: 'Full Body Fat Loss', icon: 'Activity', desc: 'Whole body metabolic deficit & lean definition' },
-  { id: 'yoga_face', label: 'Yoga & Face Sculpt', icon: 'Sparkles', desc: 'Holistic spine mobility, lymphatic drainage & jawline lift' },
+  { id: 'yoga_mobility', label: 'Yoga & Spine Mobility', icon: 'Sparkles', desc: 'Holistic spine decompression, mat Vinyasa & stability ball flows' },
 ];
 
 export const WORKOUT_LOCATIONS = [
   { id: 'home', label: 'Home Living Room', icon: 'Home', badge: 'Zero Equipment', desc: 'Pure bodyweight on floor, living room mat, sofa or chair' },
   { id: 'gym', label: 'Commercial Gym', icon: 'Dumbbell', badge: 'Full Machinery', desc: 'Machines, barbells, cables, dumbbells & heavy free weights' },
   { id: 'calisthenics', label: 'Calisthenics Park', icon: 'Zap', badge: 'Bars & Rings', desc: 'Pull-up bars, parallel dip bars, rings & bodyweight levers' },
-  { id: 'yoga', label: 'Yoga Sanctuary', icon: 'Sun', badge: 'Mat & Ball', desc: 'Barefoot on non-slip yoga mat, stability ball & facial hands' },
+  { id: 'yoga', label: 'Yoga Sanctuary', icon: 'Sun', badge: 'Mat & Ball', desc: 'Barefoot on non-slip yoga mat & stability ball decompression' },
 ];
 
 export const TRANSFORMATION_PLANS = [
@@ -300,75 +300,75 @@ export const TRANSFORMATION_PLANS = [
     ]
   },
 
-  // YOGA & FACE SCULPT
+  // YOGA & SPINE MOBILITY
   {
-    id: 'yoga-face-30',
-    targetArea: 'yoga_face',
+    id: 'yoga-mobility-30',
+    targetArea: 'yoga_mobility',
     durationDays: 30,
-    title: '30-Day Jawline Sculpt & Holistic Yoga',
-    badge: 'Facial Definition & Zen',
+    title: '30-Day Yoga Sanctuary & Spine Reset',
+    badge: 'Flexibility & Zen',
     dailyCalorieDeficit: 300,
     dailySugarLimitGrams: 20,
     workoutDaysPerWeek: 6,
-    focus: 'Jawline tightening, double chin reduction & spine decompressing flows',
-    description: 'Daily 10m Face Yoga routines paired with 20m full body Surya Namaskar and restorative poses.',
+    focus: 'Thoracic extension, hip flexibility & daily Pranayama breath equilibrium',
+    description: 'Daily 25m full-body Surya Namaskar, restorative mat poses, and stability ball spinal decompression.',
     recommendedExercises: [
-      'face-yoga-jawline-sculpt',
-      'face-yoga-cheekbone-lift',
-      'yoga-sun-salutation',
-      'yoga-downward-dog'
+      'yoga-mat-001',
+      'yoga-mat-004',
+      'yoga-ball-001',
+      'yoga-ball-002'
     ],
     dailyChecklist: [
-      'Perform 10m Face Yoga jawline & cheek sequence',
-      'Complete 20m Full Body Yoga flow',
-      'Drink 3.5L water for facial lymphatic drainage',
-      'Zero refined sugar to reduce puffiness'
+      'Complete 25m Full Body Mat Yoga flow',
+      'Perform 10m Stability Ball spine decompression',
+      'Drink 3.5L water with trace electrolytes',
+      'Keep refined sugar under 20g daily'
     ]
   },
   {
-    id: 'yoga-face-60',
-    targetArea: 'yoga_face',
+    id: 'yoga-mobility-60',
+    targetArea: 'yoga_mobility',
     durationDays: 60,
-    title: '60-Day Youth Contour & Posture Overhaul',
-    badge: 'Natural Facelift',
+    title: '60-Day Vinyasa Flow & Posture Overhaul',
+    badge: 'Core & Spine Balance',
     dailyCalorieDeficit: 300,
     dailySugarLimitGrams: 22,
     workoutDaysPerWeek: 5,
-    focus: 'Zygomaticus cheek elevation, forehead smoothing & core posture integration',
-    description: 'Deep facial neuromuscular resistance combined with full body Warrior and Balance poses.',
+    focus: 'Deep hip opening, hamstring elongation & integrated postural balance',
+    description: 'Progressive Vinyasa sequences paired with Warrior flows and stability ball core anchoring.',
     recommendedExercises: [
-      'face-yoga-cheekbone-lift',
-      'face-yoga-forehead-smooth',
-      'yoga-warrior-two',
-      'yoga-cobra-pose'
+      'yoga-mat-002',
+      'yoga-mat-010',
+      'yoga-ball-004',
+      'yoga-mat-022'
     ],
     dailyChecklist: [
-      '12m Face Yoga resistance workout',
-      '25m Spine & core yoga practice',
+      '30m Spine & core yoga practice',
+      '5m Box-breathing Pranayama cadence',
       'Track hydration & body fat in Vault'
     ]
   },
   {
-    id: 'yoga-face-90',
-    targetArea: 'yoga_face',
+    id: 'yoga-mobility-90',
+    targetArea: 'yoga_mobility',
     durationDays: 90,
-    title: '90-Day Complete Bio-Harmonic Transformation',
-    badge: 'Supreme Zen & Chiseled Features',
+    title: '90-Day Complete Bio-Harmonic Yoga Mastery',
+    badge: 'Supreme Mobility & Alignment',
     dailyCalorieDeficit: 250,
     dailySugarLimitGrams: 25,
     workoutDaysPerWeek: 5,
-    focus: 'Maximal jawline sharpness, high cheekbone volume & effortless posture',
-    description: 'The definitive anti-aging and holistic body sculpting curriculum.',
+    focus: 'Effortless spine mobility, deep pelvic opening & total recovery mastery',
+    description: 'The definitive flexibility, recovery, and holistic body-sculpting curriculum on mat and stability ball.',
     recommendedExercises: [
-      'face-yoga-jawline-sculpt',
-      'face-yoga-cheekbone-lift',
-      'face-yoga-forehead-smooth',
-      'yoga-sun-salutation'
+      'yoga-mat-001',
+      'yoga-mat-018',
+      'yoga-ball-002',
+      'yoga-ball-006'
     ],
     dailyChecklist: [
-      '15m Face Yoga master sequence',
-      '30m Full Body Asana flow',
-      'Log daily photo in Vault for body fat & face symmetry'
+      '35m Full Body Asana flow',
+      '10m Stability Ball restorative stretch',
+      'Log weekly body composition check-in in Vault'
     ]
   },
 

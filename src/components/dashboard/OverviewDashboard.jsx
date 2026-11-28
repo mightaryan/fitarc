@@ -1,18 +1,16 @@
 import React from 'react';
 import {
-  TrendingDown,
   Flame,
   Utensils,
   Scale,
   Award,
   Zap,
   Calendar,
-  CheckCircle2,
   ArrowRight,
   Sparkles,
-  Dumbbell,
 } from 'lucide-react';
 import { GlassCard } from '../common/GlassCard';
+import { HealthifySuite } from '../wellness/HealthifySuite';
 import { useApp } from '../../context/AppContext';
 
 export function OverviewDashboard() {
@@ -28,25 +26,33 @@ export function OverviewDashboard() {
     setIsWeightModalOpen,
     setIsMealScannerOpen,
     openAuthModal,
+    currentUserHealthPoints,
+    getTopHealthLeaderboard,
+    siteSettings,
   } = useApp();
 
-  // Weight trajectory analytics
+  const leaderboardSummary = getTopHealthLeaderboard ? getTopHealthLeaderboard(10) : { top10: [], currentUserRank: null };
+
+  // Weight trajectory analytics (guard empty/flat weight arrays against NaN / Infinity)
+  const fallbackWeight = Number(user?.currentWeight) || 75;
+  const safeTargetWeight = Number(user?.targetWeight) || fallbackWeight;
   const firstEntry = weightHistory[0];
   const lastEntry = weightHistory[weightHistory.length - 1];
-  const totalWeightLoss = Math.round(((firstEntry?.weight || 82) - (lastEntry?.weight || 78.5)) * 10) / 10;
-  const targetRemaining = Math.round(((lastEntry?.weight || 78.5) - (user.targetWeight || 74)) * 10) / 10;
+  const totalWeightLoss = Math.round(((firstEntry?.weight ?? user?.startWeight ?? fallbackWeight) - (lastEntry?.weight ?? fallbackWeight)) * 10) / 10;
+  const targetRemaining = Math.round(((lastEntry?.weight ?? fallbackWeight) - safeTargetWeight) * 10) / 10;
 
   // Render SVG spline chart for weight history
   const chartHeight = 160;
   const chartWidth = 500;
   const padding = 35;
-  const weights = weightHistory.map((w) => w.weight);
-  const minWeight = Math.min(...weights, user.targetWeight) - 0.8;
-  const maxWeight = Math.max(...weights) + 0.8;
+  const weights = weightHistory.length ? weightHistory.map((w) => Number(w.weight) || fallbackWeight) : [fallbackWeight];
+  const minWeight = Math.min(...weights, safeTargetWeight) - 0.8;
+  const maxWeight = Math.max(...weights, safeTargetWeight) + 0.8;
+  const weightSpan = Math.max(0.5, maxWeight - minWeight);
 
   const points = weightHistory.map((item, index) => {
     const x = padding + (index / (weightHistory.length - 1 || 1)) * (chartWidth - padding * 2);
-    const y = chartHeight - padding - ((item.weight - minWeight) / (maxWeight - minWeight)) * (chartHeight - padding * 2);
+    const y = chartHeight - padding - (((Number(item.weight) || fallbackWeight) - minWeight) / weightSpan) * (chartHeight - padding * 2);
     return { x, y, ...item };
   });
 
@@ -191,6 +197,60 @@ export function OverviewDashboard() {
           </div>
         </GlassCard>
       </div>
+
+      {/* Full Healthify Wellness Suite (Hydration, Steps, Sleep, Fasting, AI Coach) */}
+      <HealthifySuite />
+
+      {/* Top 10 Health Points Leaderboard (Controlled live by Admin feature switch) */}
+      {siteSettings?.leaderboardEnabled !== false && (
+        <div className="p-6 rounded-3xl glass-panel-glow border border-amber-500/25 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                <Award className="w-3.5 h-3.5" /> Health Points Top 10 Leaderboard
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-white">
+                Clean Food & Active Exercise Rankings
+              </h3>
+              <p className="text-xs text-slate-400">
+                Your Score: <strong className="text-amber-300">{currentUserHealthPoints?.healthPoints || 0} pts</strong>
+                {leaderboardSummary.currentUserRank ? ` · Rank #${leaderboardSummary.currentUserRank}` : ''} ·{' '}
+                {currentUserHealthPoints?.cleanMealsCount || 0} clean meals · {currentUserHealthPoints?.totalExerciseMinutes || 0} workout mins
+              </p>
+            </div>
+            <button
+              onClick={() => openAuthModal('leaderboard')}
+              className="gold-btn-outline px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 self-start sm:self-auto"
+            >
+              <span>Open Full Top 10</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+            {leaderboardSummary.top10.slice(0, 5).map((row) => (
+              <div
+                key={`${row.rank}-${row.initials}-${row.displayName}`}
+                className={`p-3 rounded-2xl border ${row.isCurrentUser
+                    ? 'bg-amber-500/15 border-amber-400 shadow-gold-glow-sm'
+                    : 'bg-black/45 border-white/10'
+                  }`}
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-xs font-black text-amber-400">{`#${row.rank}`}</span>
+                  <span className="text-[11px] font-black text-white">{`${row.healthPoints} pts`}</span>
+                </div>
+                <div className="text-xs font-bold text-white truncate mt-1">
+                  {row.displayName} {row.isCurrentUser ? '(You)' : ''}
+                </div>
+                <div className="text-[10px] text-slate-400 mt-1">
+                  {row.cleanMealsCount} clean meals · {row.totalExerciseMinutes}m ex
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Weight History Trajectory Chart */}
       <div className="p-6 sm:p-8 rounded-3xl glass-panel-glow border border-amber-500/25 space-y-6">

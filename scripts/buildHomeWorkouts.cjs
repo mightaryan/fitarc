@@ -2,6 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { MASTER_EXERCISE_CATALOG } = require('../src/data/allExercisesMaster.js');
 
+// Load Yoga catalog URLs so Home Workouts never repeat Mat Yoga or Ball Yoga GIFs
+const yogaRaw = fs.readFileSync(path.join(__dirname, '../src/data/yogaAndHomeWorkouts.js'), 'utf-8');
+const yogaGifSet = new Set(Array.from(yogaRaw.matchAll(/"gifUrl":\s*"([^"]+)"/g), (m) => m[1]));
+
 // Helper to filter master exercises by folder - STRICT TRUE HOME FLOOR / WALL / CHAIR ZERO-RIG DYNAMIC 3D EXERCISES ONLY!
 const HOME_DISALLOWED = [
   'bench', 'machine', 'hyperextension', 'roman', '45-side', 'cable', 'lever',
@@ -13,33 +17,31 @@ const HOME_DISALLOWED = [
   'bosu', 'medicine-ball', 'wheel-roller', 'roller-', 'suspended', 'with-straps', 'with-rope',
   'balance-board', 'tire-flip', 'farmers-walk', 'snatch', 'power-clean', 'squat-jerk',
   'stationary-bike', 'ski-ergometer', 'run-equipment', 'wheel-run', 'jump-rope', 'wind-sprints',
-  'decline-crunch', 'decline-sit-up', 'incline-leg-hip-raise', 'incline-twisting-sit-up',
   'glute-ham-raise', 'on-box', 'box-jump', 'stability-ball', 'exercise-ball',
   'flag', 'maltese', 'planche', 'stalder', 'on-staircase', 'reclining-big-toe-pose-with-rope',
   'chest-dip', 'scapula-dips', 'one-arm-dip', 'triceps-dip.gif', 'triceps-press',
   'inverted-row', 'wrist-roller', 'calf-stretch-with-rope', 'with-strap', 'handstand',
   'standing-behind-neck-press', 'one-arm-towel-row', 'bodyweight-standing-one-arm-row',
   'bodyweight-standing-row', 'bodyweight-squatting-row', 'bodyweight-standing-close-grip',
-  'deep-push-up', 'incline-reverse-grip', 'hands-bike', 'potty-squat',
-  'back-and-forth-step', 'short-stride-run', 'push-to-run', 'quick-feet',
-  'half-knee-bends', 'toe-touch', 'elbow-dips', 'elbow-lift-reverse', 'one-arm-against-wall',
-  'isometric-wipers', 'isometric-chest-squeeze', 'finger-curls', 'wrist-circles',
-  'stretch', 'left-hook-boxing'
+  'isometric-wipers', 'potty-squat', 'left-hook-boxing', 'preacher', 'ez-bar', 'band', 'rack', 'tower', 'rope', 'stick', 'broom'
 ];
 
 const byFolder = {};
+const seenMasterGifs = new Set();
 MASTER_EXERCISE_CATALOG.forEach((ex) => {
   if (ex.equipment !== 'bodyweight') return;
+  if (yogaGifSet.has(ex.gifUrl) || seenMasterGifs.has(ex.gifUrl)) return;
   const s = (ex.name + ' ' + ex.slug + ' ' + ex.gifUrl).toLowerCase();
   if (HOME_DISALLOWED.some((w) => s.includes(w))) return;
   if (s.includes('assisted') && !s.includes('self-assisted')) return;
   const parts = ex.gifUrl.split('/');
   const folder = parts[parts.length - 2];
   if (!byFolder[folder]) byFolder[folder] = [];
+  seenMasterGifs.add(ex.gifUrl);
   byFolder[folder].push(ex);
 });
 
-console.log('Building 520+ home exercises from authentic 3D GIF pools (STRICT ZERO-EQUIPMENT)...');
+console.log('Building 100% unique zero-equipment home exercises from distinct non-Yoga 3D GIF pools...');
 
 const TARGET_AREAS = [
   {
@@ -49,7 +51,7 @@ const TARGET_AREAS = [
     folders: ['abs'],
     muscleCategory: 'Core',
     primaryMuscleName: 'Rectus Abdominis & Transverse Core',
-    count: 110,
+    maxCount: 28,
     equipmentTypes: ['bodyweight', 'mat', 'floor'],
     lowImpactRatio: 0.65,
     tagline: 'Deep abdominal contraction targeting visceral midsection adipose without gym equipment.',
@@ -61,7 +63,7 @@ const TARGET_AREAS = [
     folders: ['pectorals'],
     muscleCategory: 'Chest',
     primaryMuscleName: 'Pectoralis Major & Sternal Head',
-    count: 95,
+    maxCount: 20,
     equipmentTypes: ['bodyweight', 'chair', 'sofa', 'wall'],
     lowImpactRatio: 0.85,
     tagline: 'High-tension zero-equipment push angles to sculpt lower and upper chest fibers.',
@@ -73,7 +75,7 @@ const TARGET_AREAS = [
     folders: ['glutes', 'quads', 'hamstrings', 'calves'],
     muscleCategory: 'Legs',
     primaryMuscleName: 'Gluteus Maximus & Quadriceps',
-    count: 115,
+    maxCount: 24,
     equipmentTypes: ['bodyweight', 'sofa', 'chair', 'wall'],
     lowImpactRatio: 0.6,
     tagline: 'Unilateral and bilateral bodyweight lower body drive for maximum glute firmness.',
@@ -82,10 +84,10 @@ const TARGET_AREAS = [
     id: 'arm_fat',
     label: 'Lose Arm Fat',
     subtitle: 'Triceps Chisel & Shoulder Tone',
-    folders: ['triceps', 'biceps', 'pectorals'],
+    folders: ['triceps', 'biceps', 'delts', 'forearms', 'pectorals'],
     muscleCategory: 'Arms',
     primaryMuscleName: 'Triceps Brachii & Deltoid Cap',
-    count: 85,
+    maxCount: 18,
     equipmentTypes: ['bodyweight', 'chair', 'sofa', 'table'],
     lowImpactRatio: 0.9,
     tagline: 'Continuous time-under-tension arm extensions eliminating stubborn posterior arm flab.',
@@ -94,10 +96,10 @@ const TARGET_AREAS = [
     id: 'back_posture',
     label: 'Back & Posture Alignment',
     subtitle: 'Spine Health & Thoracic Opening',
-    folders: ['spine', 'serratus-anterior', 'glutes'],
+    folders: ['spine', 'lats', 'upper-back', 'serratus-anterior', 'traps'],
     muscleCategory: 'Back',
     primaryMuscleName: 'Latissimus Dorsi & Rhomboids',
-    count: 65,
+    maxCount: 16,
     equipmentTypes: ['bodyweight', 'mat', 'towel', 'wall'],
     lowImpactRatio: 0.95,
     tagline: 'Postural correction restoring scapular retraction and counteracting sedentary slouch.',
@@ -106,10 +108,10 @@ const TARGET_AREAS = [
     id: 'full_body_hiit',
     label: 'Full Body Calorie Furnace',
     subtitle: 'High Metabolic Fat Burn HIIT',
-    folders: ['cardio', 'abs', 'glutes', 'pectorals'],
+    folders: ['cardio', 'abs', 'glutes', 'quads', 'pectorals'],
     muscleCategory: 'Full Body',
     primaryMuscleName: 'Full Kinetic Chain & Cardiovascular Base',
-    count: 75,
+    maxCount: 18,
     equipmentTypes: ['bodyweight', 'floor', 'mat'],
     lowImpactRatio: 0.45,
     tagline: 'Maximum EPOC oxygen consumption sprint burning calories for 24 hours post-workout.',
@@ -118,10 +120,10 @@ const TARGET_AREAS = [
     id: 'hiit_furnace_600',
     label: '400-600 kcal Extreme HIIT',
     subtitle: 'High-Octane Metabolic Incinerator',
-    folders: ['cardio', 'glutes', 'abs', 'pectorals'],
+    folders: ['cardio', 'glutes', 'abs', 'pectorals', 'quads', 'calves'],
     muscleCategory: 'Metabolic HIIT',
     primaryMuscleName: 'Full Cardiovascular System & Kinetic Chain',
-    count: 80,
+    maxCount: 24,
     equipmentTypes: ['bodyweight', 'floor', 'mat'],
     lowImpactRatio: 0.3,
     tagline: 'Extreme compound interval training specifically formulated to burn 400 to 600 calories in one sustained set/session.',
@@ -130,51 +132,54 @@ const TARGET_AREAS = [
     id: 'lazy_fitness',
     label: 'Lazy Bed & Couch Fitness',
     subtitle: 'Restorative & Bedtime Calorie Burn',
-    folders: ['glutes', 'spine', 'adductors', 'abductors'],
+    folders: ['adductors', 'abductors', 'abs', 'glutes', 'hamstrings', 'calves'],
     muscleCategory: 'Core & Mobility',
     primaryMuscleName: 'Deep Core Stabilizers & Gluteus Medius',
-    count: 45,
+    maxCount: 16,
     equipmentTypes: ['bed', 'sofa', 'pillow'],
     lowImpactRatio: 1.0,
     tagline: 'Low-effort restorative muscle activation you can perform right from your mattress or living room sofa.',
   },
 ];
 
-const VARIANT_PREFIXES = [
-  'Controlled', 'Slow Tempo', 'Bodyweight', 'Sculpting',
-  'Floor', 'Focused', 'Chisel', 'Extended',
-  'Explosive', 'Active', 'Rhythmic', 'Deep',
-  'Restorative', 'Athletic', 'Sustained', 'Steady',
-  'Postural', 'Form-First', 'Low Impact', 'Balanced'
-];
-
 const allExercises = [];
+const usedHomeGifs = new Set();
 let totalIndex = 1;
 
 TARGET_AREAS.forEach((target) => {
-  // Gather available gifs for this target
+  // Gather all unused unique GIFs belonging to this target's muscle folders
   const pool = [];
   target.folders.forEach((f) => {
     if (byFolder[f]) {
-      pool.push(...byFolder[f]);
+      byFolder[f].forEach((ex) => {
+        if (!usedHomeGifs.has(ex.gifUrl)) {
+          pool.push(ex);
+        }
+      });
     }
   });
 
-  const targetCount = target.count;
+  // Deduplicate candidate pool and cap to target maxCount (guaranteed 100% unique GIF per exercise)
+  const uniquePool = [];
+  const localSeen = new Set();
+  for (const ex of pool) {
+    if (!localSeen.has(ex.gifUrl) && !usedHomeGifs.has(ex.gifUrl)) {
+      localSeen.add(ex.gifUrl);
+      uniquePool.push(ex);
+    }
+  }
 
-  for (let i = 0; i < targetCount; i++) {
-    const baseEx = pool[i % pool.length];
-    const prefix = VARIANT_PREFIXES[i % VARIANT_PREFIXES.length];
+  const chosen = uniquePool.slice(0, target.maxCount);
+  chosen.forEach((baseEx, i) => {
+    usedHomeGifs.add(baseEx.gifUrl);
     const equip = target.equipmentTypes[i % target.equipmentTypes.length];
-    
-    // Level determination
+
     let level = 'Beginner';
     if (i % 3 === 1) level = 'Intermediate';
     if (i % 3 === 2) level = 'Advanced';
 
-    const isLowImpact = Math.random() < target.lowImpactRatio;
+    const isLowImpact = (i % 10) / 10 < target.lowImpactRatio;
 
-    // Build unique, clean, authentic name
     const rawName = baseEx.name
       .replace(/barbell\s*/gi, '')
       .replace(/dumbbell\s*/gi, '')
@@ -182,18 +187,18 @@ TARGET_AREAS.forEach((target) => {
       .replace(/smith\s*/gi, '')
       .replace(/machine\s*/gi, '')
       .trim();
-    
+
     const cleanBase = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-    const exerciseName = `${prefix} ${cleanBase} (${target.label})`;
+    const exerciseName = `${cleanBase} (${target.label})`;
     const slugId = `hw-${target.id}-${String(i + 1).padStart(3, '0')}`;
 
-    const reps = isLowImpact ? '15 Reps' : (level === 'Advanced' ? '20 Reps' : '12 Reps');
-    const duration = isLowImpact ? '30 Sec' : (level === 'Advanced' ? '45 Sec' : '30 Sec');
+    const reps = isLowImpact ? '15 Reps' : level === 'Advanced' ? '20 Reps' : '12 Reps';
+    const duration = isLowImpact ? '30 Sec' : level === 'Advanced' ? '45 Sec' : '30 Sec';
 
-    const calPerMin = Math.round((4.5 + Math.random() * 4.5) * 10) / 10;
+    const calPerMin = Math.round((4.8 + ((i * 7 + totalIndex) % 38) / 10) * 10) / 10;
     const estBurnKcal = Math.round(calPerMin * 3.5);
 
-    const exercise = {
+    allExercises.push({
       id: slugId,
       name: exerciseName,
       slug: slugId,
@@ -211,7 +216,7 @@ TARGET_AREAS.forEach((target) => {
       defaultDuration: duration,
       estimatedBurn: estBurnKcal,
       metScore: Math.round((calPerMin / 1.1) * 10) / 10,
-      hypertrophyRate: Math.round((0.5 + Math.random() * 0.4) * 10) / 10,
+      hypertrophyRate: Math.round((0.5 + ((i * 3) % 4) * 0.1) * 10) / 10,
       gifUrl: baseEx.gifUrl,
       tagline: target.tagline,
       primaryMuscles: [
@@ -235,14 +240,32 @@ TARGET_AREAS.forEach((target) => {
         'Allowing your lower back to arch excessively or losing abdominal brace.',
       ],
       proTip: `Focus strictly on mind-muscle connection. With zero equipment, a 1-second isometric pause at the peak delivers 85% higher hypertrophic fiber recruitment.`,
-    };
+    });
 
-    allExercises.push(exercise);
     totalIndex++;
-  }
+  });
 });
 
-console.log(`Generated ${allExercises.length} total zero-equipment home exercises!`);
+console.log(`Generated ${allExercises.length} 100% unique zero-equipment home exercises!`);
+
+// Pick unique exercises for each curated Trouble Zone Plan level (never repeating a gifUrl)
+function pickUniquePlanIds(targetArea, filterFn, count) {
+  const picked = [];
+  const usedPlanGifs = new Set();
+  const addFrom = (list) => {
+    for (const ex of list) {
+      if (picked.length >= count) break;
+      if (!usedPlanGifs.has(ex.gifUrl)) {
+        usedPlanGifs.add(ex.gifUrl);
+        picked.push(ex.id);
+      }
+    }
+  };
+  addFrom(allExercises.filter((e) => e.targetArea === targetArea && filterFn(e)));
+  addFrom(allExercises.filter((e) => e.targetArea === targetArea));
+  addFrom(allExercises);
+  return picked;
+}
 
 // Also build curated Leap Fitness 3-Level plans
 const TROUBLE_ZONE_PLANS = [
@@ -259,7 +282,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 10,
         estimatedCalories: 75,
         restSeconds: 20,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'belly_fat' && e.level === 'Beginner').slice(0, 8).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('belly_fat', (e) => e.level === 'Beginner', 8),
       },
       intermediate: {
         name: 'Intermediate (Body Fat 30% - 40%)',
@@ -268,7 +291,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 16,
         estimatedCalories: 135,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'belly_fat' && (e.level === 'Intermediate' || e.level === 'Beginner')).slice(0, 12).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('belly_fat', (e) => e.level === 'Intermediate' || e.level === 'Beginner', 12),
       },
       advanced: {
         name: 'Advanced (Body Fat < 30%)',
@@ -277,7 +300,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 22,
         estimatedCalories: 195,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'belly_fat' && e.level === 'Advanced').slice(0, 16).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('belly_fat', (e) => e.level === 'Advanced', 16),
       },
     },
   },
@@ -294,7 +317,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 9,
         estimatedCalories: 68,
         restSeconds: 25,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'chest_man_boobs' && e.level === 'Beginner').slice(0, 7).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('chest_man_boobs', (e) => e.level === 'Beginner', 7),
       },
       intermediate: {
         name: 'Intermediate (Body Fat 30% - 40%)',
@@ -303,7 +326,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 15,
         estimatedCalories: 125,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'chest_man_boobs' && e.level === 'Intermediate').slice(0, 11).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('chest_man_boobs', (e) => e.level === 'Intermediate', 11),
       },
       advanced: {
         name: 'Advanced (Body Fat < 30%)',
@@ -312,7 +335,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 20,
         estimatedCalories: 180,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'chest_man_boobs' && e.level === 'Advanced').slice(0, 15).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('chest_man_boobs', (e) => e.level === 'Advanced', 15),
       },
     },
   },
@@ -329,7 +352,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 8,
         estimatedCalories: 60,
         restSeconds: 20,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'arm_fat' && e.level === 'Beginner').slice(0, 7).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('arm_fat', (e) => e.level === 'Beginner', 7),
       },
       intermediate: {
         name: 'Intermediate (Body Fat 30% - 40%)',
@@ -338,7 +361,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 14,
         estimatedCalories: 115,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'arm_fat' && e.level === 'Intermediate').slice(0, 11).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('arm_fat', (e) => e.level === 'Intermediate', 11),
       },
       advanced: {
         name: 'Advanced (Body Fat < 30%)',
@@ -347,7 +370,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 19,
         estimatedCalories: 165,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'arm_fat' && e.level === 'Advanced').slice(0, 14).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('arm_fat', (e) => e.level === 'Advanced', 14),
       },
     },
   },
@@ -364,7 +387,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 10,
         estimatedCalories: 80,
         restSeconds: 25,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'full_body_hiit' && e.lowImpact).slice(0, 8).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('full_body_hiit', (e) => e.lowImpact, 8),
       },
       intermediate: {
         name: 'Intermediate (Body Fat 30% - 40%)',
@@ -373,7 +396,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 16,
         estimatedCalories: 145,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'full_body_hiit').slice(0, 12).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('full_body_hiit', () => true, 12),
       },
       advanced: {
         name: 'Advanced (Body Fat < 30%)',
@@ -382,7 +405,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 22,
         estimatedCalories: 215,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'full_body_hiit' && e.level === 'Advanced').slice(0, 16).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('full_body_hiit', (e) => e.level === 'Advanced', 16),
       },
     },
   },
@@ -399,7 +422,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 10,
         estimatedCalories: 72,
         restSeconds: 20,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'legs_glutes' && e.level === 'Beginner').slice(0, 8).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('legs_glutes', (e) => e.level === 'Beginner', 8),
       },
       intermediate: {
         name: 'Intermediate (Body Fat 30% - 40%)',
@@ -408,7 +431,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 16,
         estimatedCalories: 130,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'legs_glutes' && e.level === 'Intermediate').slice(0, 12).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('legs_glutes', (e) => e.level === 'Intermediate', 12),
       },
       advanced: {
         name: 'Advanced (Body Fat < 30%)',
@@ -417,7 +440,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 21,
         estimatedCalories: 190,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'legs_glutes' && e.level === 'Advanced').slice(0, 15).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('legs_glutes', (e) => e.level === 'Advanced', 15),
       },
     },
   },
@@ -434,7 +457,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 30,
         estimatedCalories: 410,
         restSeconds: 20,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Beginner').slice(0, 16).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('hiit_furnace_600', (e) => e.level === 'Beginner', 16),
       },
       intermediate: {
         name: 'Intermediate (500 kcal Burn)',
@@ -443,7 +466,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 38,
         estimatedCalories: 515,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Intermediate').slice(0, 22).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('hiit_furnace_600', (e) => e.level === 'Intermediate', 22),
       },
       advanced: {
         name: 'Advanced (600+ kcal Burn)',
@@ -452,7 +475,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 45,
         estimatedCalories: 620,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'hiit_furnace_600' && e.level === 'Advanced').slice(0, 28).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('hiit_furnace_600', (e) => e.level === 'Advanced', 28),
       },
     },
   },
@@ -470,7 +493,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 8,
         estimatedCalories: 55,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'lazy_fitness').slice(0, 7).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('lazy_fitness', () => true, 7),
       },
       intermediate: {
         name: 'Intermediate (Relaxed)',
@@ -479,7 +502,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 12,
         estimatedCalories: 85,
         restSeconds: 15,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'lazy_fitness').slice(0, 10).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('lazy_fitness', () => true, 10),
       },
       advanced: {
         name: 'Advanced (Deep Activation)',
@@ -488,7 +511,7 @@ const TROUBLE_ZONE_PLANS = [
         durationMinutes: 16,
         estimatedCalories: 120,
         restSeconds: 10,
-        exerciseIds: allExercises.filter(e => e.targetArea === 'lazy_fitness').slice(0, 14).map(e => e.id),
+        exerciseIds: pickUniquePlanIds('lazy_fitness', () => true, 14),
       },
     },
   },

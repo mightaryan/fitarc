@@ -1,33 +1,36 @@
 import React, { useState, useMemo } from 'react';
 import {
   Flame,
-  Zap,
-  Clock,
-  Sparkles,
   CheckCircle2,
   Play,
-  RotateCcw,
-  Sliders,
   ChevronRight,
-  Shield,
   Activity,
   Layers,
-  Heart,
-  Smile,
   ShieldCheck,
+  Lock,
 } from 'lucide-react';
 import { TROUBLE_ZONE_PLANS, HOME_WORKOUTS_EXPANDED } from '../../data/homeWorkoutsExpanded';
-import { GuidedWorkoutPlayerModal } from './GuidedWorkoutPlayerModal';
 import { WorkoutDetailModal } from './WorkoutDetailModal';
+import { mergeManagedCatalog } from '../../utils/adminCatalogHelpers';
 import { useApp } from '../../context/AppContext';
 
 export function HomeWorkoutHub() {
-  const { user } = useApp();
+  const { user, customExercises, disabledExerciseIds, exerciseOverrides, hasPaidPlan, openPlanUpgradeModal, setActiveGuidedSession } = useApp();
 
-  // Selected trouble zone (default to 'belly_fat' like Leap Fitness)
+  const managedHomeWorkouts = useMemo(
+    () =>
+      mergeManagedCatalog(HOME_WORKOUTS_EXPANDED, {
+        customItems: customExercises,
+        disabledIds: disabledExerciseIds,
+        overrides: exerciseOverrides,
+        customFilter: (ex) => ex.category === 'home_workout' || ex.subCategory === 'home_workout',
+      }),
+    [customExercises, disabledExerciseIds, exerciseOverrides]
+  );
+
   const [selectedPlanId, setSelectedPlanId] = useState('belly_fat');
-  // Selected level: 'beginner' | 'intermediate' | 'advanced'
   const [selectedLevel, setSelectedLevel] = useState(() => {
+    if (!hasPaidPlan) return 'beginner';
     const bf = user.bodyFat || 20;
     if (bf > 35) return 'beginner';
     if (bf >= 25) return 'intermediate';
@@ -38,8 +41,6 @@ export function HomeWorkoutHub() {
   // Low-impact / No-jumping toggle
   const [isLowImpact, setIsLowImpact] = useState(false);
 
-  // Guided workout modal state
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   // Detail modal state for inspection
   const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
 
@@ -51,27 +52,36 @@ export function HomeWorkoutHub() {
     return activePlan.levels[selectedLevel] || activePlan.levels.intermediate;
   }, [activePlan, selectedLevel]);
 
-  // Resolve exercises from IDs, filtering for low-impact if toggled
+  // Resolve exercises from IDs, respecting Admin hides/overrides and filtering for low-impact
   const activeExercises = useMemo(() => {
     let exercises = activeLevelData.exerciseIds
-      .map((id) => HOME_WORKOUTS_EXPANDED.find((e) => e.id === id))
+      .map((id) => managedHomeWorkouts.find((e) => e.id === id))
       .filter(Boolean);
 
-    // If low impact is enabled, swap high-impact jumping exercises with low-impact alternatives
+    // If low impact is enabled, swap high-impact jumping exercises with unique unused low-impact alternatives
     if (isLowImpact) {
-      const lowImpactPool = HOME_WORKOUTS_EXPANDED.filter(
+      const usedGifs = new Set(exercises.filter((e) => e.lowImpact).map((e) => e.gifUrl));
+      const lowImpactPool = managedHomeWorkouts.filter(
         (e) => e.targetArea === selectedPlanId && e.lowImpact
       );
+      const allLowImpactFallback = managedHomeWorkouts.filter((e) => e.lowImpact);
       exercises = exercises.map((ex, idx) => {
-        if (!ex.lowImpact && lowImpactPool.length > 0) {
-          return lowImpactPool[idx % lowImpactPool.length];
+        if (!ex.lowImpact) {
+          const replacement =
+            lowImpactPool.find((c) => !usedGifs.has(c.gifUrl)) ||
+            allLowImpactFallback.find((c) => !usedGifs.has(c.gifUrl)) ||
+            lowImpactPool[idx % (lowImpactPool.length || 1)];
+          if (replacement) {
+            usedGifs.add(replacement.gifUrl);
+            return replacement;
+          }
         }
         return ex;
       });
     }
 
     return exercises;
-  }, [activeLevelData, selectedPlanId, isLowImpact]);
+  }, [activeLevelData, selectedPlanId, isLowImpact, managedHomeWorkouts]);
 
   // Trouble Zone cards metadata
   const TROUBLE_ZONE_CARDS = [
@@ -157,7 +167,7 @@ export function HomeWorkoutHub() {
                 Zero Equipment
               </span>
               <span className="text-[11px] text-slate-400 font-semibold hidden sm:inline">
-                ★ 4.9 Rating · 670+ Zero-Rig Home Movements
+                ★ 4.9 Rating · {HOME_WORKOUTS_EXPANDED.length}+ Zero-Rig Home Movements
               </span>
             </div>
 
@@ -295,18 +305,27 @@ export function HomeWorkoutHub() {
 
           {/* Level 3: Advanced */}
           <div
-            onClick={() => setSelectedLevel('advanced')}
-            className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
+            onClick={() => {
+              if (!hasPaidPlan) {
+                openPlanUpgradeModal('Switch from Free to a Paid Plan to unlock Advanced home programs.');
+                return;
+              }
+              setSelectedLevel('advanced');
+            }}
+            className={`p-4 rounded-2xl border transition-all duration-200 cursor-pointer relative ${
               selectedLevel === 'advanced'
                 ? 'bg-rose-950/40 border-rose-500/80 shadow-[0_0_20px_rgba(244,63,94,0.3)] ring-2 ring-rose-400'
                 : 'bg-obsidian-900/80 border-white/10 hover:border-white/20'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 inline-flex items-center gap-1">
+                {!hasPaidPlan && <Lock className="w-3 h-3" />}
                 Advanced
               </span>
-              <span className="text-xs text-rose-300 font-bold">Body Fat &lt; 30%</span>
+              <span className="text-xs text-rose-300 font-bold">
+                {hasPaidPlan ? 'Unlocked' : 'Paid Plan'}
+              </span>
             </div>
             <h4 className="text-sm font-extrabold text-white mt-2">6-Pack Chisel & Density</h4>
             <p className="text-[11px] text-slate-300 mt-0.5">
@@ -467,24 +486,21 @@ export function HomeWorkoutHub() {
       {/* Floating Bottom Action Bar for Mobile & Desktop */}
       <div className="pt-2 flex justify-center">
         <button
-          onClick={() => setIsPlayerOpen(true)}
+          onClick={() =>
+            setActiveGuidedSession?.({
+              routineTitle: `${activePlan.title} - Day ${activeDay}`,
+              badge: activePlan.badge,
+              exercises: activeExercises,
+              restDurationSeconds: activeLevelData.restSeconds || 15,
+              isLowImpact,
+            })
+          }
           className="gold-btn w-full max-w-md py-4 rounded-2xl text-base font-black shadow-gold-glow flex items-center justify-center gap-2.5 uppercase tracking-wider active:scale-95"
         >
           <Play className="w-5 h-5 fill-current" />
           <span>START GUIDED WORKOUT (DAY {activeDay})</span>
         </button>
       </div>
-
-      {/* 6. GUIDED WORKOUT LIVE RUNNER MODAL */}
-      <GuidedWorkoutPlayerModal
-        isOpen={isPlayerOpen}
-        onClose={() => setIsPlayerOpen(false)}
-        routineTitle={`${activePlan.title} - Day ${activeDay}`}
-        planBadge={activePlan.badge}
-        exercises={activeExercises}
-        restDurationSeconds={activeLevelData.restSeconds || 15}
-        isLowImpact={isLowImpact}
-      />
 
       {/* 7. INDIVIDUAL EXERCISE 3D INSPECTION MODAL */}
       {selectedExerciseForModal && (

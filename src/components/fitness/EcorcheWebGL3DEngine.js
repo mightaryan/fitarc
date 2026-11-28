@@ -362,101 +362,6 @@ function buildAllGeometries(gl) {
     return [x, y, z];
   }, 24, 24);
 
-  // 8A. Face Yoga Dedicated Cervical Neck, SCM V-Straps & Clavicle Trapezius Base (no cliff step!)
-  const faceNeckBust = createSculptedMuscleGeo(gl, (u, v, th) => {
-    // Spans y = -1.10 (shoulders/clavicles) -> y = -0.10 (deep inside cranial skull base!)
-    const y = lerp(-1.10, -0.10, v);
-    const front = Math.max(0, Math.sin(th));
-    const back = Math.max(0, -Math.sin(th));
-    const sideSym = Math.abs(Math.cos(th));
-
-    // Shoulder slope smoothly blends into true anatomical neck column (rx ~ 0.32, rz ~ 0.35)
-    const shoulderBlend = v < 0.38 ? Math.pow(1.0 - v / 0.38, 1.55) : 0;
-    let rx = 0.32 + 0.78 * shoulderBlend;
-    let rz = 0.35 + 0.24 * shoulderBlend;
-
-    // Close bottom base smoothly so mesh has no open seam
-    if (v < 0.04) {
-      const cap = lerp(0.2, 1.0, v / 0.04);
-      rx *= cap;
-      rz *= cap;
-    }
-
-    // Subtle Sternocleidomastoid (SCM) diagonal V-cords from ear/mastoid to sternal notch
-    const scmXTarget = 0.15 + (1.0 - v) * 0.28;
-    const scmRidge = Math.exp(-Math.pow(sideSym - scmXTarget, 2) * 28) * Math.max(0, front - 0.1) * (v > 0.08 ? 1.0 : 0.3);
-    // Subtle clavicle bone contour at v ~ 0.16..0.28
-    const clavicle = v > 0.12 && v < 0.28 ? Math.sin(((v - 0.12) / 0.16) * Math.PI) * Math.max(0, front - 0.25) * sideSym : 0;
-    // Slight cervical lordosis (neck sits slightly behind chin line cleanly)
-    const zShift = (1.0 - v) * -0.05 - 0.05 + back * 0.04;
-
-    rz += 0.045 * scmRidge + 0.035 * clavicle;
-    return [Math.cos(th) * rx, y, Math.sin(th) * rz + zShift];
-  }, 28, 36);
-
-  // 8B. Face Yoga Sculpted Anatomical Portrait Cranium, Jawline, Cheekbones, Nose & Orbits
-  const faceHead = createSculptedMuscleGeo(gl, (u, v, th) => {
-    const theta = v * Math.PI; // 0 bottom chin -> PI crown top
-    const sinT = Math.sin(theta);
-    const ny = -Math.cos(theta); // -1.0 chin/submental -> 0 mid-face -> +1.0 crown
-
-    // Classic 1.48 : 1.0 vertical anatomical cranium + sharp sculpted V-mandible
-    const jawNarrow = ny < -0.05 ? 0.56 + 0.44 * Math.min(1, (ny + 1.0) / 0.95) : 1.0;
-    const mandibleAngle = ny > -0.62 && ny < -0.15 ? 0.09 * Math.sin(((ny + 0.62) / 0.47) * Math.PI) * Math.exp(-Math.pow(Math.abs(Math.cos(th)) - 0.72, 2) * 14) : 0;
-
-    let x = sinT * Math.cos(th) * (0.45 * jawNarrow + mandibleAngle);
-    const y = 0.24 + ny * 0.68; // Spans y = -0.44 (chin base overlapping neck -0.10!) -> +0.92 (crown)
-    let z = sinT * Math.sin(th) * (0.55 * (ny > 0 ? 1.02 : 0.88 + 0.12 * (1 + ny))) + 0.04;
-
-    const front = Math.max(0, Math.sin(th));
-    const sideSym = Math.abs(Math.cos(th));
-    const center = Math.exp(-Math.pow(Math.cos(th), 2) * 26);
-
-    // Pogonion / Chiseled Chin tip protrusion
-    if (ny > -0.88 && ny < -0.42 && front > 0.35) {
-      const chinEnv = Math.sin(((ny + 0.88) / 0.46) * Math.PI);
-      z += 0.11 * chinEnv * Math.exp(-Math.pow(Math.cos(th), 2) * 14);
-    }
-
-    // Upper & Lower Sculpted Lips
-    if (ny > -0.52 && ny < -0.26 && front > 0.45) {
-      const lT = (ny + 0.52) / 0.26;
-      const lipWave = Math.sin(lT * Math.PI * 2.0);
-      z += 0.048 * Math.abs(lipWave) * center * (lipWave > 0 ? 1.1 : 0.75);
-    }
-
-    // Sculpted Nose Bridge, Tip & Nasal Wings
-    if (ny > -0.25 && ny < 0.26 && front > 0.5) {
-      const nT = (ny + 0.25) / 0.51;
-      const tipProfile = nT < 0.25 ? Math.sin((nT / 0.25) * Math.PI * 0.5) : 1.0 - (nT - 0.25) * 0.68;
-      z += 0.165 * Math.max(0, tipProfile) * Math.exp(-Math.pow(Math.cos(th), 2) * 34);
-      if (nT < 0.30) {
-        z += 0.042 * Math.exp(-Math.pow(sideSym - 0.19, 2) * 45) * Math.sin((nT / 0.30) * Math.PI);
-      }
-    }
-
-    // Zygomatic Cheekbones (subtle protrusion) & Buccal hollow below
-    if (ny > -0.30 && ny < 0.14 && front > 0.25) {
-      const cheekEnv = Math.sin(((ny + 0.30) / 0.44) * Math.PI);
-      z += 0.055 * cheekEnv * Math.exp(-Math.pow(sideSym - 0.52, 2) * 14);
-    }
-    if (ny > -0.52 && ny < -0.18 && front > 0.25) {
-      z -= 0.038 * Math.sin(((ny + 0.52) / 0.34) * Math.PI) * Math.exp(-Math.pow(sideSym - 0.48, 2) * 16);
-    }
-
-    // Smooth Eye Orbits + Subtle Brow Ridge
-    if (ny > 0.06 && ny < 0.32 && front > 0.42) {
-      const eyeEnv = Math.sin(((ny - 0.06) / 0.26) * Math.PI);
-      z -= 0.058 * eyeEnv * Math.exp(-Math.pow(sideSym - 0.32, 2) * 28);
-    }
-    if (ny > 0.26 && ny < 0.44 && front > 0.38) {
-      const browEnv = Math.sin(((ny - 0.26) / 0.18) * Math.PI);
-      z += 0.052 * browEnv * (0.4 + 0.6 * front);
-    }
-
-    return [x, y, z];
-  }, 44, 48);
-
   // 9. Unit Sphere for Stability Ball, Shoulder Deltoids, Elbows, Knees, Hands & Feet
   const sphere = createSculptedMuscleGeo(gl, (u, v, th) => {
     const phi = v * Math.PI;
@@ -485,7 +390,7 @@ function buildAllGeometries(gl) {
   const matUv = [0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1];
   const yogaMat = finalizeMesh(gl, matPos, matNorms, matUv, matIdx);
 
-  return { thigh, calf, armUpper, armForearm, torso, shorts, head, faceNeckBust, faceHead, sphere, yogaMat };
+  return { thigh, calf, armUpper, armForearm, torso, shorts, head, sphere, yogaMat };
 }
 
 // ==================== GLSL SHADERS (SILKY GYMVISUAL 3D ECORCHÉ LOOK) ====================
@@ -575,71 +480,11 @@ void main() {
   float tendonFade = 1.0;
   float targetMask = 0.0;
 
-  if (uMaterialType > 3.5 && uMaterialType < 4.5) {
-    // 4. Face Bust Neck & Clavicles (Fine oblique Sternocleidomastoid & Platysma striations)
-    float sideSym = abs(cos(angleCoord));
-    float frontFace = max(0.0, sin(angleCoord));
-    float yNorm = vUv.y;
-    float scmFibers = sin((vUv.x * 78.0 - sideSym * 10.0 - yNorm * 14.0) * 3.14159);
-    fiberWave = scmFibers * 0.5 + 0.5;
-
-    if (uFaceMode < 0.5 || (uFaceMode > 0.5 && uFaceMode < 1.5) || uFaceMode > 5.5) {
-      // Jawline/Platysma, Mewing Hyoid, Lion Neck & Lymphatic SCM channels glow softly on upper neck
-      float frontNeck = smoothstep(0.15, 0.72, frontFace + sideSym * 0.35);
-      float upperNeck = smoothstep(0.10, 0.42, yNorm) * smoothstep(0.98, 0.70, yNorm);
-      float scale = uFaceMode > 6.5 ? 0.92 : (uFaceMode < 0.5 ? 0.65 : 0.78);
-      targetMask = frontNeck * upperNeck * scale;
-    }
-  } else if (uMaterialType > 4.5) {
-    // 5. Face Yoga Sculpted Head (Clean anatomical ecorche with delicate longitudinal muscle sheen)
-    float sideSym = abs(cos(angleCoord));
-    float frontFace = max(0.0, sin(angleCoord));
-    float yNorm = vUv.y; // 0 chin -> 1 crown
-    float fineFibers = sin((vUv.x * 84.0 + yNorm * 18.0) * 3.14159);
-    fiberWave = fineFibers * 0.5 + 0.5;
-
-    if (uFaceMode < 0.5) {
-      // Jawline & Masseter Sculpt
-      float jawArc = smoothstep(0.20, 0.0, abs(yNorm - 0.25)) * smoothstep(0.15, 0.70, frontFace + sideSym * 0.5);
-      float masseter = smoothstep(0.45, 0.85, sideSym) * smoothstep(0.18, 0.35, yNorm) * smoothstep(0.50, 0.35, yNorm);
-      targetMask = max(jawArc, masseter);
-    } else if (uFaceMode < 1.5) {
-      // Mewing & Submental Chin
-      float subChin = smoothstep(0.02, 0.20, yNorm) * smoothstep(0.32, 0.14, yNorm) * smoothstep(0.25, 0.80, frontFace);
-      targetMask = subChin;
-    } else if (uFaceMode < 2.5) {
-      // Zygomatic Cheek Lift
-      float cheeks = smoothstep(0.32, 0.48, yNorm) * smoothstep(0.62, 0.48, yNorm) * smoothstep(0.25, 0.75, sideSym) * smoothstep(0.1, 0.6, frontFace);
-      targetMask = cheeks;
-    } else if (uFaceMode < 3.5) {
-      // Frontalis Forehead Smooth
-      float brow = smoothstep(0.60, 0.74, yNorm) * smoothstep(0.88, 0.74, yNorm) * smoothstep(0.25, 0.78, frontFace);
-      targetMask = brow;
-    } else if (uFaceMode < 4.5) {
-      // Orbicularis Oculi (Eyes)
-      float dEye = length(vec2(sideSym - 0.32, (yNorm - 0.56) * 2.1));
-      targetMask = smoothstep(0.24, 0.08, dEye) * smoothstep(0.3, 0.7, frontFace);
-    } else if (uFaceMode < 5.5) {
-      // Orbicularis Oris (Lips)
-      float dLip = length(vec2(1.0 - frontFace, (yNorm - 0.30) * 3.0));
-      targetMask = smoothstep(0.34, 0.10, dLip) * smoothstep(0.55, 0.88, frontFace);
-    } else if (uFaceMode < 6.5) {
-      // Simhasana / Lion Tension Release (Jaw + Buccal + Cheekbones)
-      float jawMouth = smoothstep(0.15, 0.42, yNorm) * smoothstep(0.58, 0.34, yNorm) * smoothstep(0.3, 0.8, frontFace);
-      targetMask = jawMouth * 0.9;
-    } else {
-      // Lymphatic Cheek & Jawline Flow
-      float lymphArc = smoothstep(0.20, 0.48, yNorm) * smoothstep(0.60, 0.38, yNorm) * smoothstep(0.3, 0.85, sideSym) * smoothstep(0.1, 0.55, frontFace);
-      targetMask = lymphArc * 0.8;
-    }
-    targetMask = clamp(targetMask, 0.0, 1.0);
-  } else {
-    // 0. Full-Body Ecorche Muscles (Silky high-frequency GymVisual striations!)
-    float twist = sin(vUv.y * 8.0 + sin(angleCoord * 2.0)) * 0.25;
-    fiberWave = sin((vUv.x * 86.0 + twist) * 6.283185) * 0.5 + 0.5;
-    tendonFade = smoothstep(0.05, 0.20, vUv.y) * smoothstep(0.95, 0.80, vUv.y);
-    targetMask = uActiveGlow * smoothstep(0.08, 0.34, vUv.y) * smoothstep(0.92, 0.66, vUv.y);
-  }
+  // 0. Full-Body Ecorche Muscles (Silky high-frequency GymVisual striations!)
+  float twist = sin(vUv.y * 8.0 + sin(angleCoord * 2.0)) * 0.25;
+  fiberWave = sin((vUv.x * 86.0 + twist) * 6.283185) * 0.5 + 0.5;
+  tendonFade = smoothstep(0.05, 0.20, vUv.y) * smoothstep(0.95, 0.80, vUv.y);
+  targetMask = uActiveGlow * smoothstep(0.08, 0.34, vUv.y) * smoothstep(0.92, 0.66, vUv.y);
 
   // Refined satin charcoal ecorche albedo (subtle ~18% striation relief, zero harsh zebra bands!)
   float striationDetail = mix(0.28, 0.64, pow(fiberWave, 1.35)) * tendonFade + (1.0 - tendonFade) * 0.36;
@@ -899,61 +744,6 @@ class EcorcheWebGLStudio {
     this.drawMesh(this.meshes.sphere, buildSphereMatrix(pose3D.rElbow, 0.036, 0.036, 0.036), vp, 0.0, 0, 0.0, pulse);
     this.drawMesh(this.meshes.armForearm, buildBoneMatrix(pose3D.rElbow, pose3D.rHand, 0.038, 0.038, [0, 0, 1], 0.02, 0.015), vp, 0.0, has('arms'), 0.0, pulse);
     this.drawMesh(this.meshes.sphere, buildSphereMatrix(pose3D.rHand, 0.030, 0.023, 0.044), vp, 0.0, 0, 0.0, pulse);
-
-    destCtx.clearRect(0, 0, destW, destH);
-    destCtx.drawImage(this.glCanvas, 0, 0, w, h, 0, 0, destW, destH);
-    return true;
-  }
-
-  renderFaceBustTo2D(destCtx, destW, destH, modeStr, timeSec, compact) {
-    if (!this.ready) return false;
-    const gl = this.gl;
-    const { w, h } = this.syncProportionalViewport(destW, destH);
-
-    gl.viewport(0, 0, w, h);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.useProgram(this.prog);
-
-    const modeMap = {
-      face_jawline: 0,
-      face_mewing_chin: 1,
-      face_cheek: 2,
-      face_forehead: 3,
-      face_eyes: 4,
-      face_lips: 5,
-      face_lion_breath: 6,
-      face_lymphatic: 7,
-    };
-    const modeIdx = modeMap[modeStr] ?? 0;
-
-    // Gentle 3/4 portrait orbit highlighting true human cheekbones, nose bridge, jawline & SCM cords
-    const yaw = Math.sin(timeSec * 0.85) * 0.28 + 0.20;
-    const pitch = modeIdx === 1 ? -0.10 : 0.06;
-    const dist = compact ? 3.9 : 4.25;
-    const targetY = compact ? -0.02 : -0.04;
-    const eye = [
-      dist * Math.sin(yaw) * Math.cos(pitch),
-      targetY + dist * Math.sin(pitch),
-      dist * Math.cos(yaw) * Math.cos(pitch),
-    ];
-
-    const proj = mat4Perspective(32 * Math.PI / 180, w / h, 0.1, 20.0);
-    const view = mat4LookAt(eye, [0, targetY, 0], [0, 1, 0]);
-    const vp = mat4Multiply(proj, view);
-    gl.uniform3fv(this.locs.uCameraPos, new Float32Array(eye));
-
-    const pulse = (Math.sin(timeSec * 2.1) + 1) / 2;
-    const bustScale = compact ? 1.05 : 1.0;
-
-    // 1. Cervical Neck, SCM & Clavicle Bust (stationary foundation)
-    const neckMat = buildSphereMatrix([0, 0, 0], bustScale, bustScale, bustScale, 0, 0);
-    this.drawMesh(this.meshes.faceNeckBust, neckMat, vp, 4.0, 1.0, 0.0, pulse, modeIdx);
-
-    // 2. Articulated Portrait Cranium & Jawline (gently lifts in mewing/double-chin mode)
-    const headPitch = modeIdx === 1 ? -0.12 * pulse : Math.sin(timeSec * 1.4) * 0.025;
-    const headYaw = modeIdx === 7 ? Math.sin(timeSec * 1.1) * 0.08 : 0;
-    const headMat = buildSphereMatrix([0, 0, 0], bustScale, bustScale, bustScale, headYaw, headPitch);
-    this.drawMesh(this.meshes.faceHead, headMat, vp, 5.0, 1.0, 0.0, pulse, modeIdx);
 
     destCtx.clearRect(0, 0, destW, destH);
     destCtx.drawImage(this.glCanvas, 0, 0, w, h, 0, 0, destW, destH);

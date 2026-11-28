@@ -4,7 +4,7 @@
 
 export const DIFFICULTY_LEVELS = [
   { id: 'all', label: 'All Levels (1,323+)', icon: 'Sparkles' },
-  { id: 'beginner', label: '🟢 Simple / Beginner (441)', desc: 'Low joint strain, guided machine paths, foundational form & mobility' },
+  { id: 'beginner', label: '🟢 Beginner (441)', desc: 'Low joint strain, guided machine paths, foundational form & mobility' },
   { id: 'intermediate', label: '🟡 Intermediate (441)', desc: 'Progressive overload, 3D gym machines, compound hypertrophy' },
   { id: 'advanced', label: '🔴 Advanced / Pro (441)', desc: 'Heavy compounds, technical Olympic lifts & calisthenic mastery' },
 ];
