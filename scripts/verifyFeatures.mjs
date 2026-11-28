@@ -28,6 +28,16 @@ import {
   translate,
 } from '../src/utils/i18n.js';
 import { INITIAL_SHOP_PRODUCTS } from '../src/data/trustifiedShopCatalog.js';
+import {
+  INITIAL_BLOG_POSTS,
+  BLOG_CATEGORIES,
+  MAX_BLOG_POST_WORDS,
+  countPostWords,
+} from '../src/data/healthBlogCatalog.js';
+import {
+  resolveExercisesByIds,
+  getFitnessSubTabForExercise,
+} from '../src/utils/exerciseResolver.js';
 
 console.log('1. Verifying All HIIT Cardio GIF URLs Exist in ExerciseGymGifsDB Catalog...');
 const masterDbSrc = fs.readFileSync('src/data/allExercisesMaster.js', 'utf8');
@@ -99,14 +109,16 @@ const planModalSrc = fs.readFileSync('src/components/plans/PlanSelectorModal.jsx
 assert.ok(planModalSrc.includes('billingCycle') && planModalSrc.includes('Yearly') && planModalSrc.includes('Monthly'));
 console.log('   PASS: Monthly (₹99+) & Yearly billing, Free beginner defaults & Advanced gating verified.');
 
-console.log('4. Verifying About Links in Footer Only & PWA Install Hidden When Active...');
+console.log('4. Verifying About & Blog Links in Footer Only & PWA Install Hidden When Active...');
 const navSrc = fs.readFileSync('src/components/layout/Navbar.jsx', 'utf8');
 assert.equal(navSrc.includes("setActiveTab('about')"), false, 'Top Navbar should not render About link');
+assert.equal(navSrc.includes("'blog'"), false, 'Top Navbar should not render Blog link');
 const footerSrc = fs.readFileSync('src/components/layout/Footer.jsx', 'utf8');
 assert.ok(footerSrc.includes("navigateAndScrollTop('about')"), 'Footer must contain About link');
+assert.ok(footerSrc.includes("navigateAndScrollTop('blog')"), 'Footer must contain Blog link');
 const pwaSrc = fs.readFileSync('src/components/common/PwaInstallPrompt.jsx', 'utf8');
 assert.ok(pwaSrc.includes('if (isInstalled || siteSettings?.pwaInstallEnabled === false) return null;'));
-console.log('   PASS: About links live in Footer and PWA Install prompt hides when installed.');
+console.log('   PASS: About & Blog links live in Footer and PWA Install prompt hides when installed.');
 
 console.log('5. Verifying AI Exercise, Custom Plan Architect, Routes, SEO & PWA Icons...');
 const aiEx = generateAiExercise({ goal: 'muscle_gain', bodyPart: 'chest', equipment: 'dumbbell', customFocus: 'Tempo' });
@@ -234,4 +246,62 @@ const adminSettingsSrc = fs.readFileSync('src/components/admin/modules/AdminSett
 assert.ok(adminSettingsSrc.includes('defaultLanguage') && adminSettingsSrc.includes('lockAdvancedForFreeUsers'), 'AdminSettingsModule must manage language & Advanced lock');
 
 console.log('   PASS: Beginner wording, single mobile bottom Vault, 18 real Shop photos, 6 languages, Support Inbox & Admin parity verified.');
+
+console.log('8. Verifying About Expansion & 200+ Health Blog Catalog (<= 400 Words & 1-Click Exercise Redirects)...');
+assert.ok(INITIAL_BLOG_POSTS.length >= 200, `Expected >=200 blog posts, got ${INITIAL_BLOG_POSTS.length}`);
+const seenBlogIds = new Set();
+const seenBlogSlugs = new Set();
+const categoryTallies = {};
+const validSubTabs = new Set(['hiit_leap', 'yoga', 'home_hub', 'calisthenics', 'archive']);
+
+for (const post of INITIAL_BLOG_POSTS) {
+  assert.ok(!seenBlogIds.has(post.id), `Duplicate blog post ID: ${post.id}`);
+  assert.ok(!seenBlogSlugs.has(post.slug), `Duplicate blog post slug: ${post.slug}`);
+  seenBlogIds.add(post.id);
+  seenBlogSlugs.add(post.slug);
+  categoryTallies[post.category] = (categoryTallies[post.category] || 0) + 1;
+
+  const wc = countPostWords(post);
+  assert.ok(wc <= MAX_BLOG_POST_WORDS, `Post ${post.id} exceeds ${MAX_BLOG_POST_WORDS} words (got ${wc})`);
+  assert.ok(wc >= 110, `Post ${post.id} too short (got ${wc} words)`);
+  assert.ok(Array.isArray(post.foodsToEat) && post.foodsToEat.length >= 2, `Missing foodsToEat on ${post.id}`);
+  assert.ok(Array.isArray(post.homeChecklist) && post.homeChecklist.length >= 2, `Missing homeChecklist on ${post.id}`);
+  assert.ok(Array.isArray(post.recommendedExerciseIds) && post.recommendedExerciseIds.length >= 1, `Missing exercise links on ${post.id}`);
+
+  const resolvedEx = resolveExercisesByIds(post.recommendedExerciseIds);
+  assert.equal(
+    resolvedEx.length,
+    post.recommendedExerciseIds.length,
+    `Unresolved exercise ID inside ${post.id}: expected ${post.recommendedExerciseIds.join(',')}`
+  );
+  for (const ex of resolvedEx) {
+    assert.ok(validSubTabs.has(getFitnessSubTabForExercise(ex)), `Invalid subTab for ${ex.id}`);
+  }
+}
+
+for (const cat of BLOG_CATEGORIES.filter((c) => c.id !== 'all')) {
+  assert.ok((categoryTallies[cat.id] || 0) >= 30, `Expected >=30 posts in ${cat.id}, got ${categoryTallies[cat.id] || 0}`);
+}
+
+assert.equal(getTabFromPathname('/blog'), 'blog');
+assert.equal(getPathnameForTab('blog'), '/blog');
+assert.ok(INITIAL_SEO_SETTINGS.blog?.title && INITIAL_SITE_SETTINGS.blogEnabled === true, 'Expected Blog SEO & toggle defaults');
+
+const aboutSrc = fs.readFileSync('src/components/about/AboutSection.jsx', 'utf8');
+assert.ok(
+  aboutSrc.includes('What Problem FitArc Solves') &&
+    aboutSrc.includes('What Makes FitArc Better') &&
+    aboutSrc.includes('How FitArc Helps Beginners'),
+  'AboutSection must detail problems solved, differentiators, and beginner guidance'
+);
+const blogSrc = fs.readFileSync('src/components/blog/BlogSection.jsx', 'utf8');
+assert.ok(
+  blogSrc.includes('setSelectedExerciseForModal') && blogSrc.includes('What Foods To Consume') && blogSrc.includes('What To Do From Home'),
+  'BlogSection must render Foods, Home steps & 1-click Exercise redirects'
+);
+assert.ok(
+  adminPortalSrc.includes('AdminBlogModule') && fs.existsSync('src/components/admin/modules/AdminBlogModule.jsx'),
+  'AdminPortalPage must include AdminBlogModule CMS'
+);
+console.log(`   PASS: Verified ${INITIAL_BLOG_POSTS.length} health articles (all <= ${MAX_BLOG_POST_WORDS} words, 100% resolved exercises) + About & Admin Blog CMS.`);
 console.log('\nALL PRODUCTION TESTS & CHECKS PASSED!');

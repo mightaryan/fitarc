@@ -41,7 +41,7 @@ export function Navbar() {
       )}
 
       {siteSettings?.announcementEnabled && siteSettings?.announcementText && !hasPaidPlan && (
-        <div className="w-full bg-gradient-to-r from-amber-950/80 via-obsidian-900 to-emerald-950/70 border-b border-amber-500/20 text-amber-200 text-[11px] px-4 py-1.5 flex items-center justify-center gap-2.5 z-40">
+        <div className="hidden md:flex w-full bg-gradient-to-r from-amber-950/80 via-obsidian-900 to-emerald-950/70 border-b border-amber-500/20 text-amber-200 text-[11px] px-4 py-1.5 items-center justify-center gap-2.5 z-40">
           <Megaphone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
           <span className="truncate font-semibold">{siteSettings.announcementText}</span>
           {shopEnabled && (

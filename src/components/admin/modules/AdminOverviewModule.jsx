@@ -45,6 +45,7 @@ export function AdminOverviewModule({ onFlash, onNavigateModule }) {
 
   const featureSwitches = [
     { key: 'shopEnabled', label: 'Magazine Supplement & Protein Shop Tab' },
+    { key: 'blogEnabled', label: 'Health Blog & Home Action Guides Tab' },
     { key: 'leaderboardEnabled', label: 'Top 10 Public Leaderboard Widgets' },
     { key: 'troubleZoneEnabled', label: 'Home 30-Day Trouble Zone Challenges' },
     { key: 'homeFeaturedEnabled', label: 'Home Curated Featured Workouts Grid' },

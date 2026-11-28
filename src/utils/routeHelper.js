@@ -5,6 +5,7 @@ const TAB_TO_PATH = {
   fitness: '/fitness',
   food: '/food',
   shop: '/shop',
+  blog: '/blog',
   dashboard: '/dashboard',
   about: '/about',
 };
@@ -28,6 +29,7 @@ export function getTabFromPathname(pathname = '/') {
   if (clean === '/fitness' || clean.startsWith('/fitness/')) return 'fitness';
   if (clean === '/food' || clean.startsWith('/food/')) return 'food';
   if (clean === '/shop' || clean.startsWith('/shop/')) return 'shop';
+  if (clean === '/blog' || clean.startsWith('/blog/')) return 'blog';
   if (clean === '/dashboard' || clean.startsWith('/dashboard/')) return 'dashboard';
   if (clean === '/about' || clean.startsWith('/about/')) return 'about';
   return 'home';

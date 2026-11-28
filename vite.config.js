@@ -19,6 +19,7 @@ export default defineConfig({
           }
           if (id.includes('allExercisesMaster')) return 'exercises-master';
           if (id.includes('massiveFoodDatabase')) return 'food-master';
+          if (id.includes('healthBlogCatalog') || id.includes('src/data/blog')) return 'blog-catalog';
         },
       },
     },

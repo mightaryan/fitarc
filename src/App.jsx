@@ -47,6 +47,7 @@ const FoodSection = lazy(() => import('./components/food/FoodSection').then((m) 
 const OverviewDashboard = lazy(() => import('./components/dashboard/OverviewDashboard').then((m) => ({ default: m.OverviewDashboard })));
 const ShopSection = lazy(() => import('./components/shop/ShopSection').then((m) => ({ default: m.ShopSection })));
 const AboutSection = lazy(() => import('./components/about/AboutSection'));
+const BlogSection = lazy(() => import('./components/blog/BlogSection'));
 const AdminPortalPage = lazy(() => import('./pages/AdminPortalPage'));
 const DailyWeightModal = lazy(() => import('./components/weight/DailyWeightModal').then((m) => ({ default: m.DailyWeightModal })));
 const AuthModal = lazy(() => import('./components/auth/AuthModal').then((m) => ({ default: m.AuthModal })));
@@ -158,6 +159,25 @@ function AppContent() {
           )}
           {activeTab === 'dashboard' && <OverviewDashboard />}
           {activeTab === 'about' && <AboutSection />}
+          {activeTab === 'blog' && (
+            siteSettings?.blogEnabled !== false ? (
+              <BlogSection />
+            ) : (
+              <div className="glass-panel p-8 rounded-2xl border border-white/10 text-center space-y-3 my-8">
+                <h2 className="text-lg font-bold text-white">Health Blog Temporarily Paused</h2>
+                <p className="text-xs text-slate-400">
+                  The FitArc Health Journal is currently paused by platform operations.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('home')}
+                  className="gold-btn-outline px-4 py-2 rounded-xl text-xs font-semibold"
+                >
+                  Return to Home
+                </button>
+              </div>
+            )
+          )}
         </Suspense>
       </main>
 

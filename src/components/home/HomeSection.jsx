@@ -209,38 +209,38 @@ export function HomeSection() {
   }, [effectiveYoga]);
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-7xl mx-auto">
-      {/* 0. PRODUCTION LANDING HERO SECTION (100% Admin-Customizable) */}
+    <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-300 max-w-7xl mx-auto">
+      {/* 0. PRODUCTION LANDING HERO SECTION (Minimalist on Mobile, Full Editorial on Desktop) */}
       {siteSettings?.heroSectionEnabled !== false && (
-        <section className="p-5 sm:p-8 rounded-3xl bg-gradient-to-br from-[#12161f] via-[#0c0e14] to-amber-950/20 border border-amber-500/25 shadow-2xl relative overflow-hidden space-y-5">
-          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="flex flex-wrap items-center gap-2">
+        <section className="p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#12161f] via-[#0c0e14] to-amber-950/20 border border-amber-500/25 shadow-2xl relative overflow-hidden space-y-3 sm:space-y-5">
+          <div className="hidden sm:block absolute -top-24 -right-24 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+            <div className="space-y-2.5 sm:space-y-3 max-w-2xl">
+              <div className="hidden sm:flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-[10px] font-black uppercase tracking-widest text-amber-300">
                   {siteSettings?.heroBadge || 'Production PWA · iOS & Android Ready'}
                 </span>
                 <PwaInstallPrompt compact />
               </div>
 
-              <h2 className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-white tracking-tight leading-[1.14]">
+              <h2 className="text-xl sm:text-4xl lg:text-[2.5rem] font-black text-white tracking-tight leading-[1.15]">
                 {siteSettings?.heroTitle || 'Start Stronger with Easy Home Workouts, 30m HIIT & '}{' '}
                 <span className="gold-gradient-text">
                   {hasPaidPlan ? 'All Features Unlocked' : (siteSettings?.heroHighlight || 'Plans from ₹99')}
                 </span>
               </h2>
 
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p className="hidden sm:block text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {siteSettings?.heroSubtitle ||
                   'Choose a body part and duration, follow clear animation guides with voice coaching, track daily meals & water, and shop verified supplements.'}
               </p>
 
-              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
                 {!hasPaidPlan && (
                   <button
                     type="button"
                     onClick={() => openPlanUpgradeModal?.('Switch from Free to Monthly or Yearly Paid Plan')}
-                    className="gold-btn px-5 py-3 rounded-2xl text-xs sm:text-sm font-black shadow-gold-glow-sm active:scale-95 transition"
+                    className="gold-btn px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black shadow-gold-glow-sm active:scale-95 transition"
                   >
                     {siteSettings?.heroPrimaryCta || 'View Plans · From ₹99/mo'}
                   </button>
@@ -251,23 +251,23 @@ export function HomeSection() {
                     setFitnessSubTab?.('hiit_leap');
                     setActiveTab('fitness');
                   }}
-                  className={`${hasPaidPlan ? 'gold-btn shadow-gold-glow-sm font-black' : 'gold-btn-outline font-bold'} px-4 py-3 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 active:scale-95 transition`}
+                  className={`${hasPaidPlan ? 'gold-btn shadow-gold-glow-sm font-black' : 'gold-btn-outline font-bold'} px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 active:scale-95 transition`}
                 >
-                  <Zap className="w-4 h-4" />
+                  <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>{siteSettings?.heroSecondaryCta || 'Launch 30m HIIT Studio'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsCustomPlanModalOpen?.(true)}
-                  className="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-200 transition"
+                  className="hidden sm:inline-flex px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-200 transition"
                 >
                   ✨ Create Custom Plan
                 </button>
               </div>
             </div>
 
-            {/* Hero Proofs Grid */}
-            <div className="grid grid-cols-2 gap-2.5 lg:w-80 shrink-0">
+            {/* Hero Proofs Grid (Desktop & Tablet) */}
+            <div className="hidden md:grid grid-cols-2 gap-2.5 lg:w-80 shrink-0">
               {[
                 !hasPaidPlan
                   ? { val: '₹99/mo', label: 'Monthly & Yearly', sub: 'Unlock Advanced Plans' }
@@ -288,33 +288,33 @@ export function HomeSection() {
       )}
 
       {/* 1. HERO GREETING & STREAK BANNER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-        <div>
+      <div className="flex items-center justify-between gap-3 pt-0.5">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-400 font-mono truncate">
               {todayFormatted}
             </span>
-            <span className="w-1 h-1 rounded-full bg-slate-500" />
-            <span className="text-[11px] text-slate-400 font-medium">FITARC Golden Standard</span>
+            <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-500" />
+            <span className="hidden sm:inline text-[11px] text-slate-400 font-medium">FITARC Golden Standard</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-0.5">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight mt-0.5 truncate">
             {greeting}, <span className="gold-gradient-text">{user.name?.split(' ')[0] || 'Athlete'}</span>
           </h1>
         </div>
 
-        {/* Dynamic Streak & Health Score Pill */}
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 shadow-gold-glow-sm">
-            <span className="text-base animate-bounce">🔥</span>
+        {/* Dynamic Streak & Tier Pill */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 shadow-gold-glow-sm">
+            <span className="text-sm sm:text-base">🔥</span>
             <div className="text-left leading-none">
-              <span className="text-[9px] uppercase tracking-wider text-amber-400 font-bold block">Streak</span>
-              <span className="text-xs font-black text-amber-300">5 Days Active</span>
+              <span className="hidden sm:block text-[9px] uppercase tracking-wider text-amber-400 font-bold">Streak</span>
+              <span className="text-xs font-black text-amber-300">5 Days</span>
             </div>
           </div>
 
           <button
             onClick={() => openAuthModal('tier')}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-obsidian-850 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition text-left leading-none active:scale-95 group shadow-sm"
+            className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-obsidian-850 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition text-left leading-none active:scale-95 group shadow-sm"
             title="Athlete Tier & Perks"
           >
             <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-black font-extrabold text-[10px] flex items-center justify-center shadow-gold-glow-sm group-hover:scale-105 transition">
@@ -437,11 +437,11 @@ export function HomeSection() {
           {/* RIGHT: COMPACT BIOMETRIC SUMMARY CARDS */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full lg:w-auto flex-1">
             {/* Calories Ingested */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
+            <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                 <Utensils className="w-3.5 h-3.5 text-amber-400" /> Fuel In
               </span>
-              <div className="text-lg font-black text-white">
+              <div className="text-base sm:text-lg font-black text-white">
                 {totalCaloriesConsumed} <span className="text-[10px] font-normal text-slate-400">kcal</span>
               </div>
               <span className="text-[10px] text-slate-400 block truncate">
@@ -452,12 +452,12 @@ export function HomeSection() {
             {/* Current Weight & BMI */}
             <div
               onClick={() => setIsWeightModalOpen(true)}
-              className="p-3.5 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition cursor-pointer space-y-1"
+              className="p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition cursor-pointer space-y-1"
             >
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                 <Scale className="w-3.5 h-3.5 text-amber-400" /> Weight
               </span>
-              <div className="text-lg font-black text-amber-300">
+              <div className="text-base sm:text-lg font-black text-amber-300">
                 {user.currentWeight} <span className="text-[10px] font-normal text-slate-400">kg</span>
               </div>
               <span className="text-[10px] text-emerald-400 block truncate">
@@ -465,10 +465,10 @@ export function HomeSection() {
               </span>
             </div>
 
-            {/* Estimated Body Fat */}
+            {/* Estimated Body Fat (Desktop/Tablet grid; accessible in Vault on mobile) */}
             <div
               onClick={() => openAuthModal('biometrics')}
-              className="p-3.5 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition cursor-pointer space-y-1 col-span-2 sm:col-span-1"
+              className="hidden sm:block p-3.5 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition cursor-pointer space-y-1"
             >
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Body Fat %
@@ -657,7 +657,7 @@ export function HomeSection() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
+        <div className="flex overflow-x-auto pb-1 scrollbar-none gap-2.5 sm:grid sm:grid-cols-3 lg:grid-cols-7">
           {[
             { id: 'belly_fat', label: 'Lose Belly Fat', tag: 'Core Chisel', icon: '🔥', color: 'from-rose-500/20 to-orange-500/10', border: 'border-rose-500/30' },
             { id: 'hiit_furnace_600', label: '400-600 kcal HIIT', tag: 'Extreme Burn', icon: '⚡', color: 'from-amber-600/25 to-rose-600/15', border: 'border-amber-500/40' },
@@ -670,7 +670,7 @@ export function HomeSection() {
             <button
               key={zone.id}
               onClick={() => launchTroubleZoneSession(zone.id)}
-              className={`p-3.5 rounded-2xl bg-gradient-to-br ${zone.color} bg-obsidian-850 border ${zone.border} hover:border-amber-400 text-left transition-all duration-200 active:scale-95 flex flex-col justify-between space-y-2 group shadow-md`}
+              className={`min-w-[148px] shrink-0 sm:min-w-0 p-3 sm:p-3.5 rounded-2xl bg-gradient-to-br ${zone.color} bg-obsidian-850 border ${zone.border} hover:border-amber-400 text-left transition-all duration-200 active:scale-95 flex flex-col justify-between space-y-2 group shadow-md`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-xl group-hover:scale-110 transition">{zone.icon}</span>
@@ -690,9 +690,9 @@ export function HomeSection() {
       </div>
       )}
 
-      {/* 5. QUICK ACTION 1-TAP LAUNCHPAD */}
+      {/* 5. QUICK ACTION 1-TAP LAUNCHPAD (Desktop/Tablet; mobile uses clean bottom dock) */}
       {siteSettings?.quickLaunchpadEnabled !== false && (
-      <div className="space-y-3">
+      <div className="hidden md:block space-y-3">
         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" /> {t?.('hero.quickLaunchpad') || 'Quick Launchpad'}
         </h2>
@@ -790,9 +790,9 @@ export function HomeSection() {
         </div>
       )}
 
-      {/* AI EXERCISE & CUSTOM PLAN PROMO + PWA MOBILE INSTALL */}
+      {/* AI EXERCISE & CUSTOM PLAN PROMO (Desktop/Tablet) */}
       {siteSettings?.aiPlannerEnabled !== false && (
-        <section className="p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-obsidian-850 to-emerald-950/20 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section className="hidden md:flex p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-obsidian-850 to-emerald-950/20 border border-amber-500/30 sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
               Personalized Goal + Multi-Discipline Architect
@@ -843,12 +843,12 @@ export function HomeSection() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex overflow-x-auto pb-1 scrollbar-none gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
           {featuredWorkouts.map((item, idx) => (
             <div
               key={idx}
               onClick={() => setSelectedExercise(item.exercise)}
-              className={`p-4 rounded-3xl bg-gradient-to-br ${item.color} bg-obsidian-900 border ${item.borderColor} hover:border-amber-400 transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-4 shadow-lg active:scale-[0.98]`}
+              className={`min-w-[240px] shrink-0 sm:min-w-0 p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${item.color} bg-obsidian-900 border ${item.borderColor} hover:border-amber-400 transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3 sm:space-y-4 shadow-lg active:scale-[0.98]`}
             >
               <div className="space-y-3">
                 {/* 3D Preview Stage */}
@@ -888,8 +888,8 @@ export function HomeSection() {
       </div>
       )}
 
-      {/* 6. TODAY'S RECENT ACTIVITY & LOGGED SESSIONS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* 6. TODAY'S RECENT ACTIVITY & LOGGED SESSIONS (Desktop/Tablet; mobile views live logs cleanly in Fitness & Food tabs) */}
+      <div className="hidden md:grid md:grid-cols-2 gap-5">
         {/* Today's Logged Workouts */}
         <div className="p-5 rounded-3xl bg-obsidian-850/90 border border-amber-500/20 space-y-3">
           <div className="flex items-center justify-between">

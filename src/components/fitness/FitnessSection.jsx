@@ -72,6 +72,8 @@ export function FitnessSection() {
     t,
     fitnessSubTab: contextFitnessSubTab,
     setFitnessSubTab: contextSetFitnessSubTab,
+    selectedExerciseForModal,
+    setSelectedExerciseForModal,
     customExercises,
     disabledExerciseIds,
     exerciseOverrides,
@@ -756,10 +758,13 @@ export function FitnessSection() {
 
       {/* Exercise Detail Guide Modal */}
       <Suspense fallback={null}>
-        {selectedExercise && (
+        {(selectedExercise || selectedExerciseForModal) && (
           <WorkoutDetailModal
-            exercise={selectedExercise}
-            onClose={() => setSelectedExercise(null)}
+            exercise={selectedExercise || selectedExerciseForModal}
+            onClose={() => {
+              setSelectedExercise(null);
+              setSelectedExerciseForModal?.(null);
+            }}
           />
         )}
       </Suspense>

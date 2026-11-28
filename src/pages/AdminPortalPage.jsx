@@ -25,6 +25,7 @@ import {
   LayoutTemplate,
   Globe,
   LifeBuoy,
+  BookOpen,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { FitArcLogo } from '../components/common/FitArcLogo';
@@ -33,6 +34,7 @@ import { useDocumentSeo } from '../utils/useDocumentSeo';
 import { AdminOverviewModule } from '../components/admin/modules/AdminOverviewModule';
 import { AdminHomepageModule } from '../components/admin/modules/AdminHomepageModule';
 import { AdminSeoModule } from '../components/admin/modules/AdminSeoModule';
+import { AdminBlogModule } from '../components/admin/modules/AdminBlogModule';
 import { AdminUsersModule } from '../components/admin/modules/AdminUsersModule';
 import { AdminExercisesModule } from '../components/admin/modules/AdminExercisesModule';
 import { AdminFoodsModule } from '../components/admin/modules/AdminFoodsModule';
@@ -51,6 +53,7 @@ const ADMIN_MODULES = [
   { id: 'foods', label: 'Foods & Meals', desc: 'Nutrition Catalog CRUD', icon: Utensils },
   { id: 'plans', label: 'Plans (₹99+)', desc: 'Monthly & Yearly Plan Pricing', icon: CalendarRange },
   { id: 'shop', label: 'Shop Page', desc: 'Products, Crawler & Amazon/FK', icon: ShoppingBag },
+  { id: 'blog', label: 'Blog Posts', desc: '210+ Health Articles & Tips', icon: BookOpen },
   { id: 'payments', label: 'Payments', desc: 'Gateways & Ledger CRUD', icon: CreditCard },
   { id: 'support', label: 'Support Inbox', desc: 'Vault Tickets & Contact Setup', icon: LifeBuoy },
   { id: 'settings', label: 'Site & Security', desc: 'Language, Locks, Socials & Passcode', icon: Settings },
@@ -484,6 +487,7 @@ export function AdminPortalPage() {
             {activeModule === 'foods' && <AdminFoodsModule onFlash={flash} />}
             {activeModule === 'plans' && <AdminPlansModule onFlash={flash} />}
             {activeModule === 'shop' && <AdminShopModule onFlash={flash} />}
+            {activeModule === 'blog' && <AdminBlogModule onFlash={flash} />}
             {activeModule === 'payments' && <AdminPaymentsModule onFlash={flash} />}
             {activeModule === 'support' && <AdminSupportModule onFlash={flash} />}
             {activeModule === 'settings' && <AdminSettingsModule onFlash={flash} />}

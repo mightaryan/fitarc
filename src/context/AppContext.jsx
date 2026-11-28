@@ -69,6 +69,9 @@ function buildDefaultPlatformConfig() {
     customFoods: [],
     disabledFoodIds: [],
     foodOverrides: {},
+    customBlogPosts: [],
+    disabledBlogIds: [],
+    blogOverrides: {},
     managedPlans: decoratePlansWithPricing(TRANSFORMATION_PLANS),
     shopProducts: INITIAL_SHOP_PRODUCTS,
     paymentTransactions: INITIAL_PAYMENT_TRANSACTIONS,
@@ -194,6 +197,9 @@ function getInitialPlatformConfig() {
       customFoods: Array.isArray(parsed.customFoods) ? parsed.customFoods : [],
       disabledFoodIds: Array.isArray(parsed.disabledFoodIds) ? parsed.disabledFoodIds : [],
       foodOverrides: parsed.foodOverrides && typeof parsed.foodOverrides === 'object' ? parsed.foodOverrides : {},
+      customBlogPosts: Array.isArray(parsed.customBlogPosts) ? parsed.customBlogPosts : [],
+      disabledBlogIds: Array.isArray(parsed.disabledBlogIds) ? parsed.disabledBlogIds : [],
+      blogOverrides: parsed.blogOverrides && typeof parsed.blogOverrides === 'object' ? parsed.blogOverrides : {},
       managedPlans: mergedPlans,
       shopProducts: enrichedShop,
       paymentTransactions: cleanTransactions,
@@ -331,6 +337,9 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
   const [customFoods, setCustomFoods] = useState(initialConfig.customFoods);
   const [disabledFoodIds, setDisabledFoodIds] = useState(initialConfig.disabledFoodIds);
   const [foodOverrides, setFoodOverrides] = useState(initialConfig.foodOverrides);
+  const [customBlogPosts, setCustomBlogPosts] = useState(initialConfig.customBlogPosts);
+  const [disabledBlogIds, setDisabledBlogIds] = useState(initialConfig.disabledBlogIds);
+  const [blogOverrides, setBlogOverrides] = useState(initialConfig.blogOverrides);
   const [managedPlans, setManagedPlans] = useState(initialConfig.managedPlans);
   const [shopProducts, setShopProducts] = useState(initialConfig.shopProducts);
   const [paymentTransactions, setPaymentTransactions] = useState(initialConfig.paymentTransactions);
@@ -400,7 +409,10 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     if (activeTabState === 'shop' && siteSettings?.shopEnabled === false) {
       setActiveTabState('home');
     }
-  }, [activeTabState, siteSettings?.shopEnabled]);
+    if (activeTabState === 'blog' && siteSettings?.blogEnabled === false) {
+      setActiveTabState('home');
+    }
+  }, [activeTabState, siteSettings?.shopEnabled, siteSettings?.blogEnabled]);
 
   useEffect(() => {
     try {
@@ -416,6 +428,9 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
           customFoods,
           disabledFoodIds,
           foodOverrides,
+          customBlogPosts,
+          disabledBlogIds,
+          blogOverrides,
           managedPlans,
           shopProducts,
           paymentTransactions,
@@ -434,6 +449,9 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     customFoods,
     disabledFoodIds,
     foodOverrides,
+    customBlogPosts,
+    disabledBlogIds,
+    blogOverrides,
     managedPlans,
     shopProducts,
     paymentTransactions,
@@ -1205,6 +1223,94 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     });
   };
 
+  // Health Blog CRUD (200+ Starter Guides + Admin Override / Create / Hide / Delete)
+  const adminUpsertBlogPost = (postObj) => {
+    const title = (postObj?.title || 'Untitled Health Guide').trim();
+    const cleanSlug =
+      (postObj?.slug || title)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || `guide-${Date.now().toString(36)}`;
+
+    const normalizedPost = {
+      ...postObj,
+      title,
+      slug: cleanSlug,
+      category: postObj?.category || 'belly_fat',
+      summary: (postObj?.summary || '').trim(),
+      body: (postObj?.body || '').trim(),
+      readTimeMin: Number(postObj?.readTimeMin) || 2,
+      tags: Array.isArray(postObj?.tags)
+        ? postObj.tags.filter(Boolean)
+        : String(postObj?.tags || 'Health, Home Routine')
+            .split(',')
+            .map((tg) => tg.trim())
+            .filter(Boolean),
+      foodsToEat: Array.isArray(postObj?.foodsToEat)
+        ? postObj.foodsToEat.filter(Boolean)
+        : String(postObj?.foodsToEat || '')
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean),
+      homeChecklist: Array.isArray(postObj?.homeChecklist)
+        ? postObj.homeChecklist.filter(Boolean)
+        : String(postObj?.homeChecklist || '')
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean),
+      recommendedExerciseIds: Array.isArray(postObj?.recommendedExerciseIds)
+        ? postObj.recommendedExerciseIds.filter(Boolean)
+        : ['hiit-low-impact-march-lunge', 'cali-010'],
+    };
+
+    if (!postObj?.id) {
+      const created = {
+        ...normalizedPost,
+        id: `custom-blog-${Date.now().toString(36)}`,
+        isCustom: true,
+        updatedAt: new Date().toISOString().slice(0, 10),
+      };
+      setCustomBlogPosts((prev) => [created, ...prev]);
+      return;
+    }
+
+    const isCustom = customBlogPosts.some((p) => p.id === postObj.id);
+    if (isCustom) {
+      setCustomBlogPosts((prev) =>
+        prev.map((p) =>
+          p.id === postObj.id ? { ...p, ...normalizedPost, updatedAt: new Date().toISOString().slice(0, 10) } : p
+        )
+      );
+    } else {
+      setBlogOverrides((prev) => ({
+        ...prev,
+        [postObj.id]: {
+          ...(prev[postObj.id] || {}),
+          ...normalizedPost,
+          updatedAt: new Date().toISOString().slice(0, 10),
+        },
+      }));
+    }
+  };
+
+  const adminToggleBlogDisabled = (postId) => {
+    setDisabledBlogIds((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+    );
+  };
+
+  const adminDeleteCustomBlogPost = (postId) => {
+    setCustomBlogPosts((prev) => prev.filter((p) => p.id !== postId));
+  };
+
+  const adminResetBlogOverride = (postId) => {
+    setBlogOverrides((prev) => {
+      const next = { ...prev };
+      delete next[postId];
+      return next;
+    });
+  };
+
   // Food / Recipes CRUD
   const adminUpsertFood = (foodObj) => {
     const title = foodObj?.title || foodObj?.name || 'Custom Nutrition Recipe';
@@ -1476,6 +1582,9 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     setCustomFoods(def.customFoods);
     setDisabledFoodIds(def.disabledFoodIds);
     setFoodOverrides(def.foodOverrides);
+    setCustomBlogPosts(def.customBlogPosts);
+    setDisabledBlogIds(def.disabledBlogIds);
+    setBlogOverrides(def.blogOverrides);
     setManagedPlans(def.managedPlans);
     setShopProducts(def.shopProducts);
     setPaymentTransactions(def.paymentTransactions);
@@ -1594,6 +1703,9 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     customFoods,
     disabledFoodIds,
     foodOverrides,
+    customBlogPosts,
+    disabledBlogIds,
+    blogOverrides,
     managedPlans,
     shopProducts,
     paymentTransactions,
@@ -1614,6 +1726,10 @@ export function AppProvider({ children, initialAuthTab = 'biometrics' }) {
     adminToggleFoodDisabled,
     adminDeleteCustomFood,
     adminResetFoodOverride,
+    adminUpsertBlogPost,
+    adminToggleBlogDisabled,
+    adminDeleteCustomBlogPost,
+    adminResetBlogOverride,
     adminUpsertPlan,
     adminDeletePlan,
     adminUpdateTransactionStatus,
