@@ -1,4 +1,4 @@
-`import React, { useState } from 'react';
+import React, { useState } from 'react';
 
 /**
  * Artistic Customizable Brand Emblem & Editorial Wordmark
@@ -120,9 +120,9 @@ export function FitArcLogo({
   };
 
   return (
-    <div className={`inline - flex items - center gap - 2.5 sm: gap - 3 select - none ${ className } `}>
+    <div className={`inline-flex items-center gap-2.5 sm:gap-3 select-none ${className}`}>
       <div
-        className={`${ dims.box } p - [1.5px] bg - gradient - to - br from - amber - 300 via - orange - 500 to - amber - 800 shadow - [0_0_24px_rgba(245, 158, 11, 0.35)] flex items - center justify - center shrink - 0 transition - transform duration - 300 group - hover: scale - 105`}
+        className={`${dims.box} p-[1.5px] bg-gradient-to-br from-amber-300 via-orange-500 to-amber-800 shadow-[0_0_24px_rgba(245,158,11,0.35)] flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105`}
       >
         <div className="w-full h-full rounded-[inherit] bg-[#07080c] flex items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(251,191,36,0.18),transparent_65%)]" />
@@ -131,13 +131,13 @@ export function FitArcLogo({
       </div>
 
       <div className="leading-none">
-        <div className={`${ dims.title } font - black tracking - tight text - white flex items - center`}>
+        <div className={`${dims.title} font-black tracking-tight text-white flex items-center`}>
           <span>{firstPart}</span>
           <span className="gold-gradient-text font-black">{secondPart}</span>
           <span className="ml-1 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)]" />
         </div>
         {showTagline ? (
-          <div className={`${ dims.sub } uppercase tracking - [0.18em] text - amber - 400 / 90 font - semibold mt - 1`}>
+          <div className={`${dims.sub} uppercase tracking-[0.18em] text-amber-400/90 font-semibold mt-1`}>
             {tagline}
           </div>
         ) : (
